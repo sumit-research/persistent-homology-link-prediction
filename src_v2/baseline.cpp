@@ -102,7 +102,7 @@ double getNbrCount(int u, string type){
 
 // get common nodes between u and v. If type == 0, this method will return N(u) intersect N(v), else it will return N'(u) intersect N'(v). For undirected graph pass type = 0
 vector<int> getCommon(set<int> source_node, int v, int type){
-	vector<int> common(10); 
+	vector<int> common(1000000); 
 	set<int> dest_node;
 
 	if(type == 0){
@@ -115,7 +115,7 @@ vector<int> getCommon(set<int> source_node, int v, int type){
 			dest_node.insert(in[v][i]);
 		}
 	}
-	
+
 	vector<int>::iterator it = set_intersection(dest_node.begin(), dest_node.end(), source_node.begin(), source_node.end(), common.begin());
 	common.resize(it-common.begin());
 
@@ -151,6 +151,7 @@ double milne_witten(set<int> source_in, int dest, int source, int num_nodes){
 
 	// get N'(source) intersect N'(dest)
 	vector<int> common = getCommon(source_in, dest, 1);
+
 
 	if(common.size() == 0)
 		return -1.0 * INT_MAX;
