@@ -46,7 +46,6 @@ def main():
 		f = open(in_file, "rb")
 		data = f.read()
 		num_processors = struct.unpack('<q' , data[16:24])[0]
-		print(num_processors)
 		if(num_processors > 12):
 			num_processors = 12
 		command = "mpiexec -n " + str(num_processors) + " dipha --upper_dim 2 " + in_file + " " + out_file
@@ -80,7 +79,6 @@ def main():
 		f = open(in_file, "rb")
 		data = f.read()
 		num_processors = struct.unpack('<q' , data[16:24])[0]
-		print(num_processors)
 		if(num_processors > 12):
 			num_processors = 12
 		command = "mpiexec -n " + str(num_processors) + " dipha --upper_dim 2 " + in_file + " " + out_file
