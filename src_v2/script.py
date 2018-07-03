@@ -54,6 +54,9 @@ def main():
 		temp["distance"] = int(l[0])
 		total_pairs+=1
 
+		if(total_pairs <= 17700):
+			continue
+
 		# define file names for persistence diagrams
 
 		dgm1_file = "/Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(node_a)
@@ -72,7 +75,7 @@ def main():
 
 		# get persistence diagram for complete graph
 		in_file = "/Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
-		os.system("dipha --upper_dim 2 " + in_file + " " + dgmComplete_file)			
+		os.system("mpiexec -n 4 dipha --upper_dim 2 " + in_file + " " + dgmComplete_file)			
 
 		# compare pairwise diagrams
 		process_a_b = Popen(["/Users/admin/Desktop/Project/code/src_v2/baseline", data_file, "/Users/admin/Desktop/Project/code/src_v2/test.txt", str(node_a), str(node_b)], stdout=PIPE)

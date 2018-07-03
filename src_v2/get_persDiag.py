@@ -41,7 +41,7 @@ def main():
 
 		in_file = out_file_full
 		out_file = "/Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(nodes[0]) + "_" + str(nodes[1])
-		command = "dipha --upper_dim 2 " + in_file + " " + out_file
+		command = "mpiexec -n 4 dipha --upper_dim 2 " + in_file + " " + out_file
 
 		os.system(command)
 	else:
@@ -69,7 +69,7 @@ def main():
 
 		in_file = out_file_full
 		out_file = "/Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(nodes[0])
-		command = "dipha --upper_dim 2 " + in_file + " " + out_file
+		command = "mpiexec -n 4 dipha --upper_dim 2 " + in_file + " " + out_file
 
 		os.system(command)
 

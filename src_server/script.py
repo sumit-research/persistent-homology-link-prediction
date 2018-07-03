@@ -72,7 +72,7 @@ def main():
 
 		# get persistence diagram for complete graph
 		in_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
-		os.system("dipha --upper_dim 2 " + in_file + " " + dgmComplete_file)			
+		os.system("mpiexec -n 12 dipha --upper_dim 2 " + in_file + " " + dgmComplete_file)			
 
 		# compare pairwise diagrams
 		process_a_b = Popen(["/home/deepak/Project/code/src_server/baseline", data_file, "/home/deepak/Project/code/src_server/test.txt", str(node_a), str(node_b)], stdout=PIPE)
