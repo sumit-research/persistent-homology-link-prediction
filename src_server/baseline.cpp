@@ -16,9 +16,8 @@ using namespace std;
 #define intt int64_t
 #define ii pair<intt,intt> 
 #define di pair<double, intt>
-#define fastio	ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0)
 
-const intt N = 3e7;
+vector< vector<intt> > adj;
 vector< vector<intt> > in;
 map<intt,intt> to_indices; // maps node to index(1-n), index is always from 1-n where n is number of distinct nodes
 map<intt,intt> to_node; // reverse map tp obtain node number using it's index
@@ -32,6 +31,7 @@ intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
 	int num_sources = 0;
 	intt i = 1;
 	in.resize(1);
+	adj.resize(1);
 	while(true){
 		intt source, dest;
 		string u;
@@ -54,6 +54,7 @@ intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
 					to_node[i] = source;
 					vector< intt > tmp;
 					in.push_back(tmp);
+					adj.push_back(tmp);
 					i++;
 				}
 
@@ -69,25 +70,30 @@ intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
 					to_node[i] = dest;
 					vector< intt > tmp;
 					in.push_back(tmp);
+					adj.push_back(tmp);
 					i++;
 				}
 				iFile >> weight;
 				// cout << source << " " << dest << "\n";
-				in[to_indices[source]].push_back(to_indices[dest]); 
+				adj[to_indices[source]].push_back(to_indices[dest]);
+				in[to_indices[dest]].push_back(to_indices[source]); 
 
 				// add reverse edge if it doens't already exist
-				if(find(in[to_indices[dest]].begin(), in[to_indices[dest]].end(), to_indices[source]) == in[to_indices[dest]].end())
-					in[to_indices[source]].push_back(to_indices[source]);
+				// if(find(in[to_indices[dest]].begin(), in[to_indices[dest]].end(), make_pair(weight, to_indices[source])) == in[to_indices[dest]].end())
+				// 	in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));
 			}	
 		}
 	}
-	return i-1;
+	// cout << "Edges: " << edges << '\n';
+	return i-1; // number of distinct nodes
 }
+
+
 
 double getNbrCount(int u, string type){
 
 	if(type == "undirected" or type == "directed_out")
-		return (double)(in[u].size());
+		return (double)(adj[u].size());
 	else if(type == "directed_in")
 		return (double)(in[u].size());
 	return 0.0;
@@ -95,12 +101,12 @@ double getNbrCount(int u, string type){
 
 // get common nodes between u and v. If type == 0, this method will return N(u) intersect N(v), else it will return N'(u) intersect N'(v). For undirected graph pass type = 0
 vector<int> getCommon(set<int> source_node, int v, int type){
-	vector<int> common(10); 
+	vector<int> common(1000000); 
 	set<int> dest_node;
 
 	if(type == 0){
-		for(int i = 0; i < in[v].size(); i++){
-			dest_node.insert(in[v][i]);
+		for(int i = 0; i < adj[v].size(); i++){
+			dest_node.insert(adj[v][i]);
 		}
 	}
 	else{
@@ -108,7 +114,7 @@ vector<int> getCommon(set<int> source_node, int v, int type){
 			dest_node.insert(in[v][i]);
 		}
 	}
-	
+
 	vector<int>::iterator it = set_intersection(dest_node.begin(), dest_node.end(), source_node.begin(), source_node.end(), common.begin());
 	common.resize(it-common.begin());
 
@@ -128,7 +134,7 @@ double adamic_adar(set<int> source_out, int dest, int source){
 	for(vector<int>::iterator it = common.begin(); it != common.end(); it++){
 		int node = *it;
 
-		double indeg = getNbrCount(node, (string)"undirected");
+		double indeg = getNbrCount(node, (string)"directed_in");
 
 		if(indeg == 0.0 or indeg == 1.0)
 			continue;
@@ -145,13 +151,14 @@ double milne_witten(set<int> source_in, int dest, int source, int num_nodes){
 	// get N'(source) intersect N'(dest)
 	vector<int> common = getCommon(source_in, dest, 1);
 
+
 	if(common.size() == 0)
 		return -1.0 * INT_MAX;
 
 	double mw = 0.0;
 
-	double Uindeg = getNbrCount(source, "undirected");
-	double Vindeg = getNbrCount(dest, "undirected");
+	double Uindeg = getNbrCount(source, "directed_in");
+	double Vindeg = getNbrCount(dest, "directed_in");
 
 	// cout << to_node[dest] << ' ' << Vindeg << '\n';
 
@@ -164,8 +171,6 @@ double milne_witten(set<int> source_in, int dest, int source, int num_nodes){
 }	
 
 int main(int argc, char* argv[]){
-
-	fastio;
 
 	if(argc != 4 and argc != 5){
 		cout << "[Usage]: " << "./baseline input_filename output_filename source_node\n";
@@ -189,8 +194,8 @@ int main(int argc, char* argv[]){
 
 	// get set of nodes with an incoming edge from source
 	set<int> source_out;
-	for(int i = 0; i < in[source].size(); i++){
-		source_out.insert(in[source][i]);
+	for(int i = 0; i < adj[source].size(); i++){
+		source_out.insert(adj[source][i]);
 	}
 
 	// get set of nodes with outgoing edge to source

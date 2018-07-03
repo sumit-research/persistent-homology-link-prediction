@@ -20,7 +20,7 @@ ofstream oFile;
 
 vector<intt> bfs(vector<vector< ii > >& in, vector<intt> sources, intt num_nodes){
 	
-	vector<intt> len(num_nodes,INT64_MAX); // len[i]-> length of path from source to node i
+	vector<intt> len(num_nodes+1,INT64_MAX); // len[i]-> length of path from source to node i
 	vector<bool> visit(num_nodes,0); // visited array 
 
 	queue<int> q;
@@ -97,8 +97,8 @@ intt input(vector<vector< ii > >& in, map<intt,intt>& to_indices, map<intt,intt>
 				}
 				iFile >> weight;
 				in[to_indices[source]].push_back(make_pair(weight, to_indices[dest])); 
-				if(find(in[to_indices[dest]].begin(), in[to_indices[dest]].end(), make_pair(weight, to_indices[source])) == in[to_indices[dest]].end())
-					in[to_indices[source]].push_back(make_pair(weight, to_indices[source]));
+				// if(find(in[to_indices[dest]].begin(), in[to_indices[dest]].end(), make_pair(weight, to_indices[source])) == in[to_indices[dest]].end())
+				// 	in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));
 			}	
 		}
 	}
@@ -107,7 +107,7 @@ intt input(vector<vector< ii > >& in, map<intt,intt>& to_indices, map<intt,intt>
 }
 
 void write_complete(intt distinct_nodes, int hop, vector<intt>& sources, map<intt,intt>& to_node){
-	string out_path = "/Users/admin/Desktop/Project/outputs/n_" + to_string(hop) + "/apsp_complete_full_" + to_string(to_node[sources[0]]) + "_" + to_string(to_node[sources[1]]);
+	string out_path = "/home/deepak/Project/files/outputs/n_" + to_string(hop) + "/apsp_complete_full_" + to_string(to_node[sources[0]]) + "_" + to_string(to_node[sources[1]]);
 	
 	ofstream cFile(out_path, ios::binary);
 
@@ -131,18 +131,12 @@ intt write_txt(intt num_nodes, intt hop, vector<intt>& dist, vector<vector< ii >
 
 	for(intt v = 1; v <= num_nodes; v++){
 		if(dist[v] <= hop){
-			vector<int> temp;
+			oFile << to_node[v] << ":\n";
+			s.insert(to_node[v]);
 			for(int i = 0; i < in[v].size(); i++){
-				if(dist[in[v][i].second] <= hop)
-					temp.push_back(i);
-			}
-
-			if(temp.size() > 0){
-				oFile << to_node[v] << ":\n";
-				s.insert(to_node[v]);
-				for(int i = 0; i < temp.size(); i++){
-					s.insert(to_node[in[v][temp[i]].second]);
-					oFile << to_node[in[v][temp[i]].second] << " " << in[v][temp[i]].first <<'\n';
+				if(dist[in[v][i].second] <= hop){
+					s.insert(to_node[in[v][i].second]);
+					oFile << to_node[in[v][i].second] << " " << in[v][i].first <<'\n';
 				}
 			}
 		}

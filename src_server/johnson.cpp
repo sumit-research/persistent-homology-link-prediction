@@ -21,16 +21,17 @@ ofstream sFile;
 ofstream indFile("indices.txt");
 ofstream wFile("weight.txt");
 ofstream cFile("connections.txt");
-ofstream dFile("/Users/admin/Desktop/Project/outputs/dumped.txt");
+ofstream dFile("/home/deepak/Project/files/outputs/dumped.txt");
 
 
 // sFile.imbue(locale::classic());
 
-vector< vector< ii > > in;
+vector< vector< ii > > in; // for original graph, to get path from a->b
+vector< vector< ii > > reverse_in; // for reverse graph, to get path from b->a
 map<intt,intt> to_indices; // maps node to index(1-n), index is always from 1-n where n is number of distinct nodes
 map<intt,intt> to_node; // reverse map tp obtain node number using it's index
 
-void write_txt(intt src, vector<intt>& dist, intt num_nodes){
+void write_txt(intt src, vector<double>& dist, intt num_nodes){
 
 	intt temp = 0; // to calcualte number of connections
 
@@ -45,8 +46,7 @@ void write_txt(intt src, vector<intt>& dist, intt num_nodes){
 			cout << src << " " << v << '\n';
 		}
 		// oFile << distance << '\n';
-		if(distance == INT64_MAX)
-			distance = 6;
+
 		oFile.write(reinterpret_cast<const char*>(&distance), sizeof(double));
 
 		if(dist[v] <= num_nodes and v != src){
@@ -92,13 +92,16 @@ void write_sparse(intt num_nodes){
 	// cout << conn << " " << ind << ' ' << dis << '\n';
 }
 
-void dump_pairs(intt u, vector<intt>& dist, intt num_nodes){
+void dump_pairs(intt u, vector<double>& dist, intt num_nodes){
 	
 	for(intt i = 1; i <= num_nodes; i++){
 		if(i == u)
 			continue;
-		intt distance = ((dist[i] == INT64_MAX) ? 6 :dist[i]);
-		dFile << dist[i] << " " << to_node[u] << " " << to_node[i] << '\n';
+		intt distance = dist[i];
+		if(distance == INT64_MAX)
+			distance = 6;
+
+		dFile << distance << " " << to_node[u] << " " << to_node[i] << '\n';
 	}
 }
 
@@ -162,7 +165,7 @@ bool bellman(vector< vector< ii > >& adj, vector<intt>& dist, intt src, intt num
 	return true;
 }
 
-void johnson(vector< vector< ii > >& adj, intt num_nodes, bool dumping){
+void johnson(vector< vector< ii > >& adj, vector< vector< ii > >& reverse_adj, intt num_nodes, bool dumping){
 
 	// connect an extra vertex to every node to get graph G'
 	for(intt i = 1; i <= num_nodes; i++){
@@ -172,6 +175,8 @@ void johnson(vector< vector< ii > >& adj, intt num_nodes, bool dumping){
 	// cout << "New node created.\n";
 
 	vector<intt> dist(num_nodes+1,INT64_MAX);
+	vector<intt> reverse_dist(num_nodes+1, INT64_MAX);
+	vector<double> distance(num_nodes+1, 0.0);
 
 	// check for negative weight cycle in new graph
 	if(/*!bellman(adj, dist, 0, num_nodes)*/false){
@@ -205,32 +210,35 @@ void johnson(vector< vector< ii > >& adj, intt num_nodes, bool dumping){
 			}
 			
 			fill(dist.begin(), dist.end(), INT64_MAX);
+			fill(reverse_dist.begin(), reverse_dist.end(), INT64_MAX);
 
-			if(adj[u].size() == 0){
-				dist[u] = 0;
-				write_txt(u, dist, num_nodes);
-				if(dumping)
-					dump_pairs(u, dist, num_nodes);
-				continue;
-			}
+			dist[u] = reverse_dist[u] = 0;
 
-			dijsktra(adj, dist, u, num_nodes);
+			if(adj[u].size() != 0)
+				dijsktra(adj, dist, u, num_nodes);
+
+			if(reverse_adj.size() != 0)
+				dijsktra(reverse_adj, reverse_dist, u, num_nodes);
 
 			// get old edge/path weights back
 			for(intt v = 1; v <= num_nodes; v++){
-				if(dist[v] == INT64_MAX) continue;
-				dist[v] = dist[v] + h[v] - h[u];
+				if(dist[v] == INT64_MAX) 
+					dist[v] = 6;
+				if(reverse_dist[v] == INT64_MAX )
+					reverse_dist[v] = 6;
+
+				distance[v] = ((double)dist[v] + (double)reverse_dist[v])/2.0;
 				// if(dist[v] == 5 or dist[v] == 6 or dist[v] == 3)
 				// 	cout << dist[v] << " dest-> " << to_node[v] << " sourcce-> " << to_node[u] << '\n';	
 
 			}
 
 			// write the output to the file
-			write_txt(u, dist, num_nodes);
+			write_txt(u, distance, num_nodes);
 
 			//write pairs if dumped == true
 			if(dumping)
-				dump_pairs(u, dist, num_nodes);
+				dump_pairs(u, distance, num_nodes);
 
 		}
 		wFile.close();
@@ -248,6 +256,7 @@ intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
 	int num_sources = 0;
 	intt i = 1;
 	in.resize(1);
+	reverse_in.resize(1);
 	while(true){
 		intt source, dest;
 		string u;
@@ -270,6 +279,7 @@ intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
 					to_node[i] = source;
 					vector< ii > tmp;
 					in.push_back(tmp);
+					reverse_in.push_back(tmp);
 					i++;
 				}
 
@@ -285,19 +295,21 @@ intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
 					to_node[i] = dest;
 					vector< ii > tmp;
 					in.push_back(tmp);
+					reverse_in.push_back(tmp);
 					i++;
 				}
 				iFile >> weight;
 				// cout << source << " " << dest << "\n";
 				in[to_indices[source]].push_back(make_pair(weight, to_indices[dest])); 
+				reverse_in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));
 
 				// add reverse edge if it doens't already exist
-				if(find(in[to_indices[dest]].begin(), in[to_indices[dest]].end(), make_pair(weight, to_indices[source])) == in[to_indices[dest]].end())
-					in[to_indices[source]].push_back(make_pair(weight, to_indices[source]));
+				// if(find(in[to_indices[dest]].begin(), in[to_indices[dest]].end(), make_pair(weight, to_indices[source])) == in[to_indices[dest]].end())
+				// 	in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));
 			}	
 		}
 	}
-	cout << "Edges: " << edges << '\n';
+	// cout << "Edges: " << edges << '\n';
 	return i-1; // number of distinct nodes
 }
 
@@ -332,7 +344,7 @@ int main(int argc, char *argv[]){
 	sFile.open((string) sparse_file, ios::binary);
 
 	intt num_nodes = input(to_indices, to_node); // take input
-	cout << "Input done. " << num_nodes << '\n';
+	// cout << "Input done. " << num_nodes << '\n';
 
 	intt DIPHA = 8067171840,file_type = 7;
 	oFile.write(reinterpret_cast<const char*>(&DIPHA), sizeof(intt));
@@ -346,9 +358,18 @@ int main(int argc, char *argv[]){
 	// 		cout << to_node[in[i][j].second] << " "  << in[i][j].first << '\n';
 	// }
 
-	johnson(in, num_nodes, dumping);
+	// cout << "\n\n";
+	
+	// for(int i = 1; i <= num_nodes; i++){
+	// 	cout << to_node[i] << ":\n";
+	// 	for(int j = 0; j < reverse_in[i].size(); j++)
+	// 		cout << to_node[reverse_in[i][j].second] << " "  << reverse_in[i][j].first << '\n';
+	// }
+
+	johnson(in, reverse_in, num_nodes, dumping);
 
 	iFile.close();
 	oFile.close();
 	sFile.close();
+	dFile.close();
 }
