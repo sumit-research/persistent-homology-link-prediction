@@ -1,5 +1,6 @@
 import sys
 import os
+import struct
 import pandas as pd
 import numpy as np
 from collections import OrderedDict
@@ -83,7 +84,7 @@ def main():
 		process_complete_0 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(0)], stdout=PIPE)
 		process_complete_1 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(1)], stdout=PIPE)
 		
-		print(node_a, node_b)
+		# print(node_a, node_b)
 		(output_a_b,err) = process_a_b.communicate()
 		output_a_b = output_a_b.strip().splitlines()
 

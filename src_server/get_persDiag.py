@@ -1,5 +1,6 @@
 import sys
 import os
+import struct
 
 # get input nodes and define neighbourhood
 # input filename
@@ -41,7 +42,14 @@ def main():
 
 		in_file = out_file_full
 		out_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(nodes[0]) + "_" + str(nodes[1])
-		command = "mpiexec -n 12 dipha --upper_dim 2 " + in_file + " " + out_file
+
+		f = open(in_file, "rb")
+		data = f.read()
+		num_processors = struct.unpack('<q' , data[16:24])[0]
+		print(num_processors)
+		if(num_processors > 12):
+			num_processors = 12
+		command = "mpiexec -n " + str(num_processors) + " dipha --upper_dim 2 " + in_file + " " + out_file
 
 		os.system(command)
 	else:
@@ -69,7 +77,13 @@ def main():
 
 		in_file = out_file_full
 		out_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(nodes[0])
-		command = "mpiexec -n 12 dipha --upper_dim 2 " + in_file + " " + out_file
+		f = open(in_file, "rb")
+		data = f.read()
+		num_processors = struct.unpack('<q' , data[16:24])[0]
+		print(num_processors)
+		if(num_processors > 12):
+			num_processors = 12
+		command = "mpiexec -n " + str(num_processors) + " dipha --upper_dim 2 " + in_file + " " + out_file
 
 		os.system(command)
 
