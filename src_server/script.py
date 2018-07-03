@@ -34,7 +34,7 @@ def main():
 	os.system("/home/deepak/Project/code/src_v2/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/n_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/n_" + str(hop) + "/global_sparse.txt" )
 	data = "/home/deepak/Project/files/outputs/dumped.txt"
 	# data = "/home/deepak/Project/code/src_v2/random_select.txt"
-
+	print("Data Dumped")
 	# define a list of ordered dict to save the results in excel
 	final_results = []
 	lines = []
