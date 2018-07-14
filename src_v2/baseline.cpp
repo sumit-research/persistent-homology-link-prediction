@@ -17,7 +17,6 @@ using namespace std;
 #define ii pair<intt,intt> 
 #define di pair<double, intt>
 
-const intt N = 3e7;
 vector< vector<intt> > adj;
 vector< vector<intt> > in;
 map<intt,intt> to_indices; // maps node to index(1-n), index is always from 1-n where n is number of distinct nodes
@@ -242,6 +241,7 @@ int main(int argc, char* argv[]){
 	}
 
 	oFile << '\n';
+	return 0;
 }
 
 

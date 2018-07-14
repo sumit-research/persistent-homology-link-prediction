@@ -21,7 +21,7 @@ ofstream sFile;
 ofstream indFile("indices.txt");
 ofstream wFile("weight.txt");
 ofstream cFile("connections.txt");
-ofstream dFile("/home/deepak/Project/files/outputs/dumped.txt");
+ofstream dFile("/home/deepak/Desktop/Project/files/outputs/dumped.txt");
 
 
 // sFile.imbue(locale::classic());

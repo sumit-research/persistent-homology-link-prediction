@@ -106,9 +106,11 @@ intt input(vector<vector< ii > >& in, map<intt,intt>& to_indices, map<intt,intt>
 	return i-1; // number of distinct nodes
 }
 
-void write_complete(intt distinct_nodes, int hop, vector<intt>& sources, map<intt,intt>& to_node){
-	string out_path = "/home/deepak/Project/files/outputs/n_" + to_string(hop) + "/apsp_complete_full_" + to_string(to_node[sources[0]]) + "_" + to_string(to_node[sources[1]]);
-	
+void write_complete(intt distinct_nodes, int hop, vector<intt>& sources, map<intt,intt>& to_node, bool remove){
+	string out_path = "/home/deepak/Desktop/Project/files/outputs/n_" + to_string(hop) + "/apsp_complete_full_" + to_string(to_node[sources[0]]) + "_" + to_string(to_node[sources[1]]);
+	if(remove){
+		out_path = "/home/deepak/Desktop/Project/files/outputs/removed_edge_" + to_string(hop) + "/apsp_complete_full_" + to_string(to_node[sources[0]]) + "_" + to_string(to_node[sources[1]]);
+	}
 	ofstream cFile(out_path, ios::binary);
 
 	intt DIPHA = 8067171840,file_type = 7;
@@ -148,13 +150,16 @@ int main(int argc, char *argv[]){
 	string input_file;
 	string output_file;
 	intt source_1;
-	intt source_2;
+	intt source_2 = -1;
 	intt hop;
 	vector<intt> sources;
+	bool remove = false;
 
-	if(argc != 5 and argc != 6){
+	if(argc != 5 and argc != 6 and argc != 7){
 		cout << "[Usage]: " << "./a.out input_filename output_filename source_1 number_of_hops" << '\n';
 		cout << "[Usage]: " << "./a.out input_filename output_filename source_1 source_2 number_of_hops" << '\n';
+		cout << "Options: \n";
+		cout << "--remove -> Used when the input data is modified by removing an edge\n";
 		return 0;
 	}
 	else if(argc == 5){
@@ -163,12 +168,33 @@ int main(int argc, char *argv[]){
 		source_1 = atoi(argv[3]);
 		hop = atoi(argv[4]);
 	}
+	else if(argc == 6){
+		int i = 1;
+		if((string)argv[1] == "--remove"){
+			remove = true;
+			i = 2;
+			input_file = argv[i];
+			output_file = argv[i+1];
+			source_1 = atoi(argv[i+2]);
+			hop = atoi(argv[i+3]);
+		}
+		else{
+			input_file = argv[i];
+			output_file = argv[i+1];
+			source_1 = atoi(argv[i+2]);
+			source_2 = atoi(argv[i+3]);
+			hop = atoi(argv[i+4]);
+		}
+			
+	}
 	else{
-		input_file = argv[1];
-		output_file = argv[2];
-		source_1 = atoi(argv[3]);
-		source_2 = atoi(argv[4]);
-		hop = atoi(argv[5]);	
+		remove = true;
+		int i = 2;
+		input_file = argv[i];
+		output_file = argv[i+1];
+		source_1 = atoi(argv[i+2]);
+		source_2 = atoi(argv[i+3]);
+		hop = atoi(argv[i+4]);
 	}
 
 	iFile.open((string) input_file);
@@ -182,7 +208,7 @@ int main(int argc, char *argv[]){
 	int num_nodes = input(in, to_indices, to_node); // take input
 	// cout << "Input done. "<< num_nodes << "\n";
 	
-	if(argc == 5){
+	if(source_2 == -1){
 		sources.push_back(to_indices[source_1]);
 	}
 	else{
@@ -194,6 +220,6 @@ int main(int argc, char *argv[]){
 	vector<intt> out = bfs(in, sources, num_nodes);
 
 	intt distinct_nodes = write_txt(num_nodes, hop, out, in, to_node);
-	if(argc == 6)
-		write_complete(distinct_nodes, hop, sources, to_node);
+	if(sources.size() == 2)
+		write_complete(distinct_nodes, hop, sources, to_node, remove);
 }

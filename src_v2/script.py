@@ -42,9 +42,10 @@ def main():
 	total_pairs = 0
 
 	# open the data file and repeat the process for each pair
-	with open(data, "r") as f:
-		lines = f.readlines()
-		lines = [l.strip().split() for l in lines]
+	f = open(data, "r")
+	lines = f.readlines()
+	lines = [l.strip().split() for l in lines]
+	f.close()
 		
 	for l in lines:
 		node_a = int(l[1])
@@ -55,7 +56,7 @@ def main():
 		temp["distance"] = int(l[0])
 		total_pairs+=1
 
-		if(total_pairs <= 17700):
+		if(total_pairs <= 40900):
 			continue
 
 		# define file names for persistence diagrams
@@ -79,9 +80,8 @@ def main():
 		f = open(in_file, "rb")
 		data = f.read()
 		num_processors = struct.unpack('<q' , data[16:24])[0]
-		print(num_processors)
-		if(num_processors > 4):
-			num_processors = 4
+		if(num_processors > 3):
+			num_processors = 3
 		command = "mpiexec -n " + str(num_processors) + " dipha --upper_dim 2 " + in_file + " " + dgmComplete_file
 		os.system(command)			
 
