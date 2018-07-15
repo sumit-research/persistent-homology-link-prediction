@@ -37,10 +37,10 @@ def main():
 		if(remove):
 			out_file= "/home/deepak/Project/files/outputs/removed_edge_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(nodes[1])
 
-		command1 = "g++ -std=c++14 /home/deepak/Project/code/src_v2/n_hop_multi.cpp -o /home/deepak/Project/code/src_v2/n_hop_multi"
-		command= "/home/deepak/Project/code/src_v2/n_hop_multi " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(nodes[1]) + " " + str(hop)
+		command1 = "g++ -std=c++14 /home/deepak/Project/code/src_server/n_hop_multi.cpp -o /home/deepak/Project/code/src_server/n_hop_multi"
+		command= "/home/deepak/Project/code/src_server/n_hop_multi " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(nodes[1]) + " " + str(hop)
 		if(remove):
-			command= "/home/deepak/Project/code/src_v2/n_hop_multi --remove " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(nodes[1]) + " " + str(hop) 
+			command= "/home/deepak/Project/code/src_server/n_hop_multi --remove " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(nodes[1]) + " " + str(hop) 
  
 		os.system(command1)
 		os.system(command)
@@ -55,8 +55,8 @@ def main():
 			out_file_sparse = "/home/deepak/Project/files/outputs/removed_edge_" + str(hop) + "/apsp_sparse_" + str(nodes[0]) + "_" + str(nodes[1])
 			out_file_full = "/home/deepak/Project/files/outputs/removed_edge_" + str(hop) + "/apsp_full_" + str(nodes[0]) + "_" + str(nodes[1])
 
-		command2 = "g++ -std=c++14 /home/deepak/Project/code/src_v2/johnson.cpp -o /home/deepak/Project/code/src_v2/johnson"
-		command = "/home/deepak/Project/code/src_v2/johnson " + in_file + " " + out_file_full + " " + out_file_sparse
+		command2 = "g++ -std=c++14 /home/deepak/Project/code/src_server/johnson.cpp -o /home/deepak/Project/code/src_server/johnson"
+		command = "/home/deepak/Project/code/src_server/johnson " + in_file + " " + out_file_full + " " + out_file_sparse
 
 		os.system(command2)
 		os.system(command)
@@ -80,14 +80,14 @@ def main():
 	else:
 
 		# getting n-hop neighbourhood of the nodes
-		command1 = "g++ -std=c++14 /home/deepak/Project/code/src_v2/n_hop_multi.cpp -o /home/deepak/Project/code/src_v2/n_hop_multi"
+		command1 = "g++ -std=c++14 /home/deepak/Project/code/src_server/n_hop_multi.cpp -o /home/deepak/Project/code/src_server/n_hop_multi"
 		out_file= "/home/deepak/Project/files/outputs/n_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(hop)
 		if(remove):
 			out_file= "/home/deepak/Project/files/outputs/removed_edge_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(hop)
 
-		command= "/home/deepak/Project/code/src_v2/n_hop_multi " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(hop) 
+		command= "/home/deepak/Project/code/src_server/n_hop_multi " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(hop) 
 		if(remove):
-			command= "/home/deepak/Project/code/src_v2/n_hop_multi --remove " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(hop) 
+			command= "/home/deepak/Project/code/src_server/n_hop_multi --remove " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(hop) 
 
 
 		os.system(command1)
@@ -95,7 +95,7 @@ def main():
 
 		# get all pair shortest path distances using johnson algorithm for n-hop subgraph
 
-		command2 = "g++ -std=c++14 /home/deepak/Project/code/src_v2/johnson.cpp -o /home/deepak/Project/code/src_v2/johnson"
+		command2 = "g++ -std=c++14 /home/deepak/Project/code/src_server/johnson.cpp -o /home/deepak/Project/code/src_server/johnson"
 		in_file = out_file
 		out_file_full = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/apsp_full_" + str(nodes[0])
 		out_file_sparse = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/apsp_sparse_" + str(nodes[0])
@@ -103,7 +103,7 @@ def main():
 			out_file_full = "/home/deepak/Project/files/outputs/removed_edge_" + str(hop) + "/apsp_full_" + str(nodes[0])
 			out_file_sparse = "/home/deepak/Project/files/outputs/removed_edge_" + str(hop) + "/apsp_sparse_" + str(nodes[0])
 
-		command = "/home/deepak/Project/code/src_v2/johnson " + in_file + " " + out_file_full + " " + out_file_sparse
+		command = "/home/deepak/Project/code/src_server/johnson " + in_file + " " + out_file_full + " " + out_file_sparse
 
 		os.system(command2)
 		os.system(command)
