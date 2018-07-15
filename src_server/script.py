@@ -24,17 +24,17 @@ def main():
 	data_file = sys.argv[1]
 	hop = int(sys.argv[2])
 
-	if(os.path.exists("/home/deepak/Desktop/Project/files/outputs/n_" + str(hop)) == False):
-		os.system("mkdir /home/deepak/Desktop/Project/files/outputs/n_" + str(hop))
+	if(os.path.exists("/home/deepak/Project/files/outputs/n_" + str(hop)) == False):
+		os.system("mkdir /home/deepak/Project/files/outputs/n_" + str(hop))
 
 	# compile all c++ files
 
 
 	# get all the reachable pairs in the graph to test
 
-	os.system("/home/deepak/Desktop/Project/code/src_v2/johnson --dump_pairs " + data_file + " /home/deepak/Desktop/Project/files/outputs/n_" + str(hop) + "/global.txt /home/deepak/Desktop/Project/files/outputs/n_" + str(hop) + "/global_sparse.txt" )
-	data = "/home/deepak/Desktop/Project/files/outputs/dumped.txt"
-	# data = "/home/deepak/Desktop/Project/code/src_v2/random_select.txt"
+	os.system("/home/deepak/Project/code/src_v2/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/n_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/n_" + str(hop) + "/global_sparse.txt" )
+	data = "/home/deepak/Project/files/outputs/dumped.txt"
+	# data = "/home/deepak/Project/code/src_v2/random_select.txt"
 
 	# define a list of ordered dict to save the results in excel
 	final_results = []
@@ -61,22 +61,22 @@ def main():
 
 		# define file names for persistence diagrams
 
-		dgm1_file = "/home/deepak/Desktop/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(node_a)
-		dgm2_file = "/home/deepak/Desktop/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(node_b)
-		dgmCombine_file = "/home/deepak/Desktop/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(node_a) + "_" + str(node_b)
-		dgmComplete_file = "/home/deepak/Desktop/Project/files/outputs/n_" + str(hop) + "/dipha_complete_" + str(node_a) + "_" + str(node_b)
+		dgm1_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(node_a)
+		dgm2_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(node_b)
+		dgmCombine_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(node_a) + "_" + str(node_b)
+		dgmComplete_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/dipha_complete_" + str(node_a) + "_" + str(node_b)
 
 		# obtain persistence diagrams for node_a, node_b and combined
 
 		if(not os.path.isfile(dgm1_file)):
-			os.system("python3 /home/deepak/Desktop/Project/code/src_v2/get_persDiag.py " + data_file + " " + str(node_a) + " " + str(hop))
+			os.system("python3 /home/deepak/Project/code/src_v2/get_persDiag.py " + data_file + " " + str(node_a) + " " + str(hop))
 		if(not os.path.isfile(dgm2_file)):
-			os.system("python3 /home/deepak/Desktop/Project/code/src_v2/get_persDiag.py " + data_file + " " + str(node_b) + " " + str(hop))
+			os.system("python3 /home/deepak/Project/code/src_v2/get_persDiag.py " + data_file + " " + str(node_b) + " " + str(hop))
 
-		os.system("python3 /home/deepak/Desktop/Project/code/src_v2/get_persDiag.py " + data_file + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
+		os.system("python3 /home/deepak/Project/code/src_v2/get_persDiag.py " + data_file + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
 
 		# get persistence diagram for complete graph
-		in_file = "/home/deepak/Desktop/Project/files/outputs/n_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
+		in_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
 		f = open(in_file, "rb")
 		data = f.read()
 		num_processors = struct.unpack('<q' , data[16:24])[0]
@@ -86,13 +86,13 @@ def main():
 		os.system(command)			
 
 		# compare pairwise diagrams
-		process_a_b = Popen(["/home/deepak/Desktop/Project/code/src_v2/baseline", data_file, "/home/deepak/Desktop/Project/code/src_v2/test.txt", str(node_a), str(node_b)], stdout=PIPE)
-		process_a_0 = Popen(["python3", "/home/deepak/Desktop/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(0)], stdout=PIPE)
-		process_a_1 = Popen(["python3", "/home/deepak/Desktop/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(1)], stdout=PIPE)
-		process_b_0 = Popen(["python3", "/home/deepak/Desktop/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(0)], stdout=PIPE)
-		process_b_1 = Popen(["python3", "/home/deepak/Desktop/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(1)], stdout=PIPE)
-		process_complete_0 = Popen(["python3", "/home/deepak/Desktop/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(0)], stdout=PIPE)
-		process_complete_1 = Popen(["python3", "/home/deepak/Desktop/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(1)], stdout=PIPE)
+		process_a_b = Popen(["/home/deepak/Project/code/src_v2/baseline", data_file, "/home/deepak/Project/code/src_v2/test.txt", str(node_a), str(node_b)], stdout=PIPE)
+		process_a_0 = Popen(["python3", "/home/deepak/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(0)], stdout=PIPE)
+		process_a_1 = Popen(["python3", "/home/deepak/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(1)], stdout=PIPE)
+		process_b_0 = Popen(["python3", "/home/deepak/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(0)], stdout=PIPE)
+		process_b_1 = Popen(["python3", "/home/deepak/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(1)], stdout=PIPE)
+		process_complete_0 = Popen(["python3", "/home/deepak/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(0)], stdout=PIPE)
+		process_complete_1 = Popen(["python3", "/home/deepak/Project/code/src_v2/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(1)], stdout=PIPE)
 		
 		print(node_a, node_b)
 		(output_a_b,err) = process_a_b.communicate()
