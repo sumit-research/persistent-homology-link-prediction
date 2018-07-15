@@ -104,12 +104,27 @@ def main():
 	data = f.readlines()
 	f.close()
 
+	random_edges = []
+	num_edges = 0
+	resume_pos = 0
+
+	if(os.path.isfile(edges_out)):
+		t = open(edges_out, "r")
+		random_edges = t.readlines()
+		random_edges = [e.strip().split() for e in random_edges]
+		t.close()
+
+	else:
 	# get 100 edges at random
-	random_edges = get_random_edges(data, sample_size)
-	t = open(edges_out, "w")
-	for line in random_edges:
-		t.write(str(line[0] + " " + str(line[1] + '\n')))
-	t.close()
+		random_edges = get_random_edges(data, sample_size)
+		t = open(edges_out, "w")
+		for line in random_edges:
+			t.write(str(line[0] + " " + str(line[1] + '\n')))
+		t.close()
+
+	if(os.path.isfile(output_file)):
+		df = pd.read_csv(output_file)
+		resume_pos = df.shape[0]
 
 
 	final_results = []
@@ -117,6 +132,11 @@ def main():
 	metrics = ["W_a_0", "W_a_1", "W_b_0", "W_b_1", "B_a_0", "B_a_1", "B_b_0", "B_b_1", "W_comp_0", "W_comp_1", "B_comp_0", "B_comp_1", "AA", "MW"]
 
 	for edge in random_edges:
+		num_edges += 1
+
+		if(num_edges <= resume_pos):
+			continue
+
 		ranking = []
 		node_a = edge[0]
 		node = edge[1]
