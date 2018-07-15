@@ -56,7 +56,7 @@ def main():
 		temp["distance"] = int(l[0])
 		total_pairs+=1
 
-		if(total_pairs <= 41300):
+		if(total_pairs <= 262500):
 			continue
 
 		# define file names for persistence diagrams
