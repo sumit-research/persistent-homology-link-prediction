@@ -1,4 +1,3 @@
-import dionysus as d
 import sys
 import struct
 from rpy2.robjects.packages import importr
