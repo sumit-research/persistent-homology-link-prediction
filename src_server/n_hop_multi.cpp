@@ -111,7 +111,7 @@ void write_complete(intt distinct_nodes, int hop, vector<intt>& sources, map<int
 	if(remove){
 		out_path = "/home/deepak/Project/files/outputs/removed_edge_" + to_string(hop) + "/apsp_complete_full_" + to_string(to_node[sources[0]]) + "_" + to_string(to_node[sources[1]]);
 	}
-	cout << remove << " " << distinct_nodes << '\n';
+
 	ofstream cFile(out_path, ios::binary);
 
 	intt DIPHA = 8067171840,file_type = 7;
