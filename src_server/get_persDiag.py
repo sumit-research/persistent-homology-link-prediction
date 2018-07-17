@@ -73,6 +73,8 @@ def main():
 		num_processors = struct.unpack('<q' , data[16:24])[0]
 		if(num_processors > 3):
 			num_processors = 3
+		if(num_processors == 0):
+			num_processors+=1
 		command = "mpiexec -n " + str(num_processors) + " dipha --upper_dim 2 " + in_file + " " + out_file
 
 		os.system(command)
@@ -120,6 +122,8 @@ def main():
 		num_processors = struct.unpack('<q' , data[16:24])[0]
 		if(num_processors > 3):
 			num_processors = 3
+		if(num_processors == 0):
+			num_processors+=1
 		command = "mpiexec -n " + str(num_processors) + " dipha --upper_dim 2 " + in_file + " " + out_file
 
 		os.system(command)

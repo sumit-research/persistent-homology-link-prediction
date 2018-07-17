@@ -180,6 +180,8 @@ def main():
 			num_processors = struct.unpack('<q' , data_p[16:24])[0]
 			if(num_processors > 3):
 				num_processors = 3
+			if(num_processors == 0):
+				num_processors+=1
 			command = "mpiexec -n " + str(num_processors) + " dipha --upper_dim 2 " + in_file + " " + dgmComplete_file
 			os.system(command)			
 
@@ -246,8 +248,7 @@ def main():
 			index = get_position(ranking, node, each)
 			results_temp[each] = index
 
-		final_results.append(results_temp)
-		appendCSV(final_results, ',', output_file)
+		appendCSV(results_temp, ',', output_file)
 
 
 

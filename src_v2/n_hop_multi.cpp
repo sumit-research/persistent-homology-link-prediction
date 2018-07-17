@@ -209,9 +209,24 @@ int main(int argc, char *argv[]){
 	// cout << "Input done. "<< num_nodes << "\n";
 	
 	if(source_2 == -1){
+		if(to_indices.find(source_1) == to_indices.end()){
+			to_indices[source_1] = num_nodes+1;
+			to_node[num_nodes+1] = source_1;
+			num_nodes++;
+		}
 		sources.push_back(to_indices[source_1]);
 	}
 	else{
+		if(to_indices.find(source_1) == to_indices.end()){
+            to_indices[source_1] = num_nodes+1;
+            to_node[num_nodes+1] = source_1;
+            num_nodes++;
+        }
+		if(to_indices.find(source_2) == to_indices.end()){
+            to_indices[source_2] = num_nodes+1;
+            to_node[num_nodes+1] = source_2;
+            num_nodes++;
+        }
 		sources.push_back(to_indices[source_1]);
 		sources.push_back(to_indices[source_2]);
 	}
