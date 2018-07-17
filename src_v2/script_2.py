@@ -249,8 +249,7 @@ def main():
 			index = get_position(ranking, node, each)
 			results_temp[each] = index
 
-		final_results.append(results_temp)
-		appendCSV(final_results, ',', output_file)
+		appendCSV(results_temp, ',', output_file)
 
 
 
