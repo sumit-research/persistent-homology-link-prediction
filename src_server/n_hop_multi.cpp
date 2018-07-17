@@ -111,7 +111,10 @@ void write_complete(intt distinct_nodes, int hop, vector<intt>& sources, map<int
 	if(remove){
 		out_path = "/home/deepak/Project/files/outputs/removed_edge_" + to_string(hop) + "/apsp_complete_full_" + to_string(to_node[sources[0]]) + "_" + to_string(to_node[sources[1]]);
 	}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 70b473c93cd97e1591f94b4158b55c4f6ac1254e
 	ofstream cFile(out_path, ios::binary);
 
 	intt DIPHA = 8067171840,file_type = 7;
@@ -219,15 +222,15 @@ int main(int argc, char *argv[]){
 	}
 	else{
 		if(to_indices.find(source_1) == to_indices.end()){
-                        to_indices[source_1] = num_nodes+1;
-                        to_node[num_nodes+1] = source_1;
-                        num_nodes++;
-                }
+            to_indices[source_1] = num_nodes+1;
+            to_node[num_nodes+1] = source_1;
+            num_nodes++;
+        }
 		if(to_indices.find(source_2) == to_indices.end()){
-                        to_indices[source_2] = num_nodes+1;
-                        to_node[num_nodes+1] = source_2;
-                        num_nodes++;
-                }
+            to_indices[source_2] = num_nodes+1;
+            to_node[num_nodes+1] = source_2;
+            num_nodes++;
+        }
 		sources.push_back(to_indices[source_1]);
 		sources.push_back(to_indices[source_2]);
 	}
