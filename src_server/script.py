@@ -32,7 +32,7 @@ def main():
 
 	# get all the reachable pairs in the graph to test
 
-	# os.system("/home/deepak/Project/code/src_server/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/n_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/n_" + str(hop) + "/global_sparse.txt" )
+	os.system("/home/deepak/Project/code/src_server/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/n_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/n_" + str(hop) + "/global_sparse.txt" )
 	data = "/home/deepak/Project/files/outputs/dumped.txt"
 	# data = "/home/deepak/Project/code/src_server/random_select.txt"
 
