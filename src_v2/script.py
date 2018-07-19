@@ -9,20 +9,22 @@ from subprocess import Popen, PIPE
 # input filename
 # n-hop neighbourhood -- n
 
-def appendCSV(final_results, sep):
+def appendCSV(final_results, sep, out_file):
 	result = pd.DataFrame(final_results, columns = final_results[0].keys())
-	if(os.path.isfile("./test_results.csv")):
-		result.to_csv("./test_results.csv", mode = 'a', header = False, index = False)
+	if(os.path.isfile(out_file)):
+		result.to_csv(out_file, mode = 'a', header = False, index = False)
 	else:
-		result.to_csv("./test_results.csv", sep = sep, index=False)
+		result.to_csv(out_file, sep = sep, index=False)
 
 def main():
-	if(len(sys.argv) != 3):
-		print("[Usage:] python3 script.py data_file n")
+	if(len(sys.argv) != 5):
+		print("[Usage:] python3 script.py data_file pair_data output_file n")
 		exit()
 
 	data_file = sys.argv[1]
-	hop = int(sys.argv[2])
+	pair_data = sys.argv[2]
+	out_file = sys.argv[3]
+	hop = int(sys.argv[4])
 
 	if(os.path.exists("/Users/admin/Desktop/Project/files/outputs/n_" + str(hop)) == False):
 		os.system("mkdir /Users/admin/Desktop/Project/files/outputs/n_" + str(hop))
@@ -31,9 +33,10 @@ def main():
 
 
 	# get all the reachable pairs in the graph to test
-
 	os.system("/Users/admin/Desktop/Project/code/src_v2/johnson --dump_pairs " + data_file + " /Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/global.txt /Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/global_sparse.txt" )
-	data = "/Users/admin/Desktop/Project/files/outputs/dumped.txt"
+	
+	# some example pair data to use
+	# data = "/Users/admin/Desktop/Project/files/outputs/dumped.txt"
 	# data = "/Users/admin/Desktop/Project/code/src_v2/random_select.txt"
 
 	# define a list of ordered dict to save the results in excel
@@ -42,7 +45,7 @@ def main():
 	total_pairs = 0
 
 	# open the data file and repeat the process for each pair
-	f = open(data, "r")
+	f = open(pair_data, "r")
 	lines = f.readlines()
 	lines = [l.strip().split() for l in lines]
 	f.close()
@@ -50,8 +53,8 @@ def main():
 	# if file exists, resume 
 	resume_pos = 0
 
-	if(os.path.isfile("./test_results.csv")):
-		df = pd.read_csv("./test_results.csv")
+	if(os.path.isfile(out_file)):
+		df = pd.read_csv(out_file)
 		resume_pos = df.shape[0]
 		print(resume_pos)
 		
@@ -151,13 +154,14 @@ def main():
 
 		if(total_pairs%100 == 0):
 			print(total_pairs)
-			appendCSV(final_results, ',')
+			appendCSV(final_results, ',', out_file)
 			del final_results[:]
 
-	appendCSV(final_results, ',')
-	sorted_result = pd.read_csv("./test_results.csv")
+	if(len(final_results) > 0):
+		appendCSV(final_results, ',', out_file)
+	sorted_result = pd.read_csv(out_file)
 	sorted_result.sort_values(by=['distance'], inplace = True, ascending = True)
-	sorted_result.to_csv("./test_results.csv", sep = ',')
+	sorted_result.to_csv(out_file, sep = ',')
 
 if __name__ == '__main__':
 	main()

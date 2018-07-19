@@ -245,7 +245,7 @@ def main():
 		results_temp["node_a"] = node_a
 		results_temp["node_b"] = node
 		for each in metrics:
-			index = get_position(ranking, node, each)
+			index = get_position(ranking, node, each)+1
 			results_temp[each] = index
 
 		appendCSV(results_temp, ',', output_file)

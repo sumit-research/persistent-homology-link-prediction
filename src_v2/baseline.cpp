@@ -153,7 +153,7 @@ double milne_witten(set<int> source_in, int dest, int source, int num_nodes){
 
 
 	if(common.size() == 0)
-		return -1.0 * INT_MAX;
+		return -1.0 * INT64_MAX;
 
 	double mw = 0.0;
 
