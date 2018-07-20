@@ -1,6 +1,13 @@
 # ShapeOfYou
-This repository contains all the code written for a project with IBM. In this project we use concenpts from algebraic topology 
+This repository contains all the code written for a project with IBM. In this project we use concepts from algebraic topology 
 in the link prediction problem. TDA \- Topological Data Analysis, is an emerging data analytics tool. One of the common methods used within the context of TDA is **Persistent Homology**.
+
+## Experiments
+1. **Experiment 1**: We generate all the possible pairs for the given graph file and store those pairs with the distance in a file. We calculate all the scores for all those pairs sequentially. 
+
+2. **Experiment 2**: In this experiment, we take a random sample of 100 edges from the graph. For each edge, we remove that edge from the graph and make a new graph, and do all the computation using that graph. 
+
+3. **Experiment 3**: In this experiment we make a random sample from the graph. Random sample should contain some positive and some negative examples. Positive examples mean that those pair of nodes have an edge between them in the graph, and in negative examples they don't have an edge. Now we use experiment 2 for positive examples(removing that edge and then computing scores) and for negative edges we just compute the scores directly. Then we train a machine learning model on those scores.
 
 ## Usage
 ### I/O format
@@ -23,7 +30,8 @@ If d(a,b) represents shortest distance from node _a_ to _b_ then:
 distance(a,b) = [d(a,b) + d(b,a)]/2
 
 **DIPHA files**
-Some of the codes(johnson.cpp) generate DIPHA distance matrix files. You can read more about them [here](https://github.com/DIPHA/dipha)
+Some of the codes(johnson.cpp) generate DIPHA distance matrix files. You can read more about them [here](https://github.com/DIPHA/dipha).
+We feed these files to dipha program and it gives a DIPHA persistent diagram file.
 
 ### Details
 There is one main project directory, which has two folders:
@@ -67,3 +75,17 @@ There is one main project directory, which has two folders:
    - src_v2 - This folder was created to run the code on local laptop. Files are same as src_server.
    
 2. files \- This folder contains data and output files. 
+   - **Data** \- This folder contains all the datasets, experimental sample test(obtained from those datasets)
+   - **Outputs** \- This folder contains all the results and intermediate outputs of all experiments. It has many folders with the folder name as the dataset name. 
+       - experiment_1: This contains files of type _output\_hop.csv_, where hop is a number.
+       - experiment_2: This contains files of type _output\_hop\_expermentNum.csv_, where hop is the hop number and experimentNum is id of experiment. 
+       - experiment_3: This contains files of type _mloutput_num.csv_, where num is experiment number.
+       - n_hop: There are many folders of this type. These folders contain all the intermediate outputs like apsp distance matrix, n hop neighborhood data and dipha files for that value of hop.
+         - apsp_complete_full_node1_node2: This file contains complete graph made by n_hop neighborhood of node1 and node2.
+         - apsp_full_node1: This file contains full distance matrix for n_hop neighborhood of node1. Another variant of this file is apsp_sparse_node1, which contains sparse distance matrix.
+         - apsp_full_node1_node2: This file contains full distance matrix for combined n_hop neighborhood of node1 and node2. Another variant of this file is apsp_sparse_node1_node2, which contains sparse distance matrix.
+         - n_hop_node1: This file contains n_hop neighborhood subgraph for node1.
+         - n_hop_node1_node2: This file contains combined n_hop neighborhood subgraph for node1 and node2.
+         - dipha_node1: This file is a DIPHA persistent diagram file for n_hop neighborhood of node1.
+         - dipha_node1_node2: This file is a DIPHA persistent diagram file for n_hop neighborhood of node1 and node2.
+       - removed_edge_hop: These folders are used to store intermediate results when we are working on experiment 2, i.e. when we do all the computation after removing an edge from the graph. The file names in these folders are similar to file names in n_hop folders. 
