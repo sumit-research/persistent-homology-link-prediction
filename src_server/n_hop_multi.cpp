@@ -107,9 +107,9 @@ intt input(vector<vector< ii > >& in, map<intt,intt>& to_indices, map<intt,intt>
 }
 
 void write_complete(intt distinct_nodes, int hop, vector<intt>& sources, map<intt,intt>& to_node, bool remove){
-	string out_path = "/home/deepak/Project/files/outputs/n_" + to_string(hop) + "/apsp_complete_full_" + to_string(to_node[sources[0]]) + "_" + to_string(to_node[sources[1]]);
+	string out_path = "/home/deepak/Project/files/outputs/cora/n_" + to_string(hop) + "/apsp_complete_full_" + to_string(to_node[sources[0]]) + "_" + to_string(to_node[sources[1]]);
 	if(remove){
-		out_path = "/home/deepak/Project/files/outputs/removed_edge_" + to_string(hop) + "/apsp_complete_full_" + to_string(to_node[sources[0]]) + "_" + to_string(to_node[sources[1]]);
+		out_path = "/home/deepak/Project/files/outputs/cora/removed_edge_" + to_string(hop) + "/apsp_complete_full_" + to_string(to_node[sources[0]]) + "_" + to_string(to_node[sources[1]]);
 	}
 
 	ofstream cFile(out_path, ios::binary);

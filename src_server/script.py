@@ -26,19 +26,19 @@ def main():
 	out_file = sys.argv[3]
 	hop = int(sys.argv[4])
 
-	if(os.path.exists("/home/deepak/Project/files/outputs/n_" + str(hop)) == False):
-		os.system("mkdir /home/deepak/Project/files/outputs/n_" + str(hop))
+	if(os.path.exists("/home/deepak/Project/files/outputs/cora/n_" + str(hop)) == False):
+		os.system("mkdir /home/deepak/Project/files/outputs/cora/n_" + str(hop))
 
 	# compile all c++ files
 
 
 	# get all the reachable pairs in the graph to test
 
-	os.system("/home/deepak/Project/code/src_server/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/n_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/n_" + str(hop) + "/global_sparse.txt" )
+	os.system("/home/deepak/Project/code/src_server/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/global_sparse.txt" )
 <<<<<<< HEAD
-	# data = "/home/deepak/Project/files/outputs/dumped.txt"
+	# data = "/home/deepak/Project/files/outputs/cora/dumped.txt"
 =======
-	data = "/home/deepak/Project/files/outputs/dumped.txt"
+	data = "/home/deepak/Project/files/outputs/cora/dumped.txt"
 >>>>>>> 0c0daeb735e2da3fdb7c2f7762c25bb2046d9d98
 	# data = "/home/deepak/Project/code/src_server/random_select.txt"
 
@@ -75,10 +75,10 @@ def main():
 
 		# define file names for persistence diagrams
 
-		dgm1_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(node_a)
-		dgm2_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(node_b)
-		dgmCombine_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(node_a) + "_" + str(node_b)
-		dgmComplete_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/dipha_complete_" + str(node_a) + "_" + str(node_b)
+		dgm1_file = "/home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/dipha_" + str(node_a)
+		dgm2_file = "/home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/dipha_" + str(node_b)
+		dgmCombine_file = "/home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/dipha_" + str(node_a) + "_" + str(node_b)
+		dgmComplete_file = "/home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/dipha_complete_" + str(node_a) + "_" + str(node_b)
 
 		# obtain persistence diagrams for node_a, node_b and combined
 
@@ -90,7 +90,7 @@ def main():
 		os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py " + data_file + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
 
 		# get persistence diagram for complete graph
-		in_file = "/home/deepak/Project/files/outputs/n_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
+		in_file = "/home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
 		f = open(in_file, "rb")
 		data = f.read()
 		num_processors = struct.unpack('<q' , data[16:24])[0]

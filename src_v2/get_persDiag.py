@@ -33,9 +33,9 @@ def main():
 		nodes.append(int(sys.argv[2]))
 		# getting n-hop neighbourhood of the nodes
 
-		out_file= "/Users/admin/Desktop/Project/files/outputs/n_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(nodes[1])
+		out_file= "/Users/admin/Desktop/Project/files/outputs/cora/n_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(nodes[1])
 		if(remove):
-			out_file= "/Users/admin/Desktop/Project/files/outputs/removed_edge_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(nodes[1])
+			out_file= "/Users/admin/Desktop/Project/files/outputs/cora/removed_edge_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(nodes[1])
 
 		command1 = "g++ -std=c++14 /Users/admin/Desktop/Project/code/src_v2/n_hop_multi.cpp -o /Users/admin/Desktop/Project/code/src_v2/n_hop_multi"
 		command= "/Users/admin/Desktop/Project/code/src_v2/n_hop_multi " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(nodes[1]) + " " + str(hop)
@@ -49,11 +49,11 @@ def main():
 		# get all pair shortest path distances using johnson algorithm for n-hop subgraph
 
 		in_file = out_file
-		out_file_full = "/Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/apsp_full_" + str(nodes[0]) + "_" + str(nodes[1])
-		out_file_sparse = "/Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/apsp_sparse_" + str(nodes[0]) + "_" + str(nodes[1])
+		out_file_full = "/Users/admin/Desktop/Project/files/outputs/cora/n_" + str(hop) + "/apsp_full_" + str(nodes[0]) + "_" + str(nodes[1])
+		out_file_sparse = "/Users/admin/Desktop/Project/files/outputs/cora/n_" + str(hop) + "/apsp_sparse_" + str(nodes[0]) + "_" + str(nodes[1])
 		if(remove):
-			out_file_sparse = "/Users/admin/Desktop/Project/files/outputs/removed_edge_" + str(hop) + "/apsp_sparse_" + str(nodes[0]) + "_" + str(nodes[1])
-			out_file_full = "/Users/admin/Desktop/Project/files/outputs/removed_edge_" + str(hop) + "/apsp_full_" + str(nodes[0]) + "_" + str(nodes[1])
+			out_file_sparse = "/Users/admin/Desktop/Project/files/outputs/cora/removed_edge_" + str(hop) + "/apsp_sparse_" + str(nodes[0]) + "_" + str(nodes[1])
+			out_file_full = "/Users/admin/Desktop/Project/files/outputs/cora/removed_edge_" + str(hop) + "/apsp_full_" + str(nodes[0]) + "_" + str(nodes[1])
 
 		command2 = "g++ -std=c++14 /Users/admin/Desktop/Project/code/src_v2/johnson.cpp -o /Users/admin/Desktop/Project/code/src_v2/johnson"
 		command = "/Users/admin/Desktop/Project/code/src_v2/johnson " + in_file + " " + out_file_full + " " + out_file_sparse
@@ -64,9 +64,9 @@ def main():
 		# run dipha and get persistence diagram
 
 		in_file = out_file_full
-		out_file = "/Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(nodes[0]) + "_" + str(nodes[1])
+		out_file = "/Users/admin/Desktop/Project/files/outputs/cora/n_" + str(hop) + "/dipha_" + str(nodes[0]) + "_" + str(nodes[1])
 		if(remove):
-			out_file = "/Users/admin/Desktop/Project/files/outputs/removed_edge_" + str(hop) + "/dipha_" + str(nodes[0]) + "_" + str(nodes[1])
+			out_file = "/Users/admin/Desktop/Project/files/outputs/cora/removed_edge_" + str(hop) + "/dipha_" + str(nodes[0]) + "_" + str(nodes[1])
 
 		f = open(in_file, "rb")
 		data = f.read()
@@ -83,9 +83,9 @@ def main():
 
 		# getting n-hop neighbourhood of the nodes
 		command1 = "g++ -std=c++14 /Users/admin/Desktop/Project/code/src_v2/n_hop_multi.cpp -o /Users/admin/Desktop/Project/code/src_v2/n_hop_multi"
-		out_file= "/Users/admin/Desktop/Project/files/outputs/n_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(hop)
+		out_file= "/Users/admin/Desktop/Project/files/outputs/cora/n_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(hop)
 		if(remove):
-			out_file= "/Users/admin/Desktop/Project/files/outputs/removed_edge_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(hop)
+			out_file= "/Users/admin/Desktop/Project/files/outputs/cora/removed_edge_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(hop)
 
 		command= "/Users/admin/Desktop/Project/code/src_v2/n_hop_multi " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(hop) 
 		if(remove):
@@ -99,11 +99,11 @@ def main():
 
 		command2 = "g++ -std=c++14 /Users/admin/Desktop/Project/code/src_v2/johnson.cpp -o /Users/admin/Desktop/Project/code/src_v2/johnson"
 		in_file = out_file
-		out_file_full = "/Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/apsp_full_" + str(nodes[0])
-		out_file_sparse = "/Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/apsp_sparse_" + str(nodes[0])
+		out_file_full = "/Users/admin/Desktop/Project/files/outputs/cora/n_" + str(hop) + "/apsp_full_" + str(nodes[0])
+		out_file_sparse = "/Users/admin/Desktop/Project/files/outputs/cora/n_" + str(hop) + "/apsp_sparse_" + str(nodes[0])
 		if(remove):
-			out_file_full = "/Users/admin/Desktop/Project/files/outputs/removed_edge_" + str(hop) + "/apsp_full_" + str(nodes[0])
-			out_file_sparse = "/Users/admin/Desktop/Project/files/outputs/removed_edge_" + str(hop) + "/apsp_sparse_" + str(nodes[0])
+			out_file_full = "/Users/admin/Desktop/Project/files/outputs/cora/removed_edge_" + str(hop) + "/apsp_full_" + str(nodes[0])
+			out_file_sparse = "/Users/admin/Desktop/Project/files/outputs/cora/removed_edge_" + str(hop) + "/apsp_sparse_" + str(nodes[0])
 
 		command = "/Users/admin/Desktop/Project/code/src_v2/johnson " + in_file + " " + out_file_full + " " + out_file_sparse
 
@@ -113,9 +113,9 @@ def main():
 		# run dipha and get persistence diagram
 
 		in_file = out_file_full
-		out_file = "/Users/admin/Desktop/Project/files/outputs/n_" + str(hop) + "/dipha_" + str(nodes[0])
+		out_file = "/Users/admin/Desktop/Project/files/outputs/cora/n_" + str(hop) + "/dipha_" + str(nodes[0])
 		if(remove):
-			out_file = "/Users/admin/Desktop/Project/files/outputs/removed_edge_" + str(hop) + "/dipha_" + str(nodes[0])
+			out_file = "/Users/admin/Desktop/Project/files/outputs/cora/removed_edge_" + str(hop) + "/dipha_" + str(nodes[0])
 
 		f = open(in_file, "rb")
 		data = f.read()

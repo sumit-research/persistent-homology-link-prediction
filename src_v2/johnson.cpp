@@ -21,7 +21,7 @@ ofstream sFile;
 ofstream indFile("indices.txt");
 ofstream wFile("weight.txt");
 ofstream cFile("connections.txt");
-ofstream dFile("/Users/admin/Desktop/Project/files/outputs/dumped.txt");
+ofstream dFile("/Users/admin/Desktop/Project/files/outputs/cora/dumped.txt");
 
 
 // sFile.imbue(locale::classic());
