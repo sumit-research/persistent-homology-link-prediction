@@ -18,18 +18,18 @@ using namespace std;
 ifstream iFile;
 ofstream oFile;
 ofstream sFile;
-ofstream indFile("indices.txt");
-ofstream wFile("weight.txt");
-ofstream cFile("connections.txt");
-ofstream dFile("/home/deepak/Project/files/outputs/cora/dumped.txt");
+ofstream dFile;
+// ofstream indFile("indices.txt");
+// ofstream wFile("weight.txt");
+// ofstream cFile("connections.txt");
 
 
 // sFile.imbue(locale::classic());
 
 vector< vector< ii > > in; // for original graph, to get path from a->b
 vector< vector< ii > > reverse_in; // for reverse graph, to get path from b->a
-map<intt,intt> to_indices; // maps node to index(1-n), index is always from 1-n where n is number of distinct nodes
-map<intt,intt> to_node; // reverse map tp obtain node number using it's index
+map<string,intt> to_indices; // maps node to index(1-n), index is always from 1-n where n is number of distinct nodes
+map<intt,string> to_node; // reverse map tp obtain node number using it's index
 
 void write_txt(intt src, vector<double>& dist, intt num_nodes){
 
@@ -49,13 +49,13 @@ void write_txt(intt src, vector<double>& dist, intt num_nodes){
 
 		oFile.write(reinterpret_cast<const char*>(&distance), sizeof(double));
 
-		if(dist[v] <= num_nodes and v != src){
-			temp++;
-			indFile << (v-1) << '\n';
-			wFile << dist[v] << '\n'; 
-		}
+		// if(dist[v] <= num_nodes and v != src){
+		// 	temp++;
+		// 	indFile << (v-1) << '\n';
+		// 	wFile << dist[v] << '\n'; 
+		// }
 	}
-	cFile << temp << '\n' << flush;
+	// cFile << temp << '\n' << flush;
 }
 
 void write_sparse(intt num_nodes){
@@ -93,7 +93,7 @@ void write_sparse(intt num_nodes){
 }
 
 void dump_pairs(intt u, vector<double>& dist, intt num_nodes){
-	
+
 	for(intt i = 1; i <= num_nodes; i++){
 		if(i == u)
 			continue;
@@ -205,7 +205,7 @@ void johnson(vector< vector< ii > >& adj, vector< vector< ii > >& reverse_adj, i
 		for(intt u = 1; u <= num_nodes; u++){
 
 			// check progress
-			if(u%100 == 0){
+			if(u%1000 == 0){
 				// cout << "Done till " << u <<"th node.\n";
 			}
 			
@@ -241,24 +241,24 @@ void johnson(vector< vector< ii > >& adj, vector< vector< ii > >& reverse_adj, i
 				dump_pairs(u, distance, num_nodes);
 
 		}
-		wFile.close();
-		indFile.close();
-		cFile.close();
+		// wFile.close();
+		// indFile.close();
+		// cFile.close();
 
-		write_sparse(num_nodes);
+		// write_sparse(num_nodes);
 
 	} 
 }
 
-intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
+intt input(map<string,intt>& to_indices, map<intt,string>& to_node){
 	string u; 
 	intt edges = 0;
 	int num_sources = 0;
 	intt i = 1;
 	in.resize(1);
 	reverse_in.resize(1);
+	string source, dest;
 	while(true){
-		intt source, dest;
 		string u;
 		// cin >> u;
 		iFile >> u; // read from file
@@ -272,8 +272,8 @@ intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
 			// check for the source node
 			if(u[u.length()-1] == ':'){ 
 				string un;
-				un = u.substr(0, u.length()-1); // remove colon
-				source = stoi(un);
+				source = u.substr(0, u.length()-1); // remove colon
+				
 				if(to_indices.find(source) == to_indices.end()){
 					to_indices[source] = i;
 					to_node[i] = source;
@@ -288,7 +288,7 @@ intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
 			else{
 				edges++;
 				intt weight;
-				dest = stoi(u);
+				dest = u;
 
 				if(to_indices.find(dest) == to_indices.end()){
 					to_indices[dest] = i;
@@ -323,28 +323,31 @@ int main(int argc, char *argv[]){
 	// used to detect user option for dumping all the pairs
 	bool dumping = false;
 
-	if(argc < 4){
-		cout << "[Usage]: " << "./johnson input_filename output_filename sparse_output_filename\n";
+	if(argc < 5){
+		cout << "[Usage]: " << "./johnson dataset_name input_filename output_filename sparse_output_filename\n";
 		cout << "Options: \n";
 		cout << "--dump_pairs -> dump all the reachable pairs into text file with the distance between them. Use for testing on a big file.\n";
 		return 0;
 	}
 
-	else if(argc == 5 and (string)argv[1] == "--dump_pairs"){
+	else if(argc == 6 and (string)argv[1] == "--dump_pairs"){
 		j++;
 		dumping = true;
 	}
 
+	string dataset_name = argv[j++];
 	string input_file = argv[j++];
 	string output_file = argv[j++];
 	string sparse_file = argv[j++];
+
+	if(dumping)
+		dFile.open("/home/deepak/Project/files/outputs/"+dataset_name+"/dumped.txt");
 
 	iFile.open((string) input_file);
 	oFile.open((string) output_file, ios::binary);
 	sFile.open((string) sparse_file, ios::binary);
 
 	intt num_nodes = input(to_indices, to_node); // take input
-	// cout << "Input done. " << num_nodes << '\n';
 
 	intt DIPHA = 8067171840,file_type = 7;
 	oFile.write(reinterpret_cast<const char*>(&DIPHA), sizeof(intt));
@@ -365,6 +368,7 @@ int main(int argc, char *argv[]){
 	// 	for(int j = 0; j < reverse_in[i].size(); j++)
 	// 		cout << to_node[reverse_in[i][j].second] << " "  << reverse_in[i][j].first << '\n';
 	// }
+
 
 	johnson(in, reverse_in, num_nodes, dumping);
 

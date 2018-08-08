@@ -11,7 +11,7 @@ from subprocess import Popen, PIPE
 # n-hop neighbourhood -- n
 
 def appendCSV(final_results, sep, out_file):
-	result = pd.DataFrame(final_results, columns = final_results[0].keys())
+	result = pd.DataFrame(final_results, columns = final_results.keys(), index = [0])
 	if(os.path.isfile(out_file)):
 		result.to_csv(out_file, mode = 'a', header = False, index = False)
 	else:
@@ -71,25 +71,27 @@ def remove_edge(data, new_data, node_a, node_b):
 
 def main():
 	if(len(sys.argv) != 6):
-		print("[Usage:] python3 script.py data_file edges_out output_file n sample_size")
+		print("[Usage:] python3 script_2.py dataset_name edges_out output_file n sample_size")
 		exit()
 
-	data_file = sys.argv[1]
+	dataset_name = sys.argv[1]
 	edges_out = sys.argv[2]
 	output_file = sys.argv[3]
 	hop = int(sys.argv[4])
 	sample_size = int(sys.argv[5])
 
-	if(os.path.exists("/home/deepak/Project/files/outputs/cora/removed_edge_" + str(hop)) == False):
-		os.system("mkdir /home/deepak/Project/files/outputs/cora/removed_edge_" + str(hop))
+	data_file = "/home/deepak/Project/files/data/"+dataset_name+"/data.txt"
+
+	if(os.path.exists("/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop)) == False):
+		os.system("mkdir /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop))
 
 	# compile all c++ files
 
 
 	# get all the reachable pairs in the graph to test
 
-	dumped_file = "/home/deepak/Project/files/outputs/cora/dumped_copy.txt"
-	# os.system("/home/deepak/Project/code/src_server/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/cora/removed_edge_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/cora/removed_edge_" + str(hop) + "/global_sparse.txt" )
+	dumped_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/dumped_copy.txt"
+	# os.system("/home/deepak/Project/code/src_server/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global_sparse.txt" )
 	df = open(dumped_file, "r")
 	dumped_data = df.readlines()
 	dumped_data = [line.strip().split() for line in dumped_data]
@@ -145,8 +147,11 @@ def main():
 		print(node_a, node)
 
 		# remove the edge between node_a and node
-		removed_edge_data = "/home/deepak/Project/files/data/modified_data.txt"
+		removed_edge_data = "/home/deepak/Project/files/data/"+dataset_name+"/modified_data.txt"
 		remove_edge(data, removed_edge_data, node_a, node)
+
+		os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(hop))
+
 
 		for node_b in nodes:
 			if(node_b == str(node_a)):
@@ -161,20 +166,19 @@ def main():
 
 			# define file names for persistence diagrams
 
-			dgm1_file = "/home/deepak/Project/files/outputs/cora/removed_edge_" + str(hop) + "/dipha_" + str(node_a)
-			dgm2_file = "/home/deepak/Project/files/outputs/cora/removed_edge_" + str(hop) + "/dipha_" + str(node_b)
-			dgmCombine_file = "/home/deepak/Project/files/outputs/cora/removed_edge_" + str(hop) + "/dipha_" + str(node_a) + "_" + str(node_b)
-			dgmComplete_file = "/home/deepak/Project/files/outputs/cora/removed_edge_" + str(hop) + "/dipha_complete_" + str(node_a) + "_" + str(node_b)
+			dgm1_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/dipha_" + str(node_a)
+			dgm2_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/dipha_" + str(node_b)
+			dgmCombine_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/dipha_" + str(node_a) + "_" + str(node_b)
+			dgmComplete_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/dipha_complete_" + str(node_a) + "_" + str(node_b)
 
 			# obtain persistence diagrams for node_a, node_b and combined
 
-			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py --remove " + removed_edge_data + " " + str(node_a) + " " + str(hop))
-			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py --remove " + removed_edge_data + " " + str(node_b) + " " + str(hop))
+			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_b) + " " + str(hop))
 
-			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py --remove " + removed_edge_data + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
+			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
 
 			# get persistence diagram for complete graph
-			in_file = "/home/deepak/Project/files/outputs/cora/removed_edge_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
+			in_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
 			f = open(in_file, "rb")
 			data_p = f.read()
 			num_processors = struct.unpack('<q' , data_p[16:24])[0]

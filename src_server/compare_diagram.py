@@ -42,7 +42,7 @@ def get_bottleneck_distance(dim, dgm1, dgm2):
 	# print(ro.r["dgm1"])
 	# print(ro.r["dgm2"])
 
-	# get wasserstein distance
+	# get bottleneck distance
 	f = TDA.bottleneck(dgm1, dgm2, dimension = dim)
 	return f[0]
 
@@ -73,6 +73,7 @@ def main():
 	dgm2 = get_dgm(dgm2_file)
 	num_points_diag = len(dgm1)
 	
+	# for conversion of numpy matrix to r array
 	ro.conversion.py2ri = numpy2ri
 	ro.numpy2ri.activate()
 

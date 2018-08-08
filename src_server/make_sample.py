@@ -39,9 +39,11 @@ def find_edges(data_file):
 
 def main():
 	if(len(sys.argv) != 5):
-		print("[Usage:] python3 make_sample.py data_file sample_out_file num_positive_samples num_negative_samples\n")
+		print("[Usage:] python3 make_sample.py dataset_name sample_out_file num_positive_samples num_negative_samples\n")
+		sys.exit()
 
-	data_file = sys.argv[1]
+	dataset_name = sys.argv[1]
+	data_file = "/home/deepak/Project/files/data/"+dataset_name+"/data.txt"
 	sample_out_file = sys.argv[2]
 	num_positive_samples = int(sys.argv[3])
 	num_negative_samples = int(sys.argv[4])

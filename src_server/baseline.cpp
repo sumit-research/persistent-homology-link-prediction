@@ -15,25 +15,27 @@
 using namespace std;
 #define intt int64_t
 #define ii pair<intt,intt> 
-#define di pair<double, intt>
+#define di pair<double, string>
 
 vector< vector<intt> > adj;
 vector< vector<intt> > in;
-map<intt,intt> to_indices; // maps node to index(1-n), index is always from 1-n where n is number of distinct nodes
-map<intt,intt> to_node; // reverse map tp obtain node number using it's index
+map<string,intt> to_indices; // maps node to index(1-n), index is always from 1-n where n is number of distinct nodes
+map<intt,string> to_node; // reverse map tp obtain node number using it's index
 
 ifstream iFile;
 ofstream oFile;
 
-intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
+intt input(map<string,intt>& to_indices, map<intt,string>& to_node){
 	string u; 
 	intt edges = 0;
 	int num_sources = 0;
 	intt i = 1;
 	in.resize(1);
 	adj.resize(1);
+			
+	string source, dest;
+
 	while(true){
-		intt source, dest;
 		string u;
 		// cin >> u;
 		iFile >> u; // read from file
@@ -48,7 +50,7 @@ intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
 			if(u[u.length()-1] == ':'){ 
 				string un;
 				un = u.substr(0, u.length()-1); // remove colon
-				source = stoi(un);
+				source = un;
 				if(to_indices.find(source) == to_indices.end()){
 					to_indices[source] = i;
 					to_node[i] = source;
@@ -63,7 +65,7 @@ intt input(map<intt,intt>& to_indices, map<intt,intt>& to_node){
 			else{
 				edges++;
 				intt weight;
-				dest = stoi(u);
+				dest = u;
 
 				if(to_indices.find(dest) == to_indices.end()){
 					to_indices[dest] = i;
@@ -100,7 +102,7 @@ double getNbrCount(int u, string type){
 }
 
 // get common nodes between u and v. If type == 0, this method will return N(u) intersect N(v), else it will return N'(u) intersect N'(v). For undirected graph pass type = 0
-vector<int> getCommon(set<int> source_node, int v, int type){
+vector<int> getCommon(set<int> source_node, intt v, int type){
 	vector<int> common(1000000); 
 	set<int> dest_node;
 
@@ -173,24 +175,25 @@ double milne_witten(set<int> source_in, int dest, int source, int num_nodes){
 int main(int argc, char* argv[]){
 
 	if(argc != 4 and argc != 5){
-		cout << "[Usage]: " << "./baseline input_filename output_filename source_node\n";
-		cout << "[Usage]: " << "./baseline input_filename output_filename source_node node\n";
+		cout << "[Usage]: " << "./baseline data_file output_filename source_node\n";
+		cout << "[Usage]: " << "./baseline data_file output_filename source_node node\n";
 		return 0;
 	}
 
 	string in_file = argv[1];
 	string out_file = argv[2];
-	int source = atoi(argv[3]);
-	int node;
+	string node1 = argv[3];
+	string dest;
 	if(argc == 5)
-		node = atoi(argv[4]);
+		dest = argv[4];
+
 
 	iFile.open(in_file);
 
 	int num_nodes = input(to_indices, to_node);
 
-	source = to_indices[source];
-	node = to_indices[node];
+	intt source = to_indices[node1];
+	intt node = to_indices[dest];
 
 	// get set of nodes with an incoming edge from source
 	set<int> source_out;

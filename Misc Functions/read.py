@@ -1,14 +1,15 @@
-v = {}
-with open('./coracites.txt') as file:
+from collections import OrderedDict
+v = OrderedDict([])
+with open('/home/deepak/Project/files/data/wordnet/wordnet-mlj12-train.txt') as file:
 	for line in file:
-		graph = list(map(int, line.strip().split('\t')))
-		if(graph[1] in v):
-			v[graph[1]].append(graph[0])
+		graph = line.strip().split('\t')
+		if(graph[0] in v):
+			v[graph[0]].append(graph[2])
 		else:
-			v[graph[1]] = [graph[0]]
+			v[graph[0]] = [graph[2]]
 
 
 for k in v:
-	print("%d:" % k)
+	print("%s:" % k)
 	for i in v[k]:
-		print("%d %d" % (i, 1))
+		print("%s %s" % (i, 1))

@@ -18,28 +18,27 @@ def appendCSV(final_results, sep, out_file):
 
 def main():
 	if(len(sys.argv) != 5):
-		print("[Usage:] python3 script.py data_file pair_data output_file n")
+		print("[Usage:] python3 script.py dataset_name pair_data output_file n")
 		exit()
 
-	data_file = sys.argv[1]
+	dataset_name = sys.argv[1]
 	pair_data = sys.argv[2]
 	out_file = sys.argv[3]
 	hop = int(sys.argv[4])
 
-	if(os.path.exists("/home/deepak/Project/files/outputs/cora/n_" + str(hop)) == False):
-		os.system("mkdir /home/deepak/Project/files/outputs/cora/n_" + str(hop))
+	data_file =  "/home/deepak/Project/files/data/"+dataset_name+"/data.txt"
+
+	if(os.path.exists("/home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop)) == False):
+		os.system("mkdir /home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop))
 
 	# compile all c++ files
 
 
 	# get all the reachable pairs in the graph to test
 
-	os.system("/home/deepak/Project/code/src_server/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/global_sparse.txt" )
-<<<<<<< HEAD
-	# data = "/home/deepak/Project/files/outputs/cora/dumped.txt"
-=======
-	data = "/home/deepak/Project/files/outputs/cora/dumped.txt"
->>>>>>> 0c0daeb735e2da3fdb7c2f7762c25bb2046d9d98
+	# os.system("/home/deepak/Project/code/src_server/johnson --dump_pairs " + dataset_name + " " + data_file + " /home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/global_sparse.txt" )
+
+	# data = "/home/deepak/Project/files/outputs/"+dataset_name+"/dumped.txt"
 	# data = "/home/deepak/Project/code/src_server/random_select.txt"
 
 	# define a list of ordered dict to save the results in excel
@@ -60,10 +59,10 @@ def main():
 		df = pd.read_csv(out_file)
 		resume_pos = df.shape[0]
 		print(resume_pos)
-		
+	
 	for l in lines:
-		node_a = int(l[1])
-		node_b = int(l[2])
+		node_a = l[1]
+		node_b = l[2]
 		temp = OrderedDict()
 		temp["node_a"] = node_a
 		temp["node_b"] = node_b
@@ -75,22 +74,22 @@ def main():
 
 		# define file names for persistence diagrams
 
-		dgm1_file = "/home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/dipha_" + str(node_a)
-		dgm2_file = "/home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/dipha_" + str(node_b)
-		dgmCombine_file = "/home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/dipha_" + str(node_a) + "_" + str(node_b)
-		dgmComplete_file = "/home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/dipha_complete_" + str(node_a) + "_" + str(node_b)
+		dgm1_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/dipha_" + str(node_a)
+		dgm2_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/dipha_" + str(node_b)
+		dgmCombine_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/dipha_" + str(node_a) + "_" + str(node_b)
+		dgmComplete_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/dipha_complete_" + str(node_a) + "_" + str(node_b)
 
 		# obtain persistence diagrams for node_a, node_b and combined
 
 		if(not os.path.isfile(dgm1_file)):
-			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py " + data_file + " " + str(node_a) + " " + str(hop))
+			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py " + dataset_name + " " + data_file + " " + str(node_a) + " " + str(hop))
 		if(not os.path.isfile(dgm2_file)):
-			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py " + data_file + " " + str(node_b) + " " + str(hop))
+			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py " + dataset_name + " " + data_file + " " + str(node_b) + " " + str(hop))
 
-		os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py " + data_file + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
+		os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py " + dataset_name + " " + data_file + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
 
 		# get persistence diagram for complete graph
-		in_file = "/home/deepak/Project/files/outputs/cora/n_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
+		in_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
 		f = open(in_file, "rb")
 		data = f.read()
 		num_processors = struct.unpack('<q' , data[16:24])[0]
@@ -166,7 +165,7 @@ def main():
 		appendCSV(final_results, ',', out_file)
 	sorted_result = pd.read_csv(out_file)
 	sorted_result.sort_values(by=['distance'], inplace = True, ascending = True)
-	sorted_result.to_csv(out_file, sep = ',', out_file)
+	sorted_result.to_csv(out_file, sep = ',')
 
 if __name__ == '__main__':
 	main()
