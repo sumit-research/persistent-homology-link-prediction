@@ -26,10 +26,11 @@ def main():
 
 	i = 0
 	for line in f:
+		line = line.strip().split()
+
 		i+=1
 		if(i%1000000==0):
 			print(i)
-		line = line.strip().split()
 		if(((line[1], line[2]) in testdict2.keys()) or ((line[2], line[1]) in testdict2.keys())):
 			if(int(line[0]) in test_dist):
 				test_dist[int(line[0])] += 1
