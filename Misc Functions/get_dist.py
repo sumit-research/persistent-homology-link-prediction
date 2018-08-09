@@ -14,14 +14,23 @@ def main():
 
 	d = open(testset, 'r')
 	testdata = d.readlines()
-	testdata = [e.strip().split() for e in testdata]
+	testdata = [e.strip().split()[1:] for e in testdata]
 	d.close()
+
+	testdict2 = dict([])
+	for e in testdata:
+		testdict2[e[0], e[1]] = 1
+
 
 	f = open(dataset, 'r')
 
+	i = 0
 	for line in f:
+		i+=1
+		if(i%1000000==0):
+			print(i)
 		line = line.strip().split()
-		if(([1, line[1], line[2]] in testdata) or ([1, line[2], line[1]] in testdata)):
+		if(((line[1], line[2]) in testdict2.keys()) or ((line[2], line[1]) in testdict2.keys())):
 			if(int(line[0]) in test_dist):
 				test_dist[int(line[0])] += 1
 			else:
