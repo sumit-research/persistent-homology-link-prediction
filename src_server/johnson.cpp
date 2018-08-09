@@ -206,7 +206,7 @@ void johnson(vector< vector< ii > >& adj, vector< vector< ii > >& reverse_adj, i
 
 			// check progress
 			if(u%1000 == 0){
-				// cout << "Done till " << u <<"th node.\n";
+				cout << "Done till " << u <<"th node.\n";
 			}
 			
 			fill(dist.begin(), dist.end(), INT64_MAX);

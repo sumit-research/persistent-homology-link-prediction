@@ -93,8 +93,8 @@ def main():
 		f = open(in_file, "rb")
 		data = f.read()
 		num_processors = struct.unpack('<q' , data[16:24])[0]
-		if(num_processors > 3):
-			num_processors = 3
+		if(num_processors > 20):
+			num_processors = 20
 		if(num_processors == 0):
 			num_processors+=1
 		command = "mpiexec -n " + str(num_processors) + " dipha --upper_dim 2 " + in_file + " " + dgmComplete_file
@@ -156,9 +156,9 @@ def main():
 
 		final_results.append(temp)
 
-		if(total_pairs%100 == 0):
+		if(total_pairs%1 == 0):
 			print(total_pairs)
-			appendCSV(final_results, ',')
+			appendCSV(final_results, ',', out_file)
 			del final_results[:]
 
 	if(len(final_results) > 0):
