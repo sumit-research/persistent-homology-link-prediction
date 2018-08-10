@@ -32,6 +32,7 @@ def main():
 		if(i%1000000==0):
 			print(i)
 		if((line[1], line[2]) in testdict2.keys()):
+			print(line)
 			if(int(line[0]) in test_dist):
 				test_dist[int(line[0])] += 1
 			else:
@@ -43,7 +44,6 @@ def main():
 			train_dist[int(line[0])] = int(1)
 	f.close()
 
-	# result = pd.DataFrame(train_dist, columns = train_dist.keys(), index = [0])
 	with open(train_output_file, 'w') as csv_file:
 	    writer = csv.writer(csv_file)
 	    for key in sorted(train_dist.keys()):
@@ -53,10 +53,6 @@ def main():
 	    writer = csv.writer(csv_file)
 	    for key in sorted(test_dist.keys()):
 	       writer.writerow([key, test_dist[key]])
-
-	# sorted_result = pd.read_csv(train_output_file)
-	# sorted_result.sort_values(by=sorted_result.columns[0], inplace = True, ascending = True)
-	# sorted_result.to_csv(train_output_file, sep = ',')
 
 
 if __name__ == '__main__':
