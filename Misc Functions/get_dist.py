@@ -31,7 +31,7 @@ def main():
 		i+=1
 		if(i%1000000==0):
 			print(i)
-		if(((line[1], line[2]) in testdict2.keys()) or ((line[2], line[1]) in testdict2.keys())):
+		if((line[1], line[2]) in testdict2.keys()):
 			if(int(line[0]) in test_dist):
 				test_dist[int(line[0])] += 1
 			else:

@@ -1,6 +1,6 @@
 from collections import OrderedDict
 v = OrderedDict([])
-with open('/home/deepak/Project/files/data/fb15K-237/test.txt') as file:
+with open('/home/deepak/Project/files/data/fb15k/test.txt') as file:
 	for line in file:
 		graph = line.strip().split('\t')
 		if((graph[0], graph[2]) in v):
