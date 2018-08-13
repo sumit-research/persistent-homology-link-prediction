@@ -35,7 +35,7 @@ void write_txt(intt src, vector<double>& dist, intt num_nodes){
 
 	intt temp = 0; // to calcualte number of connections
 
-	for(intt v = 1; v <= src; v++){
+	for(intt v = 1; v < src; v++){
 
 
 		double distance = static_cast<double>(dist[v]);
