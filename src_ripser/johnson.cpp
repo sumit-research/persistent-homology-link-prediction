@@ -19,6 +19,7 @@ ifstream iFile;
 ofstream oFile;
 ofstream sFile;
 ofstream dFile;
+int tatti = 0;
 // ofstream indFile("indices.txt");
 // ofstream wFile("weight.txt");
 // ofstream cFile("connections.txt");
@@ -37,6 +38,8 @@ void write_txt(intt src, vector<double>& dist, intt num_nodes){
 
 	for(intt v = 1; v < src; v++){
 
+		tatti++;
+
 
 		double distance = static_cast<double>(dist[v]);
 		// if(distance == 1){
@@ -46,7 +49,11 @@ void write_txt(intt src, vector<double>& dist, intt num_nodes){
 			cout << src << " " << v << '\n';
 		}
 
-		oFile << distance << ',';
+		oFile << distance;
+		if(v != src-1)
+			oFile << ',';
+		else
+			oFile << '\n';
 
 		// oFile.write(reinterpret_cast<const char*>(&distance), sizeof(double));
 
@@ -56,7 +63,6 @@ void write_txt(intt src, vector<double>& dist, intt num_nodes){
 		// 	wFile << dist[v] << '\n'; 
 		// }
 	}
-	oFile << '\n';
 	// cFile << temp << '\n' << flush;
 }
 
@@ -373,6 +379,7 @@ int main(int argc, char *argv[]){
 
 
 	johnson(in, reverse_in, num_nodes, dumping);
+	cout << tatti << '\n';
 
 	iFile.close();
 	oFile.close();
