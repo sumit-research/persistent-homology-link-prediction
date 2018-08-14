@@ -36,10 +36,10 @@ def main():
 
 	# get all the reachable pairs in the graph to test
 
-	# os.system("/home/deepak/Project/code/src_server/johnson --dump_pairs " + dataset_name + " " + data_file + " /home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/global_sparse.txt" )
+	# os.system("/home/deepak/Project/code/src_ripser/johnson --dump_pairs " + dataset_name + " " + data_file + " /home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/global_sparse.txt" )
 
 	# data = "/home/deepak/Project/files/outputs/"+dataset_name+"/dumped.txt"
-	# data = "/home/deepak/Project/code/src_server/random_select.txt"
+	# data = "/home/deepak/Project/code/src_ripser/random_select.txt"
 
 	# define a list of ordered dict to save the results in excel
 	final_results = []
@@ -82,11 +82,11 @@ def main():
 		# obtain persistence diagrams for node_a, node_b and combined
 
 		if(not os.path.isfile(dgm1_file)):
-			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py " + dataset_name + " " + data_file + " " + str(node_a) + " " + str(hop))
+			os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py " + dataset_name + " " + data_file + " " + str(node_a) + " " + str(hop))
 		if(not os.path.isfile(dgm2_file)):
-			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py " + dataset_name + " " + data_file + " " + str(node_b) + " " + str(hop))
+			os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py " + dataset_name + " " + data_file + " " + str(node_b) + " " + str(hop))
 
-		os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py " + dataset_name + " " + data_file + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
+		os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py " + dataset_name + " " + data_file + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
 
 		# get persistence diagram for complete graph
 		in_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
@@ -97,17 +97,24 @@ def main():
 		# 	num_processors = 20
 		# if(num_processors == 0):
 		# 	num_processors+=1
-		command = "ripser --dim 1 " + in_file + " > " + dgmComplete_file
+		_format = "lower-distance"
+		with open(in_file, "r") as apsp_file:
+			first_line = apsp_file.readline()
+			apsp_file.close()
+			if(first_line == '0'):
+				_format = "distance"
+
+		command = "ripser --dim 1 --threshold 4 --format " + _format + " " + in_file + " > " + dgmComplete_file
 		os.system(command)			
 
 		# compare pairwise diagrams
-		process_a_b = Popen(["/home/deepak/Project/code/src_server/baseline", data_file, "/home/deepak/Project/code/src_server/test.txt", str(node_a), str(node_b)], stdout=PIPE)
-		process_a_0 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(0)], stdout=PIPE)
-		process_a_1 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(1)], stdout=PIPE)
-		process_b_0 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(0)], stdout=PIPE)
-		process_b_1 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(1)], stdout=PIPE)
-		process_complete_0 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(0)], stdout=PIPE)
-		process_complete_1 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(1)], stdout=PIPE)
+		process_a_b = Popen(["/home/deepak/Project/code/src_ripser/baseline", data_file, "/home/deepak/Project/code/src_ripser/test.txt", str(node_a), str(node_b)], stdout=PIPE)
+		process_a_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(0)], stdout=PIPE)
+		process_a_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(1)], stdout=PIPE)
+		process_b_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(0)], stdout=PIPE)
+		process_b_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(1)], stdout=PIPE)
+		process_complete_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(0)], stdout=PIPE)
+		process_complete_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(1)], stdout=PIPE)
 		
 		print(node_a, node_b)
 		(output_a_b,err) = process_a_b.communicate()

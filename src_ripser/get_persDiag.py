@@ -39,10 +39,10 @@ def main():
 		if(remove):
 			out_file= "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(nodes[1])
 
-		command1 = "g++ -std=c++14 /home/deepak/Project/code/src_server/n_hop_multi.cpp -o /home/deepak/Project/code/src_server/n_hop_multi"
-		command= "/home/deepak/Project/code/src_server/n_hop_multi " + dataset_name + " " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(nodes[1]) + " " + str(hop)
+		command1 = "g++ -std=c++14 /home/deepak/Project/code/src_ripser/n_hop_multi.cpp -o /home/deepak/Project/code/src_ripser/n_hop_multi"
+		command= "/home/deepak/Project/code/src_ripser/n_hop_multi " + dataset_name + " " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(nodes[1]) + " " + str(hop)
 		if(remove):
-			command= "/home/deepak/Project/code/src_server/n_hop_multi --remove " + dataset_name + " " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(nodes[1]) + " " + str(hop) 
+			command= "/home/deepak/Project/code/src_ripser/n_hop_multi --remove " + dataset_name + " " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(nodes[1]) + " " + str(hop) 
  
 		os.system(command1)
 		os.system(command)
@@ -56,8 +56,8 @@ def main():
 			out_file_sparse = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/apsp_sparse_" + str(nodes[0]) + "_" + str(nodes[1])
 			out_file_full = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/apsp_full_" + str(nodes[0]) + "_" + str(nodes[1])
 
-		command2 = "g++ -std=c++14 /home/deepak/Project/code/src_server/johnson.cpp -o /home/deepak/Project/code/src_server/johnson"
-		command = "/home/deepak/Project/code/src_server/johnson " + dataset_name + " " + in_file + " " + out_file_full + " " + out_file_sparse
+		command2 = "g++ -std=c++14 /home/deepak/Project/code/src_ripser/johnson.cpp -o /home/deepak/Project/code/src_ripser/johnson"
+		command = "/home/deepak/Project/code/src_ripser/johnson " + dataset_name + " " + in_file + " " + out_file_full + " " + out_file_sparse
 
 		os.system(command2)
 		os.system(command)
@@ -76,21 +76,28 @@ def main():
 		# 	num_processors = 20
 		# if(num_processors == 0):
 		# 	num_processors+=1
-		command = "ripser --dim 1 " + in_file + " > " + out_file
+		_format = "lower-distance"
+		with open(in_file, "r") as apsp_file:
+			first_line = apsp_file.readline()
+			apsp_file.close()
+			if(first_line == '0'):
+				_format = "distance"
+
+		command = "ripser --dim 1 --threshold 4 --format " + _format + " " + in_file + " > " + out_file
 
 		os.system(command)
 
 	else:
 
 		# getting n-hop neighbourhood of the nodes
-		command1 = "g++ -std=c++14 /home/deepak/Project/code/src_server/n_hop_multi.cpp -o /home/deepak/Project/code/src_server/n_hop_multi"
+		command1 = "g++ -std=c++14 /home/deepak/Project/code/src_ripser/n_hop_multi.cpp -o /home/deepak/Project/code/src_ripser/n_hop_multi"
 		out_file= "/home/deepak/Project/files/outputs/"+dataset_name+"/n_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(hop)
 		if(remove):
 			out_file= "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"  + str(hop) + "/n_hop_" + str(nodes[0]) + "_" + str(hop)
 
-		command= "/home/deepak/Project/code/src_server/n_hop_multi " + dataset_name + " " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(hop) 
+		command= "/home/deepak/Project/code/src_ripser/n_hop_multi " + dataset_name + " " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(hop) 
 		if(remove):
-			command= "/home/deepak/Project/code/src_server/n_hop_multi --remove " + dataset_name + " " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(hop) 
+			command= "/home/deepak/Project/code/src_ripser/n_hop_multi --remove " + dataset_name + " " + data_file + " " + out_file + " " + str(nodes[0]) + " " + str(hop) 
 
 
 		os.system(command1)
@@ -98,7 +105,7 @@ def main():
 
 		# get all pair shortest path distances using johnson algorithm for n-hop subgraph
 
-		command2 = "g++ -std=c++14 /home/deepak/Project/code/src_server/johnson.cpp -o /home/deepak/Project/code/src_server/johnson"
+		command2 = "g++ -std=c++14 /home/deepak/Project/code/src_ripser/johnson.cpp -o /home/deepak/Project/code/src_ripser/johnson"
 		in_file = out_file
 		out_file_full = "/home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/apsp_full_" + str(nodes[0])
 		out_file_sparse = "/home/deepak/Project/files/outputs/"+dataset_name+"/n_" + str(hop) + "/apsp_sparse_" + str(nodes[0])
@@ -106,7 +113,7 @@ def main():
 			out_file_full = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/apsp_full_" + str(nodes[0])
 			out_file_sparse = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/apsp_sparse_" + str(nodes[0])
 
-		command = "/home/deepak/Project/code/src_server/johnson " + dataset_name + " " + in_file + " " + out_file_full + " " + out_file_sparse
+		command = "/home/deepak/Project/code/src_ripser/johnson " + dataset_name + " " + in_file + " " + out_file_full + " " + out_file_sparse
 
 		os.system(command2)
 		os.system(command)
@@ -125,7 +132,14 @@ def main():
 		# 	num_processors = 20
 		# if(num_processors == 0):
 		# 	num_processors+=1
-		command = "ripser --dim 1 " + in_file + " > " + out_file
+		_format = "lower-distance"
+		with open(in_file, "r") as apsp_file:
+			first_line = apsp_file.readline()
+			apsp_file.close()
+			if(first_line == '0'):
+				_format = "distance"
+
+		command = "ripser --dim 1 --threshold 4 --format " + _format + " " + in_file + " > " + out_file
 
 		os.system(command)
 

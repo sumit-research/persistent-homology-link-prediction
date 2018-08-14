@@ -117,15 +117,20 @@ void write_complete(intt distinct_nodes, int hop, vector<intt>& sources, map<int
 
 	ofstream cFile(out_path, ios::binary);
 
-	intt DIPHA = 8067171840,file_type = 7;
-	cFile.write(reinterpret_cast<const char*>(&DIPHA), sizeof(intt));
-	cFile.write(reinterpret_cast<const char*>(&file_type), sizeof(intt));
-	cFile.write(reinterpret_cast<const char*>(&distinct_nodes), sizeof(intt));
+	// intt DIPHA = 8067171840,file_type = 7;
+	// cFile.write(reinterpret_cast<const char*>(&DIPHA), sizeof(intt));
+	// cFile.write(reinterpret_cast<const char*>(&file_type), sizeof(intt));
+	// cFile.write(reinterpret_cast<const char*>(&distinct_nodes), sizeof(intt));
 
 	for(int i = 0; i < distinct_nodes; i++){
-		for(int j = 0; j < distinct_nodes; j++){
+		for(int j = 0; j < i; j++){
 			double distance = (double)(1-(i==j));
-			cFile.write(reinterpret_cast<const char*>(&distance), sizeof(double));
+			cFile << distance;
+			if(j != i-1)
+				cFile << ',';
+			else
+				cFile << '\n';
+			// cFile.write(reinterpret_cast<const char*>(&distance), sizeof(double));
 		}
 	}
 	cFile.close();

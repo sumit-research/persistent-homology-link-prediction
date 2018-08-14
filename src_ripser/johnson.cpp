@@ -19,7 +19,6 @@ ifstream iFile;
 ofstream oFile;
 ofstream sFile;
 ofstream dFile;
-int tatti = 0;
 // ofstream indFile("indices.txt");
 // ofstream wFile("weight.txt");
 // ofstream cFile("connections.txt");
@@ -37,9 +36,6 @@ void write_txt(intt src, vector<double>& dist, intt num_nodes){
 	intt temp = 0; // to calcualte number of connections
 
 	for(intt v = 1; v < src; v++){
-
-		tatti++;
-
 
 		double distance = static_cast<double>(dist[v]);
 		// if(distance == 1){
@@ -102,9 +98,8 @@ void write_sparse(intt num_nodes){
 
 void dump_pairs(intt u, vector<double>& dist, intt num_nodes){
 
-	for(intt i = 1; i <= num_nodes; i++){
-		if(i == u)
-			continue;
+	for(intt i = 1; i < u; i++){
+
 		double distance = dist[i];
 		if(distance == INT64_MAX)
 			distance = 6;
@@ -357,6 +352,15 @@ int main(int argc, char *argv[]){
 
 	intt num_nodes = input(to_indices, to_node); // take input
 
+	if(num_nodes == 1){
+		oFile << (double) 0 << '\n';
+		iFile.close();
+		oFile.close();
+		sFile.close();
+		dFile.close();
+		return 0;
+	}
+
 	// intt DIPHA = 8067171840,file_type = 7;
 	// oFile.write(reinterpret_cast<const char*>(&DIPHA), sizeof(intt));
 	// oFile.write(reinterpret_cast<const char*>(&file_type), sizeof(intt));
@@ -379,10 +383,11 @@ int main(int argc, char *argv[]){
 
 
 	johnson(in, reverse_in, num_nodes, dumping);
-	cout << tatti << '\n';
 
 	iFile.close();
 	oFile.close();
 	sFile.close();
 	dFile.close();
+
+	return 0;
 }

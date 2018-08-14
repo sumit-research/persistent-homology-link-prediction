@@ -6,33 +6,37 @@ from rpy2.robjects import numpy2ri
 import numpy as np
 
 def get_dgm(input_filename):
-	f = open(input_filename, "rb")
-	data = f.read()
+	f = open(input_filename, "r")
 	
 	# read dipha magic number, file type and number of nodes
-	args = struct.unpack('<'+3*'q', data[0:24])
-	dipha = args[0]
-	file_type = args[1]
-	num_nodes = args[2]
+	# args = struct.unpack('<'+3*'q', data[0:24])
+	# dipha = args[0]
+	# file_type = args[1]
+	# num_nodes = args[2]
 
 	# get positions of starting bits for each variable
-	dims_ind = list(range(24, (num_nodes+1)*3*8, 24))
-	birth_ind = list(range(32, (num_nodes+1)*3*8, 24))
-	death_ind = list(range(40, (num_nodes+1)*3*8, 24))
+	# dims_ind = list(range(24, (num_nodes+1)*3*8, 24))
+	# birth_ind = list(range(32, (num_nodes+1)*3*8, 24))
+	# death_ind = list(range(40, (num_nodes+1)*3*8, 24))
 	
 	dgm = []
 
+	for line in f:
+		line = list(map(float,line.strip().split(", ")))
+		# line[0] = int(line[0])
+		dgm.append(line)
+	f.close()
 
-	for i,j,k in zip(dims_ind,birth_ind,death_ind):
-		dims = struct.unpack('<q', data[i:i+8])[0]
-		birth = struct.unpack('<d', data[j:j+8])[0]
-		death = struct.unpack('<d', data[k:k+8])[0]
+	# for i,j,k in zip(dims_ind,birth_ind,death_ind):
+	# 	dims = struct.unpack('<q', data[i:i+8])[0]
+	# 	birth = struct.unpack('<d', data[j:j+8])[0]
+	# 	death = struct.unpack('<d', data[k:k+8])[0]
 
-		if(dims < 0):
-			dims = -dims - 1
+	# 	if(dims < 0):
+	# 		dims = -dims - 1
 
-		temp = [dims, birth, death]
-		dgm.append(temp)
+	# 	temp = [dims, birth, death]
+	# 	dgm.append(temp)
 	return np.array(dgm)
 
 def get_bottleneck_distance(dim, dgm1, dgm2):

@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import random
 from collections import OrderedDict
+from time import time
 from subprocess import Popen, PIPE
 # get input nodes and define neighbourhood
 # input filename
@@ -73,6 +74,8 @@ def main():
 	if(len(sys.argv) != 6):
 		print("[Usage:] python3 script_2.py dataset_name edges_out output_file n sample_size")
 		exit()
+	
+	start = time()
 
 	dataset_name = sys.argv[1]
 	edges_out = sys.argv[2]
@@ -91,14 +94,14 @@ def main():
 	# get all the reachable pairs in the graph to test
 
 	dumped_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/dumped_copy.txt"
-	# os.system("/home/deepak/Project/code/src_server/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global_sparse.txt" )
+	# os.system("/home/deepak/Project/code/src_ripser/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global_sparse.txt" )
 	df = open(dumped_file, "r")
 	dumped_data = df.readlines()
 	dumped_data = [line.strip().split() for line in dumped_data]
 	df.close()
 
 
-	# data = "/home/deepak/Project/code/src_server/random_select.txt"
+	# data = "/home/deepak/Project/code/src_ripser/random_select.txt"
 
 
 	# read data from input file 
@@ -132,7 +135,15 @@ def main():
 
 	metrics = ["W_a_0", "W_a_1", "W_b_0", "W_b_1", "B_a_0", "B_a_1", "B_b_0", "B_b_1", "W_comp_0", "W_comp_1", "B_comp_0", "B_comp_1", "AA", "MW"]
 
+	end = time()
+	print("Preprocessing time: %f" % float(end-start))
+
+	nodes_compared = 0
+
 	for edge in random_edges:
+
+		start = time()
+
 		num_edges += 1
 
 		if(num_edges <= resume_pos):
@@ -144,13 +155,14 @@ def main():
 
 		# get all the nodes at distance <= 5 from node_a
 		nodes = get_nodes(dumped_data, edge[0])
+		nodes_compared = len(nodes)
 		print(node_a, node)
 
 		# remove the edge between node_a and node
 		removed_edge_data = "/home/deepak/Project/files/data/"+dataset_name+"/modified_data.txt"
 		remove_edge(data, removed_edge_data, node_a, node)
 
-		os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(hop))
+		os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(hop))
 
 
 		for node_b in nodes:
@@ -166,37 +178,44 @@ def main():
 
 			# define file names for persistence diagrams
 
-			dgm1_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/dipha_" + str(node_a)
-			dgm2_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/dipha_" + str(node_b)
-			dgmCombine_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/dipha_" + str(node_a) + "_" + str(node_b)
-			dgmComplete_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/dipha_complete_" + str(node_a) + "_" + str(node_b)
+			dgm1_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_" + str(node_a) + ".txt"
+			dgm2_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_" + str(node_b) + ".txt"
+			dgmCombine_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_" + str(node_a) + "_" + str(node_b) + ".txt"
+			dgmComplete_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_complete_" + str(node_a) + "_" + str(node_b) + ".txt"
 
 			# obtain persistence diagrams for node_a, node_b and combined
 
-			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_b) + " " + str(hop))
+			os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_b) + " " + str(hop))
 
-			os.system("python3 /home/deepak/Project/code/src_server/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
+			os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
 
 			# get persistence diagram for complete graph
 			in_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
-			f = open(in_file, "rb")
-			data_p = f.read()
-			num_processors = struct.unpack('<q' , data_p[16:24])[0]
-			if(num_processors > 3):
-				num_processors = 3
-			if(num_processors == 0):
-				num_processors+=1
-			command = "mpiexec -n " + str(num_processors) + " dipha --upper_dim 2 " + in_file + " " + dgmComplete_file
+			# f = open(in_file, "rb")
+			# data_p = f.read()
+			# num_processors = struct.unpack('<q' , data_p[16:24])[0]
+			# if(num_processors > 3):
+			# 	num_processors = 3
+			# if(num_processors == 0):
+			# 	num_processors+=1
+			_format = "lower-distance"
+			with open(in_file, "r") as apsp_file:
+				first_line = apsp_file.readline()
+				apsp_file.close()
+				if(first_line == '0'):
+					_format = "distance"
+
+			command = "ripser --dim 1 --threshold 4 --format " + _format + " " + in_file + " > " + dgmComplete_file
 			os.system(command)			
 
 			# compare pairwise diagrams
-			process_a_b = Popen(["/home/deepak/Project/code/src_server/baseline", removed_edge_data, "/home/deepak/Project/code/src_server/test.txt", str(node_a), str(node_b)], stdout=PIPE)
-			process_a_0 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(0)], stdout=PIPE)
-			process_a_1 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(1)], stdout=PIPE)
-			process_b_0 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(0)], stdout=PIPE)
-			process_b_1 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(1)], stdout=PIPE)
-			process_complete_0 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(0)], stdout=PIPE)
-			process_complete_1 = Popen(["python3", "/home/deepak/Project/code/src_server/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(1)], stdout=PIPE)
+			process_a_b = Popen(["/home/deepak/Project/code/src_ripser/baseline", removed_edge_data, "/home/deepak/Project/code/src_ripser/test.txt", str(node_a), str(node_b)], stdout=PIPE)
+			process_a_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(0)], stdout=PIPE)
+			process_a_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(1)], stdout=PIPE)
+			process_b_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(0)], stdout=PIPE)
+			process_b_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(1)], stdout=PIPE)
+			process_complete_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(0)], stdout=PIPE)
+			process_complete_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(1)], stdout=PIPE)
 			
 			(output_a_b,err) = process_a_b.communicate()
 			output_a_b = output_a_b.strip().splitlines()
@@ -243,6 +262,10 @@ def main():
 			temp["MW"] = float(output_a_b[1])
 
 			ranking.append(temp)
+
+		end = time()
+		print("Nodes compared: %d" % nodes_compared)
+		print("Time taken: %f" % float(end-start))
 
 		ranking = pd.DataFrame(ranking)
 		results_temp = OrderedDict()
