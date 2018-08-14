@@ -14,13 +14,17 @@ from subprocess import Popen, PIPE
 
 def create_table(df, database):
 	conn = sqlite3.connect(database)
-
-	df.to_sql("nodes", conn, if_exists='append', index = False)
+	
+	sql_table = """ CREATE TABLE IF NOT EXISTS nodes(
+					distance float,
+					ID_a text,
+					ID_b text); """
 	c = conn.cursor()
+	c.execute(sql_table)
+	df.to_sql("nodes", conn, if_exists='replace', index = False)
 
 	create_index = """ CREATE INDEX IF NOT EXISTS index_nodes ON nodes(distance, ID_a, ID_b) """
 
-	c = conn.cursor()
 	c.execute(create_index)
 	c.close()
 
@@ -123,7 +127,7 @@ def main():
 
 	dumped_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/dumped.txt"
 	# os.system("/home/deepak/Project/code/src_ripser/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global_sparse.txt" )
-	df = pd.read_csv(dumped_file, sep=" ", names = ["distance", "ID_a", "ID_b"])
+	df = pd.read_csv(dumped_file, sep=" ", names = ["distance", "ID_a", "ID_b"], dtype={"distance":float, "ID_a": str, "ID_b": str})
 	database = "/home/deepak/Project/files/outputs/"+dataset_name+"/database.db"
 	conn = create_table(df, database);
 
@@ -183,6 +187,9 @@ def main():
 		# get all the nodes at distance <= 5 from node_a
 
 		nodes = get_nodes(conn, node_a)
+		# print(nodes, type(nodes[0]))
+		# print(node, type(node))
+		# sys.exit()	
 		nodes_compared = len(nodes)
 		print(node_a, node)
 
