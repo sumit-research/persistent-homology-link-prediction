@@ -124,7 +124,7 @@ def main():
 	dumped_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/dumped.txt"
 	# os.system("/home/deepak/Project/code/src_ripser/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global_sparse.txt" )
 	df = pd.read_csv(dumped_file, sep=" ", names = ["distance", "ID_a", "ID_b"])
-	database = "/home/Project/files/outputs/"+dataset_name+"/database.db"
+	database = "/home/deepak/Project/files/outputs/"+dataset_name+"/database.db"
 	conn = create_table(df, database);
 
 
