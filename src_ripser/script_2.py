@@ -4,12 +4,27 @@ import struct
 import pandas as pd
 import numpy as np
 import random
+import sqlite3
 from collections import OrderedDict
 from time import time
 from subprocess import Popen, PIPE
 # get input nodes and define neighbourhood
 # input filename
 # n-hop neighbourhood -- n
+
+def create_table(df, database):
+	conn = sqlite3.connect(database)
+
+	df.to_sql("nodes", conn, if_exists='append', index = False)
+	c = conn.cursor()
+
+	create_index = """ CREATE INDEX IF NOT EXISTS index_nodes ON nodes(distance, ID_a, ID_b) """
+
+	c = conn.cursor()
+	c.execute(create_index)
+	c.close()
+
+	return conn
 
 def appendCSV(final_results, sep, out_file):
 	result = pd.DataFrame(final_results, columns = final_results.keys(), index = [0])
@@ -18,10 +33,23 @@ def appendCSV(final_results, sep, out_file):
 	else:
 		result.to_csv(out_file, sep = sep, index=False)
 
-def get_nodes(data, node):
+def get_nodes(conn, node):
+
+	query_a = """ SELECT ID_b from nodes WHERE (ID_a=?) AND distance<=? """ 
+	query_b = """ SELECT ID_a from nodes WHERE (ID_b=?) AND distance<=? """ 
+
+	c = conn.cursor()
+	c.execute(query_a, (node, 5,))
+	rows = [i[0] for i in c.fetchall()]
+
+	c.execute(query_b, (node, 5,))
+	rows_1 = [i[0] for i in c.fetchall()]
+
 	nodes = set([])
-	nodes = [l[2] for l in data if(l[1] == node and int(l[0]) <= 5)]
-	return nodes
+	nodes.update(rows)
+	nodes.update(rows_1)
+
+	return list(nodes)
 
 def get_position(results, node, metric):
 	ascending = True
@@ -93,12 +121,11 @@ def main():
 
 	# get all the reachable pairs in the graph to test
 
-	dumped_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/dumped_copy.txt"
+	dumped_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/dumped.txt"
 	# os.system("/home/deepak/Project/code/src_ripser/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global_sparse.txt" )
-	df = open(dumped_file, "r")
-	dumped_data = df.readlines()
-	dumped_data = [line.strip().split() for line in dumped_data]
-	df.close()
+	df = pd.read_csv(dumped_file, sep=" ", names = ["distance", "ID_a", "ID_b"])
+	database = "/home/Project/files/outputs/"+dataset_name+"/database.db"
+	conn = create_table(df, database);
 
 
 	# data = "/home/deepak/Project/code/src_ripser/random_select.txt"
@@ -154,7 +181,8 @@ def main():
 		node = edge[1]
 
 		# get all the nodes at distance <= 5 from node_a
-		nodes = get_nodes(dumped_data, edge[0])
+
+		nodes = get_nodes(conn, node_a)
 		nodes_compared = len(nodes)
 		print(node_a, node)
 
