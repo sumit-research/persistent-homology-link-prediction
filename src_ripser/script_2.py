@@ -8,27 +8,28 @@ import sqlite3
 from collections import OrderedDict
 from time import time
 from subprocess import Popen, PIPE
-# get input nodes and define neighbourhood
+# get input nodes and define neighborhood
 # input filename
-# n-hop neighbourhood -- n
+# n-hop neighborhood -- n
 
 def create_table(df, database):
 	conn = sqlite3.connect(database)
 	
 	sql_table = """ CREATE TABLE IF NOT EXISTS nodes(
 					distance float,
+					hop int,
 					ID_a text,
 					ID_b text); """
 	c = conn.cursor()
 	c.execute(sql_table)
 	df.to_sql("nodes", conn, if_exists='replace', index = False)
 
-	create_index = """ CREATE INDEX IF NOT EXISTS index_nodes ON nodes(distance, ID_a, ID_b) """
+	create_index = """ CREATE INDEX IF NOT EXISTS index_nodes ON nodes(distance, hop, ID_a, ID_b) """
 
 	c.execute(create_index)
 	c.close()
-
-	return conn
+	conn.commit()
+	conn.close()
 
 def appendCSV(final_results, sep, out_file):
 	result = pd.DataFrame(final_results, columns = final_results.keys(), index = [0])
@@ -37,23 +38,107 @@ def appendCSV(final_results, sep, out_file):
 	else:
 		result.to_csv(out_file, sep = sep, index=False)
 
-def get_nodes(conn, node):
 
-	query_a = """ SELECT ID_b from nodes WHERE (ID_a=?) AND distance<=? """ 
-	query_b = """ SELECT ID_a from nodes WHERE (ID_b=?) AND distance<=? """ 
+
+def get_nodes(database, node, hop, var):
+	conn = sqlite3.connect(database)
+
+	if(var):
+		query_a = """ SELECT ID_b from nodes WHERE (ID_a = ?) AND distance <= ? """ 
+		hop = float(hop)
+
+	else:
+		query_a = """ SELECT ID_b from nodes WHERE (ID_a = ?) AND hop <= ? """ 
+
+	input_ = (node, hop)
 
 	c = conn.cursor()
-	c.execute(query_a, (node, 5,))
+	c.execute(query_a, input_)
 	rows = [i[0] for i in c.fetchall()]
-
-	c.execute(query_b, (node, 5,))
-	rows_1 = [i[0] for i in c.fetchall()]
+	c.close()
 
 	nodes = set([])
 	nodes.update(rows)
-	nodes.update(rows_1)
+	conn.close()
 
 	return list(nodes)
+
+def get_APSP(database, nodes, hop, dataset_name):
+	filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/apsp_full_" + str(nodes[0]) + ".txt"
+	if(len(nodes) == 2):
+		filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/apsp_full_" + str(nodes[0]) + "_" + str(nodes[1]) + ".txt"
+	
+	f = open(filename,"w")
+
+	neighborhood = set(nodes)
+	_format = "lower-distance"
+
+	node_neighborhood = []
+
+	for each in nodes:
+		node_neighborhood = get_nodes(database, each, hop, False)
+		neighborhood.update(node_neighborhood)
+	
+	if(len(nodes)==2):
+		complete_filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/apsp_complete_full_" + str(nodes[0]) + "_" + str(nodes[1]) + ".txt"
+		d = open(complete_filename, "w")
+
+		for i in range(1,neighborhood.__len__()):
+			distances = "1, "
+			distances = distances*(i-1)
+			distances += "1\n"
+			d.write(distances)
+		d.close()
+
+	if(neighborhood.__len__()==1):
+		_format = "distance"
+		f.write("0.0\n")
+		f.close()
+		return _format
+
+	query = """ SELECT distance FROM nodes WHERE (ID_a=? AND ID_b=?)"""
+	conn = sqlite3.connect(database)
+	curr = conn.cursor()
+
+	for i,a in enumerate(neighborhood):
+		distances = ""
+		for j,b in enumerate(neighborhood):
+			if(j==i):
+				break
+			else:
+				curr.execute(query,(a,b,))
+				dis = curr.fetchone()[0]
+				if(j==i-1):
+					f.write("%f\n"%(dis))
+				else:
+					f.write("%f, " % dis)
+	curr.close()
+	conn.close
+	f.close()
+
+	return _format
+
+def get_persDiag(database, nodes, hop, dataset_name):
+	filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/ripser_" + str(nodes[0]) + ".txt"
+	if(len(nodes) == 2):
+		filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/ripser_" + str(nodes[0]) + "_" + str(nodes[1]) + ".txt"
+
+	in_filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/apsp_full_" + str(nodes[0]) + ".txt"
+	if(len(nodes) == 2):
+		in_filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/apsp_full_" + str(nodes[0]) + "_" + str(nodes[1]) + ".txt"
+
+	_format = get_APSP(database, nodes, hop, dataset_name)
+
+	command = "ripser --dim 1 --threshold 4 --format " + _format + " " + in_filename + " > " + filename
+	os.system(command)
+	
+	if(len(nodes) == 2):
+		complete_in_filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/apsp_complete_full_" + str(nodes[0]) + "_" + str(nodes[1]) + ".txt"
+		complete_out_filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/ripser_complete_" + str(nodes[0]) + "_" + str(nodes[1]) + ".txt"
+		command = "ripser --dim 1 --threshold 4 --format lower-distance " + complete_in_filename + " > " + complete_out_filename
+		os.system(command)
+
+
 
 def get_position(results, node, metric):
 	ascending = True
@@ -127,10 +212,9 @@ def main():
 
 	dumped_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/dumped.txt"
 	# os.system("/home/deepak/Project/code/src_ripser/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global_sparse.txt" )
-	df = pd.read_csv(dumped_file, sep=" ", names = ["distance", "ID_a", "ID_b"], dtype={"distance":float, "ID_a": str, "ID_b": str})
+	df = pd.read_csv(dumped_file, sep=" ", names = ["distance", "hop", "ID_a", "ID_b"], dtype={"distance":float, "hop": int, "ID_a": str, "ID_b": str})
 	database = "/home/deepak/Project/files/outputs/"+dataset_name+"/database.db"
-	conn = create_table(df, database);
-
+	create_table(df, database);
 
 	# data = "/home/deepak/Project/code/src_ripser/random_select.txt"
 
@@ -186,7 +270,8 @@ def main():
 
 		# get all the nodes at distance <= 5 from node_a
 
-		nodes = get_nodes(conn, node_a)
+		nodes = get_nodes(database, node_a, 5, True)
+
 		# print(nodes, type(nodes[0]))
 		# print(node, type(node))
 		# sys.exit()	
@@ -197,8 +282,9 @@ def main():
 		removed_edge_data = "/home/deepak/Project/files/data/"+dataset_name+"/modified_data.txt"
 		remove_edge(data, removed_edge_data, node_a, node)
 
-		os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(hop))
+		# os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(hop))
 
+		get_persDiag(database, [node_a], hop, dataset_name)
 
 		for node_b in nodes:
 			if(node_b == str(node_a)):
@@ -220,12 +306,14 @@ def main():
 
 			# obtain persistence diagrams for node_a, node_b and combined
 
-			os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_b) + " " + str(hop))
+			# os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_b) + " " + str(hop))
+			get_persDiag(database, [node_b], hop, dataset_name)
 
-			os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
+			# os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
+			get_persDiag(database, [node_a, node_b], hop, dataset_name)
 
 			# get persistence diagram for complete graph
-			in_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
+			# in_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
 			# f = open(in_file, "rb")
 			# data_p = f.read()
 			# num_processors = struct.unpack('<q' , data_p[16:24])[0]
@@ -233,15 +321,15 @@ def main():
 			# 	num_processors = 3
 			# if(num_processors == 0):
 			# 	num_processors+=1
-			_format = "lower-distance"
-			with open(in_file, "r") as apsp_file:
-				first_line = apsp_file.readline()
-				apsp_file.close()
-				if(first_line == '0'):
-					_format = "distance"
+			# _format = "lower-distance"
+			# with open(in_file, "r") as apsp_file:
+			# 	first_line = apsp_file.readline()
+			# 	apsp_file.close()
+			# 	if(first_line == '0'):
+			# 		_format = "distance"
 
-			command = "ripser --dim 1 --threshold 4 --format " + _format + " " + in_file + " > " + dgmComplete_file
-			os.system(command)			
+			# command = "ripser --dim 1 --threshold 4 --format " + _format + " " + in_file + " > " + dgmComplete_file
+			# os.system(command)			
 
 			# compare pairwise diagrams
 			process_a_b = Popen(["/home/deepak/Project/code/src_ripser/baseline", removed_edge_data, "/home/deepak/Project/code/src_ripser/test.txt", str(node_a), str(node_b)], stdout=PIPE)

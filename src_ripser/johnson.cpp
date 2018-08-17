@@ -96,15 +96,17 @@ void write_sparse(intt num_nodes){
 	// cout << conn << " " << ind << ' ' << dis << '\n';
 }
 
-void dump_pairs(intt u, vector<double>& dist, intt num_nodes){
+void dump_pairs(intt u, vector<double>& avg_dist, vector<intt>& hop_dist, intt num_nodes){
 
-	for(intt i = 1; i < u; i++){
+	for(intt i = 1; i <= num_nodes; i++){
 
-		double distance = dist[i];
+		if(i == u)
+			continue;
+		double distance = avg_dist[i];
 		if(distance == INT64_MAX)
 			distance = 6;
 
-		dFile << distance << " " << to_node[u] << " " << to_node[i] << '\n';
+		dFile << distance << " " << hop_dist[i] << " " << to_node[u] << " " << to_node[i] << '\n';
 	}
 }
 
@@ -241,7 +243,7 @@ void johnson(vector< vector< ii > >& adj, vector< vector< ii > >& reverse_adj, i
 
 			//write pairs if dumped == true
 			if(dumping)
-				dump_pairs(u, distance, num_nodes);
+				dump_pairs(u, distance, dist, num_nodes);
 
 		}
 		// wFile.close();
