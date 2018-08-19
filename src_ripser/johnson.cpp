@@ -100,8 +100,6 @@ void dump_pairs(intt u, vector<double>& avg_dist, vector<intt>& hop_dist, intt n
 
 	for(intt i = 1; i <= num_nodes; i++){
 
-		if(i == u)
-			continue;
 		double distance = avg_dist[i];
 		if(distance == INT64_MAX)
 			distance = 6;

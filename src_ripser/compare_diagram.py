@@ -1,5 +1,6 @@
 import sys
 import struct
+from time import time
 from rpy2.robjects.packages import importr
 import rpy2.robjects as ro
 from rpy2.robjects import numpy2ri
@@ -66,6 +67,7 @@ def main():
 		print("[Usage:] python3 compare_diagram.py dgm1_file dgm2_file p dimension")
 		exit()
 
+	# start = time()
 	# get params
 	dgm1_file = sys.argv[1]
 	dgm2_file = sys.argv[2]
@@ -90,8 +92,15 @@ def main():
 	ro.r.assign("m2", m2)
 
 	# print wasserstein distance
-	print("%f" % (get_wasserstein_distance(p, dim, ro.r["m1"], ro.r["m2"])))
+	# start = time()
+	# print("%f" % (get_wasserstein_distance(p, dim, ro.r["m1"], ro.r["m2"])))
+	print("%f" % (0.0))
+	# end = time()
+	# print("wasserstein-> ", t+end-start)
+	# start = time()
 	print("%f" % (get_bottleneck_distance(dim, ro.r["m1"], ro.r["m2"])))
+	# end = time()
+	# print("bottleneck-> ", t+end-start)
 
 if __name__ == '__main__':
 	main()

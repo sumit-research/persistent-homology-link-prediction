@@ -5,15 +5,15 @@ import pandas as pd
 import numpy as np
 import random
 import sqlite3
-from collections import OrderedDict
+from math import sqrt
 from time import time
+from collections import OrderedDict
 from subprocess import Popen, PIPE
 # get input nodes and define neighborhood
 # input filename
 # n-hop neighborhood -- n
 
-def create_table(df, database):
-	conn = sqlite3.connect(database)
+def create_table(df, conn):
 	
 	sql_table = """ CREATE TABLE IF NOT EXISTS nodes(
 					distance float,
@@ -24,12 +24,12 @@ def create_table(df, database):
 	c.execute(sql_table)
 	df.to_sql("nodes", conn, if_exists='replace', index = False)
 
-	create_index = """ CREATE INDEX IF NOT EXISTS index_nodes ON nodes(distance, hop, ID_a, ID_b) """
+	create_index = """ CREATE INDEX IF NOT EXISTS index_nodes ON nodes(ID_a, ID_b, distance, hop) """
 
 	c.execute(create_index)
 	c.close()
 	conn.commit()
-	conn.close()
+	return conn
 
 def appendCSV(final_results, sep, out_file):
 	result = pd.DataFrame(final_results, columns = final_results.keys(), index = [0])
@@ -40,15 +40,10 @@ def appendCSV(final_results, sep, out_file):
 
 
 
-def get_nodes(database, node, hop, var):
-	conn = sqlite3.connect(database)
+def get_nodes(conn, node, hop, var):
+	# conn = sqlite3.connect(database)
 
-	if(var):
-		query_a = """ SELECT ID_b from nodes WHERE (ID_a = ?) AND distance <= ? """ 
-		hop = float(hop)
-
-	else:
-		query_a = """ SELECT ID_b from nodes WHERE (ID_a = ?) AND hop <= ? """ 
+	query_a = """ SELECT ID_b from nodes WHERE ID_a = ? AND ID_b != Id_a AND hop <= ? """ 
 
 	input_ = (node, hop)
 
@@ -59,66 +54,86 @@ def get_nodes(database, node, hop, var):
 
 	nodes = set([])
 	nodes.update(rows)
-	conn.close()
+	# conn.close()
 
 	return list(nodes)
 
-def get_APSP(database, nodes, hop, dataset_name):
+def get_APSP(conn, nodes, hop, dataset_name):
 	filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/apsp_full_" + str(nodes[0]) + ".txt"
 	if(len(nodes) == 2):
 		filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/apsp_full_" + str(nodes[0]) + "_" + str(nodes[1]) + ".txt"
 	
 	f = open(filename,"w")
-
-	neighborhood = set(nodes)
 	_format = "lower-distance"
 
-	node_neighborhood = []
+	query = """ SELECT n_hood1.A AS F, n_hood2.B, nodes.hop, nodes.distance 
+				FROM
+				(SELECT ID_b AS A FROM nodes WHERE (ID_a = ?) AND hop <= ?) n_hood1,
+				(SELECT ID_b AS B FROM nodes WHERE (ID_a = ?) AND hop <= ?) n_hood2,
+				nodes
+				WHERE n_hood1.A > n_hood2.B AND nodes.ID_a = n_hood1.A AND nodes.ID_b = n_hood2.B ORDER BY F ASC; """
+	_input = (nodes[0], hop, nodes[0], hop,)
 
-	for each in nodes:
-		node_neighborhood = get_nodes(database, each, hop, False)
-		neighborhood.update(node_neighborhood)
-	
+	if(len(nodes) == 2):
+		query = """ SELECT n_hood1.A AS F, n_hood2.B, nodes.hop, nodes.distance 
+				FROM
+				(SELECT DISTINCT(ID_b) AS A FROM nodes WHERE (ID_a = ? OR ID_a = ?) AND hop <= ?) n_hood1,
+				(SELECT DISTINCT(ID_b) AS B FROM nodes WHERE (ID_a = ? OR ID_a = ?) AND hop <= ?) n_hood2,
+				nodes
+				WHERE n_hood1.A >= n_hood2.B AND nodes.ID_a = n_hood1.A AND nodes.ID_b = n_hood2.B ORDER BY F ASC; """
+		_input = (nodes[0], nodes[1], hop, nodes[0], nodes[1], hop,)
+
+
+
+	curr = conn.cursor()
+
+	curr.execute(query, _input)
+	sp = curr.fetchall()
+	i,j,s = [0,1,0]
+
 	if(len(nodes)==2):
 		complete_filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/apsp_complete_full_" + str(nodes[0]) + "_" + str(nodes[1]) + ".txt"
 		d = open(complete_filename, "w")
-
-		for i in range(1,neighborhood.__len__()):
-			distances = "1, "
-			distances = distances*(i-1)
-			distances += "1\n"
-			d.write(distances)
+		num = (sqrt(1+8*len(sp)) - 1)/2
+		distances = ""
+		for i in range(1,int(num)):
+			dis = "1, "
+			dis = dis*(i-1)
+			dis += "1\n"
+			distances += dis
+		d.write(distances)
 		d.close()
 
-	if(neighborhood.__len__()==1):
+	distances = ""
+	if(len(sp) == 0):
 		_format = "distance"
 		f.write("0.0\n")
 		f.close()
+		curr.close()
 		return _format
-
-	query = """ SELECT distance FROM nodes WHERE (ID_a=? AND ID_b=?)"""
-	conn = sqlite3.connect(database)
-	curr = conn.cursor()
-
-	for i,a in enumerate(neighborhood):
-		distances = ""
-		for j,b in enumerate(neighborhood):
-			if(j==i):
-				break
-			else:
-				curr.execute(query,(a,b,))
-				dis = curr.fetchone()[0]
-				if(j==i-1):
-					f.write("%f\n"%(dis))
+	else:
+		for i,x in enumerate(sp):
+			s += 1
+			if(s == j*(j+1)/2):
+				if(x[3] == 0.0):
+					distances += "\n"
 				else:
-					f.write("%f, " % dis)
+					distances += str(x[3]) + "\n"
+				j+=1
+			else:
+				if(x[3] != 0.0):
+					distances += str(x[3]) + ", "
+		f.write(distances)
+
+
+
 	curr.close()
-	conn.close
+	# conn.close
 	f.close()
 
 	return _format
 
-def get_persDiag(database, nodes, hop, dataset_name):
+def get_persDiag(conn, nodes, hop, dataset_name):
 	filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/ripser_" + str(nodes[0]) + ".txt"
 	if(len(nodes) == 2):
 		filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/ripser_" + str(nodes[0]) + "_" + str(nodes[1]) + ".txt"
@@ -127,10 +142,15 @@ def get_persDiag(database, nodes, hop, dataset_name):
 	if(len(nodes) == 2):
 		in_filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/apsp_full_" + str(nodes[0]) + "_" + str(nodes[1]) + ".txt"
 
-	_format = get_APSP(database, nodes, hop, dataset_name)
+	_format = get_APSP(conn, nodes, hop, dataset_name)
 
-	command = "ripser --dim 1 --threshold 4 --format " + _format + " " + in_filename + " > " + filename
-	os.system(command)
+	if(_format == "distance"):
+		f = open(filename,"w")
+		f.write("0, 0, 4\n")
+		f.close()
+	else:
+		command = "ripser --dim 1 --threshold 4 --format " + _format + " " + in_filename + " > " + filename
+		os.system(command)
 	
 	if(len(nodes) == 2):
 		complete_in_filename = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_"+ str(hop) + "/apsp_complete_full_" + str(nodes[0]) + "_" + str(nodes[1]) + ".txt"
@@ -188,10 +208,11 @@ def remove_edge(data, new_data, node_a, node_b):
 	w.close()
 
 def main():
-	if(len(sys.argv) != 6):
-		print("[Usage:] python3 script_2.py dataset_name edges_out output_file n sample_size")
+	if(len(sys.argv) != 7):
+		print("[Usage:] python3 script_2.py dataset_name edges_out output_file n sample_size make_table")
 		exit()
-	
+
+	total_time = 0.0
 	start = time()
 
 	dataset_name = sys.argv[1]
@@ -199,9 +220,16 @@ def main():
 	output_file = sys.argv[3]
 	hop = int(sys.argv[4])
 	sample_size = int(sys.argv[5])
+	make_table = sys.argv[6]
+	if(make_table == "1"):
+		make_table = True
+	else:
+		make_table = False
 
 	data_file = "/home/deepak/Project/files/data/"+dataset_name+"/data.txt"
 
+
+	# check if the folder exists
 	if(os.path.exists("/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop)) == False):
 		os.system("mkdir /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop))
 
@@ -209,12 +237,14 @@ def main():
 
 
 	# get all the reachable pairs in the graph to test
-
 	dumped_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/dumped.txt"
 	# os.system("/home/deepak/Project/code/src_ripser/johnson --dump_pairs " + data_file + " /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global.txt /home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/global_sparse.txt" )
-	df = pd.read_csv(dumped_file, sep=" ", names = ["distance", "hop", "ID_a", "ID_b"], dtype={"distance":float, "hop": int, "ID_a": str, "ID_b": str})
 	database = "/home/deepak/Project/files/outputs/"+dataset_name+"/database.db"
-	create_table(df, database);
+	
+	conn = sqlite3.connect(database)
+	if(make_table):
+		df = pd.read_csv(dumped_file, sep=" ", names = ["distance", "hop", "ID_a", "ID_b"], dtype={"distance":float, "hop": int, "ID_a": str, "ID_b": str})
+		conn = create_table(df, conn)	
 
 	# data = "/home/deepak/Project/code/src_ripser/random_select.txt"
 
@@ -228,6 +258,7 @@ def main():
 	num_edges = 0
 	resume_pos = 0
 
+	# if given edges_out already exists then it will not create a sample of random edges
 	if(os.path.isfile(edges_out)):
 		t = open(edges_out, "r")
 		random_edges = t.readlines()
@@ -255,8 +286,10 @@ def main():
 
 	nodes_compared = 0
 
-	for edge in random_edges:
+	time_taken = [0.0, 0.0 , 0.0]
 
+	for edge in random_edges:
+		time_taken = [0.0, 0.0, 0.0]
 		start = time()
 
 		num_edges += 1
@@ -268,23 +301,24 @@ def main():
 		node_a = edge[0]
 		node = edge[1]
 
-		# get all the nodes at distance <= 5 from node_a
-
-		nodes = get_nodes(database, node_a, 5, True)
-
-		# print(nodes, type(nodes[0]))
-		# print(node, type(node))
-		# sys.exit()	
+		# get all the nodes at hop <= 5 from node_a
+		nodes = get_nodes(conn, node_a, 5, True)
+		nodes.append(node)
 		nodes_compared = len(nodes)
 		print(node_a, node)
 
 		# remove the edge between node_a and node
-		removed_edge_data = "/home/deepak/Project/files/data/"+dataset_name+"/modified_data.txt"
-		remove_edge(data, removed_edge_data, node_a, node)
+		# removed_edge_data = "/home/deepak/Project/files/data/"+dataset_name+"/modified_data.txt"
+		# remove_edge(data, removed_edge_data, node_a, node)
 
 		# os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(hop))
+		startin = time()
+		dgm1_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_" + str(node_a) + ".txt"
 
-		get_persDiag(database, [node_a], hop, dataset_name)
+		if(os.path.exists(dgm1_file) == False):
+			get_persDiag(conn, [node_a], hop, dataset_name)
+		endin = time()
+		time_taken[0] += (endin-startin)
 
 		for node_b in nodes:
 			if(node_b == str(node_a)):
@@ -293,13 +327,13 @@ def main():
 			temp = OrderedDict()
 			temp["node_a"] = node_a
 			temp["node_b"] = node_b
+			# print(node_a, node_b)
 
 			# if(total_pairs <= 34800):
 			# 	continue
 
 			# define file names for persistence diagrams
 
-			dgm1_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_" + str(node_a) + ".txt"
 			dgm2_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_" + str(node_b) + ".txt"
 			dgmCombine_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_" + str(node_a) + "_" + str(node_b) + ".txt"
 			dgmComplete_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_complete_" + str(node_a) + "_" + str(node_b) + ".txt"
@@ -307,11 +341,18 @@ def main():
 			# obtain persistence diagrams for node_a, node_b and combined
 
 			# os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_b) + " " + str(hop))
-			get_persDiag(database, [node_b], hop, dataset_name)
+			startin = time()
+			if(os.path.exists(dgm2_file) == False):
+				get_persDiag(conn, [node_b], hop, dataset_name)
+			endin = time()
+			time_taken[0] += (endin-startin)
 
 			# os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
-			get_persDiag(database, [node_a, node_b], hop, dataset_name)
-
+			startin = time()
+			if(os.path.exists(dgmCombine_file) == False):
+				get_persDiag(conn, [node_a, node_b], hop, dataset_name)
+			endin = time()
+			time_taken[0] += (endin-startin)
 			# get persistence diagram for complete graph
 			# in_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
 			# f = open(in_file, "rb")
@@ -332,7 +373,7 @@ def main():
 			# os.system(command)			
 
 			# compare pairwise diagrams
-			process_a_b = Popen(["/home/deepak/Project/code/src_ripser/baseline", removed_edge_data, "/home/deepak/Project/code/src_ripser/test.txt", str(node_a), str(node_b)], stdout=PIPE)
+			process_a_b = Popen(["/home/deepak/Project/code/src_ripser/baseline", data_file, "/home/deepak/Project/code/src_ripser/test.txt", str(node_a), str(node_b)], stdout=PIPE)
 			process_a_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(0)], stdout=PIPE)
 			process_a_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(1)], stdout=PIPE)
 			process_b_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(0)], stdout=PIPE)
@@ -340,9 +381,13 @@ def main():
 			process_complete_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(0)], stdout=PIPE)
 			process_complete_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(1)], stdout=PIPE)
 			
+			startin = time()
 			(output_a_b,err) = process_a_b.communicate()
 			output_a_b = output_a_b.strip().splitlines()
+			endin = time()
+			time_taken[1] += (endin-startin)
 
+			startin = time()
 			(output_a_0,err) = process_a_0.communicate()
 			output_a_0 = output_a_0.strip().splitlines()
 
@@ -360,6 +405,8 @@ def main():
 
 			(output_complete_1, err) = process_complete_1.communicate()
 			output_complete_1 = output_complete_1.strip().split()
+			endin = time()
+			time_taken[2] += (endin-startin)
 
 			# create a temporary dictionary
 				
@@ -386,10 +433,9 @@ def main():
 
 			ranking.append(temp)
 
-		end = time()
 		print("Nodes compared: %d" % nodes_compared)
-		print("Time taken: %f" % float(end-start))
 
+		startin = time()
 		ranking = pd.DataFrame(ranking)
 		results_temp = OrderedDict()
 		results_temp["node_a"] = node_a
@@ -399,6 +445,13 @@ def main():
 			results_temp[each] = index
 
 		appendCSV(results_temp, ',', output_file)
+		endin = time()
+		print("PersDiag, Baselines, Comparison-> ", time_taken)
+		print("Getting scores-> ", endin-startin)
+		end = time()
+		print("Total time-> ", end-start)
+		total_time += end-start
+	print(total_time)
 
 
 
