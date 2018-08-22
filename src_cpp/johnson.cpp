@@ -312,7 +312,7 @@ intt input(map<string,intt>& to_indices, map<intt,string>& to_node){
 			}	
 		}
 	}
-	cout << "Edges: " << edges << '\n';
+	// cout << "Edges: " << edges << '\n';
 	return i-1; // number of distinct nodes
 }
 
@@ -351,8 +351,6 @@ int main(int argc, char *argv[]){
 	sFile.open((string) sparse_file, ios::binary);
 
 	intt num_nodes = input(to_indices, to_node); // take input
-	cout << num_nodes << '\n';
-	return 0;
 
 	if(num_nodes == 1){
 		oFile << (double) 0 << '\n';

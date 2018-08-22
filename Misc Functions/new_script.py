@@ -9,10 +9,41 @@ from math import sqrt
 from time import time
 from collections import OrderedDict
 from subprocess import Popen, PIPE
+
 # get input nodes and define neighborhood
 # input filename
 # n-hop neighborhood -- n
+# Precise method, which guarantees v = v1 when t = 1.
+def lerp( v0, v1, t):
+  # print "LERP"
+  # print v0
+  # print v1
+  # print t
+  # print float( ( 1.0 - t) * v0) + float(t * v1)
+  return (1 - t) * v0 + t * v1
 
+
+def get_LERP(x):
+	# Largest pd_distance
+	C = 5
+	# Take C a "very big number" (Largest PD distance), set f(C) = 0, f(1/C) = 1, 
+	# then f(x) = 0 for x >= C, f(x) = 1 for x <= 1/C, and interpolate linearly between 1/C and C.
+
+	# PD distance to score...
+	score = -1
+
+	if x >= C:
+		score = 0.0
+		norm_score = 0.0
+	if x <= (1/C):
+		score = 1.0
+		norm_score = 1.0
+
+	if score == -1:
+		score = lerp( 1/float(C), C, float(x) / float( C - 1/ float(C))  )
+		norm_score = 1 - float(score) / float( C - 1/ float(C))
+
+	return norm_score
 def create_table(df, conn):
 	
 	sql_table = """ CREATE TABLE IF NOT EXISTS nodes(
@@ -32,7 +63,7 @@ def create_table(df, conn):
 	return conn
 
 def appendCSV(final_results, sep, out_file):
-	result = pd.DataFrame(final_results, columns = final_results.keys(), index = [0])
+	result = pd.DataFrame(final_results, columns = final_results[0].keys())
 	if(os.path.isfile(out_file)):
 		result.to_csv(out_file, mode = 'a', header = False, index = False)
 	else:
@@ -249,11 +280,12 @@ def main():
 	# data = "/home/deepak/Project/code/src_ripser/random_select.txt"
 
 
-	# read data from input file 
-	f = open(data_file, "r")
-	data = f.readlines()
-	f.close()
+	# # read data from input file 
+	# f = open(data_file, "r")
+	# data = f.readlines()
+	# f.close()
 
+	total_pairs = 0
 	random_edges = []
 	num_edges = 0
 	resume_pos = 0
@@ -277,9 +309,9 @@ def main():
 		df = pd.read_csv(output_file)
 		resume_pos = df.shape[0]
 
-	final_results = []
+	score = []
 
-	metrics = ["W_a_0", "W_a_1", "W_b_0", "W_b_1", "B_a_0", "B_a_1", "B_b_0", "B_b_1", "W_comp_0", "W_comp_1", "B_comp_0", "B_comp_1", "AA", "MW"]
+	metrics = ["B_ab_0", "B_ab_1", "L1_norm", "L2_norm", "LERP_L1", "LERP_L2", "AA", "MW"]
 
 	end = time()
 	print("Preprocessing time: %f" % float(end-start))
@@ -289,6 +321,7 @@ def main():
 	time_taken = [0.0, 0.0 , 0.0]
 
 	for edge in random_edges:
+		total_pairs+=1
 		time_taken = [0.0, 0.0, 0.0]
 		start = time()
 
@@ -298,14 +331,14 @@ def main():
 			continue
 
 		ranking = []
-		node_a = edge[0]
-		node = edge[1]
+		node_a = edge[1]
+		node_b = edge[2]
 
 		# get all the nodes at hop <= 5 from node_a
-		nodes = get_nodes(conn, node_a, 1, True)
-		nodes.append(node)
-		nodes_compared = len(nodes)
-		print(node_a, node)
+		# nodes = get_nodes(conn, node_a, 5, True)
+		# nodes.append(node)
+		# nodes_compared = len(nodes)
+		print(node_a, node_b)
 
 		# remove the edge between node_a and node
 		# removed_edge_data = "/home/deepak/Project/files/data/"+dataset_name+"/modified_data.txt"
@@ -320,140 +353,113 @@ def main():
 		endin = time()
 		time_taken[0] += (endin-startin)
 
-		for node_b in nodes:
-			if(node_b == str(node_a)):
-				continue
+		if(node_b == str(node_a)):
+			continue
 
-			temp = OrderedDict()
-			temp["node_a"] = node_a
-			temp["node_b"] = node_b
-			# print(node_a, node_b)
+		temp = OrderedDict()
+		temp["node_a"] = node_a
+		temp["node_b"] = node_b
+		temp["label"] = edge[0]
+		# print(node_a, node_b)
 
-			# if(total_pairs <= 34800):
-			# 	continue
+		# if(total_pairs <= 34800):
+		# 	continue
 
-			# define file names for persistence diagrams
+		# define file names for persistence diagrams
 
-			dgm2_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_" + str(node_b) + ".txt"
-			dgmCombine_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_" + str(node_a) + "_" + str(node_b) + ".txt"
-			dgmComplete_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_complete_" + str(node_a) + "_" + str(node_b) + ".txt"
+		dgm2_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_" + str(node_b) + ".txt"
+		# dgmCombine_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_" + str(node_a) + "_" + str(node_b) + ".txt"
+		# dgmComplete_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/ripser_complete_" + str(node_a) + "_" + str(node_b) + ".txt"
 
-			# obtain persistence diagrams for node_a, node_b and combined
+		# obtain persistence diagrams for node_a, node_b and combined
 
-			# os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_b) + " " + str(hop))
-			startin = time()
-			if(os.path.exists(dgm2_file) == False):
-				get_persDiag(conn, [node_b], hop, dataset_name)
-			endin = time()
-			time_taken[0] += (endin-startin)
+		# os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_b) + " " + str(hop))
+		startin = time()
+		if(os.path.exists(dgm2_file) == False):
+			get_persDiag(conn, [node_b], hop, dataset_name)
+		endin = time()
+		time_taken[0] += (endin-startin)
 
-			# os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
-			startin = time()
-			if(os.path.exists(dgmCombine_file) == False):
-				get_persDiag(conn, [node_a, node_b], hop, dataset_name)
-			endin = time()
-			time_taken[0] += (endin-startin)
-			# get persistence diagram for complete graph
-			# in_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
-			# f = open(in_file, "rb")
-			# data_p = f.read()
-			# num_processors = struct.unpack('<q' , data_p[16:24])[0]
-			# if(num_processors > 3):
-			# 	num_processors = 3
-			# if(num_processors == 0):
-			# 	num_processors+=1
-			# _format = "lower-distance"
-			# with open(in_file, "r") as apsp_file:
-			# 	first_line = apsp_file.readline()
-			# 	apsp_file.close()
-			# 	if(first_line == '0'):
-			# 		_format = "distance"
+		# os.system("python3 /home/deepak/Project/code/src_ripser/get_persDiag.py --remove " + dataset_name + " " + removed_edge_data + " " + str(node_a) + " " + str(node_b) + " " + str(hop))
+		# startin = time()
+		# if(os.path.exists(dgmCombine_file) == False):
+		# 	get_persDiag(conn, [node_a, node_b], hop, dataset_name)
+		# endin = time()
+		# time_taken[0] += (endin-startin)
+		# get persistence diagram for complete graph
+		# in_file = "/home/deepak/Project/files/outputs/"+dataset_name+"/removed_edge_" + str(hop) + "/apsp_complete_full_" + str(node_a) + "_" + str(node_b)
+		# f = open(in_file, "rb")
+		# data_p = f.read()
+		# num_processors = struct.unpack('<q' , data_p[16:24])[0]
+		# if(num_processors > 3):
+		# 	num_processors = 3
+		# if(num_processors == 0):
+		# 	num_processors+=1
+		# _format = "lower-distance"
+		# with open(in_file, "r") as apsp_file:
+		# 	first_line = apsp_file.readline()
+		# 	apsp_file.close()
+		# 	if(first_line == '0'):
+		# 		_format = "distance"
 
-			# command = "ripser --dim 1 --threshold 4 --format " + _format + " " + in_file + " > " + dgmComplete_file
-			# os.system(command)			
+		# command = "ripser --dim 1 --threshold 4 --format " + _format + " " + in_file + " > " + dgmComplete_file
+		# os.system(command)			
 
-			# compare pairwise diagrams
-			process_a_b = Popen(["/home/deepak/Project/code/src_ripser/baseline", data_file, "/home/deepak/Project/code/src_ripser/test.txt", str(node_a), str(node_b)], stdout=PIPE)
-			process_a_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(0)], stdout=PIPE)
-			process_a_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm1_file, str(2),str(1)], stdout=PIPE)
-			process_b_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(0)], stdout=PIPE)
-			process_b_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(1)], stdout=PIPE)
-			process_complete_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(0)], stdout=PIPE)
-			process_complete_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(1)], stdout=PIPE)
-			
-			startin = time()
-			(output_a_b,err) = process_a_b.communicate()
-			output_a_b = output_a_b.strip().splitlines()
-			endin = time()
-			time_taken[1] += (endin-startin)
-
-			startin = time()
-			(output_a_0,err) = process_a_0.communicate()
-			output_a_0 = output_a_0.strip().splitlines()
-
-			(output_a_1,err) = process_a_1.communicate()
-			output_a_1 = output_a_1.strip().splitlines()
-
-			(output_b_0,err) = process_b_0.communicate()
-			output_b_0 = output_b_0.strip().splitlines()
-
-			(output_b_1,err) = process_b_1.communicate()
-			output_b_1 = output_b_1.strip().splitlines()
-
-			(output_complete_0, err) = process_complete_0.communicate()
-			output_complete_0 = output_complete_0.strip().split()
-
-			(output_complete_1, err) = process_complete_1.communicate()
-			output_complete_1 = output_complete_1.strip().split()
-			endin = time()
-			time_taken[2] += (endin-startin)
-
-			# create a temporary dictionary
-				
-			temp["W_a_0"] = float(output_a_0[0])
-			temp["B_a_0"] = float(output_a_0[1])
-
-			temp["W_b_0"] = float(output_b_0[0])
-			temp["B_b_0"] = float(output_b_0[1])
-
-			temp["W_a_1"] = float(output_a_1[0])
-			temp["B_a_1"] = float(output_a_1[1])
-
-			temp["W_b_1"] = float(output_b_1[0])
-			temp["B_b_1"] = float(output_b_1[1])
-
-			temp["W_comp_0"] = float(output_complete_0[0])
-			temp["B_comp_0"] = float(output_complete_0[1])
-
-			temp["W_comp_1"] = float(output_complete_1[0])
-			temp["B_comp_1"] = float(output_complete_1[1])
-			
-			temp["AA"] = float(output_a_b[0])
-			temp["MW"] = float(output_a_b[1])
-
-			ranking.append(temp)
-
-		print("Nodes compared: %d" % nodes_compared)
+		# compare pairwise diagrams
+		process_baseline = Popen(["/home/deepak/Project/code/src_ripser/baseline", data_file, "/home/deepak/Project/code/src_ripser/test.txt", str(node_a), str(node_b)], stdout=PIPE)
+		process_ab = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py",dgm1_file, dgm2_file, str(2),str(0)], stdout=PIPE)
+		process_ab_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py",dgm1_file, dgm2_file, str(2),str(1)], stdout=PIPE)
+		# process_b_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(0)], stdout=PIPE)
+		# process_b_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgm2_file, str(2),str(1)], stdout=PIPE)
+		# process_complete_0 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(0)], stdout=PIPE)
+		# process_complete_1 = Popen(["python3", "/home/deepak/Project/code/src_ripser/compare_diagram.py", dgmCombine_file, dgmComplete_file, str(2),str(1)], stdout=PIPE)
+		
+		startin = time()
+		(output_baseline,err) = process_baseline.communicate()
+		output_baseline = output_baseline.strip().splitlines()
+		endin = time()
+		time_taken[1] += (endin-startin)
 
 		startin = time()
-		ranking = pd.DataFrame(ranking)
-		results_temp = OrderedDict()
-		results_temp["node_a"] = node_a
-		results_temp["node_b"] = node
-		for each in metrics:
-			index = get_position(ranking, node, each)+1
-			results_temp[each] = index
+		(output_ab,err) = process_ab.communicate()
+		output_ab = output_ab.strip().splitlines()
 
-		appendCSV(results_temp, ',', output_file)
-		endin = time()
-		print("PersDiag, Baselines, Comparison-> ", time_taken)
-		print("Getting scores-> ", endin-startin)
-		end = time()
-		print("Total time-> ", end-start)
-		total_time += end-start
-	print(total_time)
+		(output_ab_1,err) = process_ab_1.communicate()
+		output_ab_1 = output_ab_1.strip().splitlines()
+
+		# (output_b_0,err) = process_b_0.communicate()
+		# output_b_0 = output_b_0.strip().splitlines()
+
+		# (output_b_1,err) = process_b_1.communicate()
+		# output_b_1 = output_b_1.strip().splitlines()
+
+		# (output_complete_0, err) = process_complete_0.communicate()
+		# output_complete_0 = output_complete_0.strip().split()
+
+		# (output_complete_1, err) = process_complete_1.communicate()
+		# output_complete_1 = output_complete_1.strip().split()
+		# endin = time()
+		# time_taken[2] += (endin-startin)
+
+		# create a temporary dictionary
+		temp["B_ab_0"] = float(output_ab[1])
+		temp["B_ab_1"] = float(output_ab_1[1])
+		
+		temp["L1_norm"] = abs(float(output_ab[1])) + abs(float(output_ab_1[1]))
+		temp["L2_norm"] = sqrt(float(output_ab[1]) ** 2 + float(output_ab_1[1]) ** 2)
+
+		temp["LERP_L1"] = get_LERP(temp["L1_norm"])
+		temp["LERP_L2"] = get_LERP(temp["L2_norm"])
+
+		temp["AA"] = float(output_baseline[0])
+		temp["MW"] = float(output_baseline[1])
 
 
+		score.append(temp)
+
+		if(total_pairs%100 == 0):
+			appendCSV(score, ',', output_file) 
+			score.clear()
 
 if __name__ == '__main__':
 	main()
