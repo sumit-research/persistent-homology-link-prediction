@@ -263,7 +263,6 @@ vector<vector<double>> getPD(vector<vector<ii>> small_graph)
 		}
 	}
 	vector<vector<double>> apsp = johnson(small_graph, reverse_graph, small_graph.size() - 1);
-
 	return call_ripser(1, 4, apsp); //threshold = 4 is for some reason. max dimension = 1 required by us.
 }
 vector<pair<double, double>> getDimPD(vector<vector<double>> pd, double dimension)

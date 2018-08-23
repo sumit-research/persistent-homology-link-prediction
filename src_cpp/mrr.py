@@ -53,7 +53,7 @@ def main():
 	ex_data.append(mrr(df))
 	
 
-	for i in [1, 2, 3, 4, 5]:
+	for i in [5, 10, 20, 50, 100]:
 		ex_data.append(map(df, i))
 
 	new_df = pd.DataFrame(ex_data, columns = list(df.columns.values))

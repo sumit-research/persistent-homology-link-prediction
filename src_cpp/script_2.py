@@ -302,7 +302,7 @@ def main():
 		node = edge[1]
 
 		# get all the nodes at hop <= 5 from node_a
-		nodes = get_nodes(conn, node_a, 1, True)
+		nodes = get_nodes(conn, node_a, 5, True)
 		nodes.append(node)
 		nodes_compared = len(nodes)
 		print(node_a, node)
