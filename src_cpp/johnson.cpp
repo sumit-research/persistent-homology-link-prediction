@@ -17,7 +17,6 @@ using namespace std;
 
 ifstream iFile;
 ofstream oFile;
-ofstream sFile;
 ofstream dFile;
 // ofstream indFile("indices.txt");
 // ofstream wFile("weight.txt");
@@ -62,39 +61,39 @@ void write_txt(intt src, vector<double>& dist, intt num_nodes){
 	// cFile << temp << '\n' << flush;
 }
 
-void write_sparse(intt num_nodes){
-	intt DIPHA = 8067171840,file_type = 8;
-	sFile.write(reinterpret_cast<const char*>(&DIPHA), sizeof(intt));
-	sFile.write(reinterpret_cast<const char*>(&file_type), sizeof(intt));
-	sFile.write(reinterpret_cast<const char*>(&num_nodes), sizeof(intt));
-	ifstream cFileIn("connections.txt");
-	ifstream indFileIn("indices.txt");
-	ifstream wFileIn("weight.txt");
+// void write_sparse(intt num_nodes){
+// 	intt DIPHA = 8067171840,file_type = 8;
+// 	sFile.write(reinterpret_cast<const char*>(&DIPHA), sizeof(intt));
+// 	sFile.write(reinterpret_cast<const char*>(&file_type), sizeof(intt));
+// 	sFile.write(reinterpret_cast<const char*>(&num_nodes), sizeof(intt));
+// 	ifstream cFileIn("connections.txt");
+// 	ifstream indFileIn("indices.txt");
+// 	ifstream wFileIn("weight.txt");
 
-	intt conn = 0, ind = 0, dis = 0;
-	string line;
-	while(getline(cFileIn, line)){
-		intt u = stoll(line);		
-		conn += u;
-		sFile.write(reinterpret_cast<const char*>(&u), sizeof(intt));
-	}
-	while(getline(indFileIn, line)){
-		intt u = stoll(line);
-		ind++;
-		sFile.write(reinterpret_cast<const char*>(&u), sizeof(intt));
-	}
-	while(getline(wFileIn, line)){
-		double u = stod(line);
-		dis++;
-		double distance = static_cast<double>(u);
-		sFile.write(reinterpret_cast<const char*>(&distance), sizeof(double));
-	}
+// 	intt conn = 0, ind = 0, dis = 0;
+// 	string line;
+// 	while(getline(cFileIn, line)){
+// 		intt u = stoll(line);		
+// 		conn += u;
+// 		sFile.write(reinterpret_cast<const char*>(&u), sizeof(intt));
+// 	}
+// 	while(getline(indFileIn, line)){
+// 		intt u = stoll(line);
+// 		ind++;
+// 		sFile.write(reinterpret_cast<const char*>(&u), sizeof(intt));
+// 	}
+// 	while(getline(wFileIn, line)){
+// 		double u = stod(line);
+// 		dis++;
+// 		double distance = static_cast<double>(u);
+// 		sFile.write(reinterpret_cast<const char*>(&distance), sizeof(double));
+// 	}
 
-	indFileIn.close();
-	wFileIn.close();
-	cFileIn.close();
-	// cout << conn << " " << ind << ' ' << dis << '\n';
-}
+// 	indFileIn.close();
+// 	wFileIn.close();
+// 	cFileIn.close();
+// 	// cout << conn << " " << ind << ' ' << dis << '\n';
+// }
 
 void dump_pairs(intt u, vector<double>& avg_dist, vector<intt>& hop_dist, intt num_nodes){
 
@@ -327,7 +326,7 @@ int main(int argc, char *argv[]){
 	bool dumping = false;
 
 	if(argc < 5){
-		cout << "[Usage]: " << "./johnson dataset_name input_filename output_filename sparse_output_filename\n";
+		cout << "[Usage]: " << "./johnson dataset_name input_filename output_filename dump_file\n";
 		cout << "Options: \n";
 		cout << "--dump_pairs -> dump all the reachable pairs into text file with the distance between them. Use for testing on a big file.\n";
 		return 0;
@@ -341,14 +340,13 @@ int main(int argc, char *argv[]){
 	string dataset_name = argv[j++];
 	string input_file = argv[j++];
 	string output_file = argv[j++];
-	string sparse_file = argv[j++];
+	string dump_file = argv[j++];
 
 	if(dumping)
-		dFile.open("/home/deepak/Project/files/outputs/"+dataset_name+"/dumped.txt");
+		dFile.open(dump_file);
 
 	iFile.open((string) input_file);
 	oFile.open((string) output_file);
-	sFile.open((string) sparse_file, ios::binary);
 
 	intt num_nodes = input(to_indices, to_node); // take input
 
@@ -356,7 +354,6 @@ int main(int argc, char *argv[]){
 		oFile << (double) 0 << '\n';
 		iFile.close();
 		oFile.close();
-		sFile.close();
 		dFile.close();
 		return 0;
 	}
@@ -386,7 +383,6 @@ int main(int argc, char *argv[]){
 
 	iFile.close();
 	oFile.close();
-	sFile.close();
 	dFile.close();
 
 	return 0;
