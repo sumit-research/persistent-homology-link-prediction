@@ -89,28 +89,22 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 																						   // map<string, intt> &to_ind, map<intt, string> &to_no)
 {
 
-	char *psql = "SELECT DISTINCT n_hood1.ID_b, n_hood2.ID_b, nodes.hop, nodes.distance FROM (SELECT * FROM nodes WHERE (ID_a = ? OR ID_a = ?) AND hop <= ?) n_hood1, (SELECT * FROM nodes WHERE (ID_a = ? OR ID_a = ?) AND hop <= ?) n_hood2,nodes WHERE nodes.ID_a = n_hood1.ID_b AND nodes.ID_b = n_hood2.ID_b AND nodes.hop <= 1 ORDER BY n_hood1.ID_b;";
+	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ? UNION Select ID_b FROM nodes where ID_a = ? AND hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_B IN nhood1 AND HOP<=1;";
 
 	int rc = sqlite3_prepare_v2(database, psql, -1, &res, 0);
 
 	char value1[sources[0].size()];
-	char value2[sources[1].size()];
-	char value4[sources[0].size()];
-	char value5[sources[1].size()];
+	char value3[sources[1].size()];
 
 	if (rc == SQLITE_OK)
 	{
 		strcpy(value1, sources[0].c_str());
-		strcpy(value2, sources[1].c_str());
-		strcpy(value4, sources[0].c_str());
-		strcpy(value5, sources[1].c_str());
+		strcpy(value3, sources[1].c_str());
 
 		sqlite3_bind_text(res, 1, value1, strlen(value1), 0);
-		sqlite3_bind_text(res, 2, value2, strlen(value2), 0);
-		sqlite3_bind_int(res, 3, hop);
-		sqlite3_bind_text(res, 4, value4, strlen(value4), 0);
-		sqlite3_bind_text(res, 5, value5, strlen(value5), 0);
-		sqlite3_bind_int(res, 6, hop);
+		sqlite3_bind_int(res, 2, hop);
+		sqlite3_bind_text(res, 3, value3, strlen(value3), 0);
+		sqlite3_bind_int(res, 4, hop);
 	}
 	else
 	{
@@ -362,7 +356,7 @@ int main(int argc, char *argv[])
 	int comb_nbd_hop = atoi(argv[5]);
 	string output_file = argv[6];
 
-	string database_loc = "./database.db";
+	string database_loc = "/home/deepak/Project/files/outputs/cora/database.db";
 	char database_loc_proper[database_loc.size()];
 	strcpy(database_loc_proper, database_loc.c_str());
 	int rc = sqlite3_open(database_loc_proper, &database);
