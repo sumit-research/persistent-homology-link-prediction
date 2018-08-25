@@ -1,5 +1,6 @@
 import sys
 import sqlite3
+import numpy as np
 import pandas as pd
 
 def main():
@@ -18,7 +19,7 @@ def main():
 
 	chunksize = 10 ** 6 
 	for chunk in pd.read_csv(dumped_file, sep=" ", names = ["distance", "hop", "ID_a", "ID_b"], dtype={"distance":float, "hop": int, "ID_a": str, "ID_b": str}, chunksize = chunksize):
-		chunk.to_sql("nodes", conn, if_exists='apppend', index = False)
+		chunk.to_sql("nodes", conn, if_exists='append', index = False)
 
 	create_index = """ CREATE INDEX IF NOT EXISTS index_nodes ON nodes(ID_a, ID_b, distance, hop) """
 
