@@ -348,10 +348,10 @@ int main(int argc, char *argv[])
 {
 	fastio;
 
-	if (argc < 5)
+	if (argc < 6)
 	{
 		cout << "[Usage]: "
-			 << "./script dataset_name train_set test_set nbd_hop output_file\n";
+			 << "./script dataset_name train_set test_set nbd_hop comb_nbd_hop output_file\n";
 		return 0;
 	}
 
@@ -359,7 +359,8 @@ int main(int argc, char *argv[])
 	string train_set = argv[2];
 	string test_set = argv[3];
 	int nbd_hop = atoi(argv[4]);
-	string output_file = argv[5];
+	int comb_nbd_hop = atoi(argv[5]);
+	string output_file = argv[6];
 
 	string database_loc = "./database.db";
 	char database_loc_proper[database_loc.size()];
@@ -388,6 +389,9 @@ int main(int argc, char *argv[])
 			{
 				vector<string> src_nbd = just_getNhop_database(dataset_name, source, nbd_hop);
 				bool isFoundDest = false;
+				// cout<<"\nSource: "<<source<<"\t NbdSize = "<<src_nbd.size()<<"\n";
+				// int a;
+				// cin>>a;
 				for (size_t i = 0; i < src_nbd.size(); i++)
 				{
 					// cout << "\n"
@@ -399,33 +403,33 @@ int main(int argc, char *argv[])
 						break;
 					}
 				}
-
+				// cout<<"\nisFound: "<<isFoundDest<<"\n";
 				if (isFoundDest)
 				{
 
-					// cout << "\n";
-					oFile << "\n";
-					// cout << source << "\t" << dest << "\t";
-					oFile << source << "\t" << dest << "\t";
 					for (size_t i = 0; i < src_nbd.size(); i++)
 					{
-
 						vector<string> sources;
 						sources.push_back(source);
 						sources.push_back(src_nbd[i]);
-						// sources.push_back("1033");
-						// sources.push_back("1034");
-						vector<double> scores = callFunctions(sources, nbd_hop, dataset_name);
-						// cout << src_nbd[i] << ":"
-						// 	 << scores[0] << ","
-						// 	 << scores[1] << ","
-						// 	 << scores[2] << ","
-						// 	 << scores[3] << ","
-						// 	 << scores[4] << ","
-						// 	 << scores[5] << ","
-						// 	 << scores[6] << ","
-						// 	 << scores[7] << "\t";
-						oFile << src_nbd[i] << ":"
+						// cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
+						vector<double> scores = callFunctions(sources, comb_nbd_hop, dataset_name);
+						cout << "\n"
+							 << source << "\t"
+							 << dest << "\t" 
+							 << src_nbd[i] << ":"
+							 << scores[0] << ","
+							 << scores[1] << ","
+							 << scores[2] << ","
+							 << scores[3] << ","
+							 << scores[4] << ","
+							 << scores[5] << ","
+							 << scores[6] << ","
+							 << scores[7] << "\t";
+						oFile << "\n"
+							  << source << "\t"
+							  << dest << "\t"
+							  << src_nbd[i] << ":"
 							  << scores[0] << ","
 							  << scores[1] << ","
 							  << scores[2] << ","
@@ -439,9 +443,9 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					// cout << "\n"
-					// 	 << source << "\t" << dest << "\t"
-					// 	 << "inf";
+					cout << "\n"
+						 << source << "\t" << dest << "\t"
+						 << "inf";
 					oFile << "\n"
 						  << source << "\t" << dest << "\t"
 						  << "inf";
