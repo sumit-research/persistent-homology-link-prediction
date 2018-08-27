@@ -89,7 +89,7 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 																						   // map<string, intt> &to_ind, map<intt, string> &to_no)
 {
 
-	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ? UNION Select ID_b FROM nodes where ID_a = ? AND hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_B IN nhood1 AND HOP<=1;";
+	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ? UNION ALL Select ID_b FROM nodes where ID_a = ? AND hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_b IN nhood1 AND nodes.HOP=1;";
 
 	int rc = sqlite3_prepare_v2(database, psql, -1, &res, 0);
 
@@ -129,28 +129,32 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 			temp[i] = string((char *)sqlite3_column_text(res, i));
 		}
 
-		if (to_ind.find(temp[0]) == to_ind.end())
+		if (to_ind.find(temp[2]) == to_ind.end())
 		{
-			to_ind[temp[0]] = current_node;
-			to_no[current_node] = temp[0];
+			to_ind[temp[2]] = current_node;
+			to_no[current_node] = temp[2];
 			vector<ii> tmp;
 			nhood_graph.push_back(tmp);
 			current_node++;
 		}
-		if (to_ind.find(temp[1]) == to_ind.end())
+		if (to_ind.find(temp[3]) == to_ind.end())
 		{
-			to_ind[temp[1]] = current_node;
-			to_no[current_node] = temp[1];
+			to_ind[temp[3]] = current_node;
+			to_no[current_node] = temp[3];
 			vector<ii> tmp;
 			nhood_graph.push_back(tmp);
 			current_node++;
 		}
 
-		if (temp[2] != "0")
-			nhood_graph[to_ind[temp[0]]].push_back(make_pair(1, to_ind[temp[1]]));
+		nhood_graph[to_ind[temp[2]]].push_back(make_pair(1, to_ind[temp[3]]));
 		// results.push_back(temp);
 
 		rc = sqlite3_step(res);
+	}
+	if(nhood_graph.size() == 0){
+		vector<ii> tmp;
+		nhood_graph.push_back(tmp);
+		nhood_graph.push_back(tmp);
 	}
 
 	sqlite3_finalize(res);
@@ -220,6 +224,15 @@ vector<vector<ii>> getNHop(vector<vector<ii>> &graph, vector<string> sources, in
 		}
 	}
 
+	// cout << "\nWithout SQL\n";
+	// for (int i = 1; i < new_graph.size(); i++)
+	// {
+	// 	cout << to_node[to_node_nhop[i]] << "-> ";
+	// 	for (int j = 0; j < new_graph[i].size(); j++)
+	// 		cout << to_node[to_node_nhop[new_graph[i][j].second]] << " ";
+
+	// 	cout << '\n';
+	// }
 	return new_graph;
 }
 
@@ -280,7 +293,7 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 	to_indices_nhop.clear();
 	to_node_nhop.clear();
 	vector<vector<ii>> comb_nbd = getNhop_database(dataset_name, sources, hop); //, to_ind, to_no);
-	// vector<vector<ii>> comb_nbd = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
+	// vector<vector<ii>> comb_nbd_waste = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
 	vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]]);
 	// vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
 
@@ -356,7 +369,7 @@ int main(int argc, char *argv[])
 	int comb_nbd_hop = atoi(argv[5]);
 	string output_file = argv[6];
 
-	string database_loc = "/home/deepak/Project/files/outputs/cora/database.db";
+	string database_loc = "/home/deepak/Project/files/outputs/moreno/database.db";
 	char database_loc_proper[database_loc.size()];
 	strcpy(database_loc_proper, database_loc.c_str());
 	int rc = sqlite3_open(database_loc_proper, &database);
@@ -406,6 +419,8 @@ int main(int argc, char *argv[])
 						vector<string> sources;
 						sources.push_back(source);
 						sources.push_back(src_nbd[i]);
+						// sources.push_back("1033");
+						// sources.push_back("1034");
 						// cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
 						vector<double> scores = callFunctions(sources, comb_nbd_hop, dataset_name);
 						cout << "\n"
@@ -432,6 +447,7 @@ int main(int argc, char *argv[])
 							  << scores[5] << ","
 							  << scores[6] << ","
 							  << scores[7] << "\t";
+						// return 0;
 						scores.clear();
 					}
 				}

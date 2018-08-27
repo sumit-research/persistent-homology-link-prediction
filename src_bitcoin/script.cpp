@@ -89,7 +89,7 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 																						   // map<string, intt> &to_ind, map<intt, string> &to_no)
 {
 
-	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ? UNION Select ID_b FROM nodes where ID_a = ? AND hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_B IN nhood1 AND HOP<=1;";
+	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ? UNION Select ID_b FROM nodes where ID_a = ? AND hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_B IN nhood1 AND HOP=1;";
 
 	int rc = sqlite3_prepare_v2(database, psql, -1, &res, 0);
 
@@ -146,11 +146,15 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 			current_node++;
 		}
 
-		if (temp[2] != "0")
-			nhood_graph[to_ind[temp[0]]].push_back(make_pair(1, to_ind[temp[1]]));
+		nhood_graph[to_ind[temp[0]]].push_back(make_pair(1, to_ind[temp[1]]));
 		// results.push_back(temp);
 
 		rc = sqlite3_step(res);
+	}
+	if(nhood_graph.size() == 0){
+		vector<ii> tmp;
+		nhood_graph.push_back(tmp);
+		nhood_graph.push_back(tmp);
 	}
 
 	sqlite3_finalize(res);
