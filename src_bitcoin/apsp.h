@@ -118,9 +118,9 @@ vector<vector<double>> johnson(vector<vector<ii>> &adj, vector<vector<ii>> &reve
         for (intt v = 1; v <= num_nodes; v++)
         {
             if (dist[v] == std::numeric_limits<double>::max())
-                dist[v] = 6.0;
+                dist[v] = 100.0;
             if (reverse_dist[v] == std::numeric_limits<double>::max())
-                reverse_dist[v] = 6.0;
+                reverse_dist[v] = 100.0;
 
             distance[v] = ((double)dist[v] + (double)reverse_dist[v]) / 2.0;
             // if(dist[v] == 5 or dist[v] == 6 or dist[v] == 3)

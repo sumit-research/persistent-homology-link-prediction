@@ -129,24 +129,24 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 			temp[i] = string((char *)sqlite3_column_text(res, i));
 		}
 
-		if (to_ind.find(temp[0]) == to_ind.end())
+		if (to_ind.find(temp[2]) == to_ind.end())
 		{
-			to_ind[temp[0]] = current_node;
-			to_no[current_node] = temp[0];
+			to_ind[temp[2]] = current_node;
+			to_no[current_node] = temp[2];
 			vector<ii> tmp;
 			nhood_graph.push_back(tmp);
 			current_node++;
 		}
-		if (to_ind.find(temp[1]) == to_ind.end())
+		if (to_ind.find(temp[3]) == to_ind.end())
 		{
-			to_ind[temp[1]] = current_node;
-			to_no[current_node] = temp[1];
+			to_ind[temp[3]] = current_node;
+			to_no[current_node] = temp[3];
 			vector<ii> tmp;
 			nhood_graph.push_back(tmp);
 			current_node++;
 		}
 
-		nhood_graph[to_ind[temp[0]]].push_back(make_pair(1, to_ind[temp[1]]));
+		nhood_graph[to_ind[temp[2]]].push_back(make_pair(1, to_ind[temp[3]]));
 		// results.push_back(temp);
 
 		rc = sqlite3_step(res);

@@ -102,7 +102,7 @@ void dump_pairs(intt u, vector<double>& avg_dist, vector<intt>& hop_dist, intt n
 
 		double distance = avg_dist[i];
 		if(distance == INT64_MAX)
-			distance = 6;
+			distance = 100;
 
 		dFile << distance << " " << hop_dist[i] << " " << to_node[u] << " " << to_node[i] << '\n';
 	}
@@ -231,9 +231,9 @@ void johnson(vector< vector< ii > >& adj, vector< vector< ii > >& reverse_adj, i
 			// get old edge/path weights back
 			for(intt v = 1; v <= num_nodes; v++){
 				if(dist[v] == std::numeric_limits<double>::max()) 
-					dist[v] = 6.0;
+					dist[v] = 100.0;
 				if(reverse_dist[v] == std::numeric_limits<double>::max() )
-					reverse_dist[v] = 6.0;
+					reverse_dist[v] = 100.0;
 
 				distance[v] = ((double)dist[v] + (double)reverse_dist[v])/2.0;
 				// if(dist[v] == 5 or dist[v] == 6 or dist[v] == 3)

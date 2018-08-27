@@ -21,8 +21,8 @@ def main():
 	for chunk in pd.read_csv(dumped_file, sep=" ", names = ["distance", "hop", "ID_a", "ID_b"], dtype={"distance":float, "hop": int, "ID_a": str, "ID_b": str}, chunksize = chunksize):
 		chunk.to_sql("nodes", conn, if_exists='append', index = False)
 
-	create_index1 = """ CREATE INDEX IF NOT EXISTS index_nodes ON nodes(ID_a,hop) """
-	create_index2 = """ CREATE INDEX IF NOT EXISTS index_nodes ON nodes(ID_b) """
+	create_index1 = """ CREATE INDEX IF NOT EXISTS index_nbrhood ON nodes(ID_a,hop); """
+	create_index2 = """ CREATE INDEX IF NOT EXISTS index_dst ON nodes(ID_b); """
 
 	c.execute(create_index1)
 	c.execute(create_index2)
