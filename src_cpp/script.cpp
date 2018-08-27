@@ -90,28 +90,22 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 																						   // map<string, intt> &to_ind, map<intt, string> &to_no)
 {
 
-	char *psql = "SELECT DISTINCT n_hood1.ID_b, n_hood2.ID_b, nodes.hop, nodes.distance FROM (SELECT * FROM nodes WHERE (ID_a = ? OR ID_a = ?) AND hop <= ?) n_hood1, (SELECT * FROM nodes WHERE (ID_a = ? OR ID_a = ?) AND hop <= ?) n_hood2,nodes WHERE nodes.ID_a = n_hood1.ID_b AND nodes.ID_b = n_hood2.ID_b AND nodes.hop <= 1 ORDER BY n_hood1.ID_b;";
+	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ? UNION ALL Select ID_b FROM nodes where ID_a = ? AND hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_b IN nhood1 AND nodes.HOP=1;";
 
 	int rc = sqlite3_prepare_v2(database, psql, -1, &res, 0);
 
 	char value1[sources[0].size()];
-	char value2[sources[1].size()];
-	char value4[sources[0].size()];
-	char value5[sources[1].size()];
+	char value3[sources[1].size()];
 
 	if (rc == SQLITE_OK)
 	{
 		strcpy(value1, sources[0].c_str());
-		strcpy(value2, sources[1].c_str());
-		strcpy(value4, sources[0].c_str());
-		strcpy(value5, sources[1].c_str());
+		strcpy(value3, sources[1].c_str());
 
 		sqlite3_bind_text(res, 1, value1, strlen(value1), 0);
-		sqlite3_bind_text(res, 2, value2, strlen(value2), 0);
-		sqlite3_bind_int(res, 3, hop);
-		sqlite3_bind_text(res, 4, value4, strlen(value4), 0);
-		sqlite3_bind_text(res, 5, value5, strlen(value5), 0);
-		sqlite3_bind_int(res, 6, hop);
+		sqlite3_bind_int(res, 2, hop);
+		sqlite3_bind_text(res, 3, value3, strlen(value3), 0);
+		sqlite3_bind_int(res, 4, hop);
 	}
 	else
 	{
@@ -136,28 +130,32 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 			temp[i] = string((char *)sqlite3_column_text(res, i));
 		}
 
-		if (to_ind.find(temp[0]) == to_ind.end())
+		if (to_ind.find(temp[2]) == to_ind.end())
 		{
-			to_ind[temp[0]] = current_node;
-			to_no[current_node] = temp[0];
+			to_ind[temp[2]] = current_node;
+			to_no[current_node] = temp[2];
 			vector<ii> tmp;
 			nhood_graph.push_back(tmp);
 			current_node++;
 		}
-		if (to_ind.find(temp[1]) == to_ind.end())
+		if (to_ind.find(temp[3]) == to_ind.end())
 		{
-			to_ind[temp[1]] = current_node;
-			to_no[current_node] = temp[1];
+			to_ind[temp[3]] = current_node;
+			to_no[current_node] = temp[3];
 			vector<ii> tmp;
 			nhood_graph.push_back(tmp);
 			current_node++;
 		}
 
-		if (temp[2] != "0")
-			nhood_graph[to_ind[temp[0]]].push_back(make_pair(1, to_ind[temp[1]]));
+		nhood_graph[to_ind[temp[2]]].push_back(make_pair(1, to_ind[temp[3]]));
 		// results.push_back(temp);
 
 		rc = sqlite3_step(res);
+	}
+	if(nhood_graph.size() == 0){
+		vector<ii> tmp;
+		nhood_graph.push_back(tmp);
+		nhood_graph.push_back(tmp);
 	}
 
 	sqlite3_finalize(res);
@@ -227,6 +225,15 @@ vector<vector<ii>> getNHop(vector<vector<ii>> &graph, vector<string> sources, in
 		}
 	}
 
+	// cout << "\nWithout SQL\n";
+	// for (int i = 1; i < new_graph.size(); i++)
+	// {
+	// 	cout << to_node[to_node_nhop[i]] << "-> ";
+	// 	for (int j = 0; j < new_graph[i].size(); j++)
+	// 		cout << to_node[to_node_nhop[new_graph[i][j].second]] << " ";
+
+	// 	cout << '\n';
+	// }
 	return new_graph;
 }
 
@@ -287,7 +294,7 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 	to_indices_nhop.clear();
 	to_node_nhop.clear();
 	vector<vector<ii>> comb_nbd = getNhop_database(dataset_name, sources, hop); //, to_ind, to_no);
-	// vector<vector<ii>> comb_nbd = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
+	// vector<vector<ii>> comb_nbd_waste = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
 	vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]]);
 	// vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
 
@@ -414,6 +421,8 @@ int main(int argc, char *argv[])
 						vector<string> sources;
 						sources.push_back(source);
 						sources.push_back(src_nbd[i]);
+						// sources.push_back("1033");
+						// sources.push_back("1034");
 						// cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
 						vector<double> scores = callFunctions(sources, comb_nbd_hop, dataset_name);
 						cout << "\n"
@@ -440,6 +449,7 @@ int main(int argc, char *argv[])
 							  << scores[5] << ","
 							  << scores[6] << ","
 							  << scores[7] << "\t";
+						// return 0;
 						scores.clear();
 					}
 				}

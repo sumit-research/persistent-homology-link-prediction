@@ -118,9 +118,9 @@ vector<vector<double>> johnson(vector<vector<ii>> &adj, vector<vector<ii>> &reve
         for (intt v = 1; v <= num_nodes; v++)
         {
             if (dist[v] == INT64_MAX)
-                dist[v] = 6;
+                dist[v] = 100;
             if (reverse_dist[v] == INT64_MAX)
-                reverse_dist[v] = 6;
+                reverse_dist[v] = 100;
 
             distance[v] = ((double)dist[v] + (double)reverse_dist[v]) / 2.0;
             // if(dist[v] == 5 or dist[v] == 6 or dist[v] == 3)
