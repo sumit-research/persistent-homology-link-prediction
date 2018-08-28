@@ -152,7 +152,8 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 
 		rc = sqlite3_step(res);
 	}
-	if(nhood_graph.size() == 0){
+	if (nhood_graph.size() == 0)
+	{
 		vector<ii> tmp;
 		nhood_graph.push_back(tmp);
 		nhood_graph.push_back(tmp);
@@ -288,19 +289,34 @@ vector<pair<double, double>> getDimPD(vector<vector<double>> pd, double dimensio
 
 vector<double> callFunctions(vector<string> sources, intt hop, string dataset_name)
 {
-
+	vector<double> output;
 	to_ind.clear();
 	to_no.clear();
 	to_indices_nhop.clear();
 	to_node_nhop.clear();
 	vector<vector<ii>> comb_nbd = getNhop_database(dataset_name, sources, hop); //, to_ind, to_no);
+
 	// vector<vector<ii>> comb_nbd_waste = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
 	vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]]);
 	// vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
-
+	vector<string> sources_a;
+	sources_a.push_back(sources[0]);
+	sources_a.push_back(sources[0]);
+	vector<string> sources_b;
+	sources_b.push_back(sources[1]);
+	sources_b.push_back(sources[1]);
+	vector<vector<ii>> a_nbd = getNhop_database(dataset_name, sources_a, hop); //, to_ind, to_no);
+	vector<vector<ii>> b_nbd = getNhop_database(dataset_name, sources_b, hop); //, to_ind, to_no);
+	cout << "\n"
+		 << sources[0] << "\t" << sources[1] << "\n";
+	return output;
+	vector<vector<double>> pd_a = getPD(a_nbd);
+	vector<vector<double>> pd_b = getPD(b_nbd);
 	vector<vector<double>> pd_ab = getPD(comb_nbd);
 	vector<vector<double>> pd_ab_with_edge = getPD(comb_nbd_with_edge);
 	vector<vector<double>> pd_ab_complete = getPD(comb_nbd.size() - 1);
+	vector<pair<double, double>> pdgm_a = getDimPD(pd_a, double(0));
+	vector<pair<double, double>> pdgm_b = getDimPD(pd_b, double(0));
 	vector<pair<double, double>> pdgm = getDimPD(pd_ab, double(0));
 	vector<pair<double, double>> pdgm_with_edge = getDimPD(pd_ab_with_edge, double(0));
 	vector<pair<double, double>> pdgm_complete = getDimPD(pd_ab_complete, double(0));
@@ -322,28 +338,31 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 	params.gamma_threshold = 0.0;
 	params.max_num_phases = 800;
 
-	vector<double> output;
-	double bn_dist_0 = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
-	output.push_back(bn_dist_0);
-	double bn_dist_complete_0 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
-	output.push_back(bn_dist_complete_0);
-	double w_dist_0 = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
-	output.push_back(w_dist_0);
-	double w_dist_complete_0 = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
-	output.push_back(w_dist_complete_0);
+	// double bn_dist_0 = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
+	// output.push_back(bn_dist_0);
+	// double bn_dist_complete_0 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
+	// output.push_back(bn_dist_complete_0);
+	double w_dist = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
+	output.push_back(w_dist);
+	double w_dist_complete = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
+	output.push_back(w_dist_complete);
+	double w_dist_a = hera::wasserstein_dist(pdgm_a, pdgm_with_edge, params, "");
+	output.push_back(w_dist_a);
+	double w_dist_b = hera::wasserstein_dist(pdgm_b, pdgm_with_edge, params, "");
+	output.push_back(w_dist_b);
 
-	pdgm = getDimPD(pd_ab, double(1));
-	pdgm_with_edge = getDimPD(pd_ab_with_edge, double(1));
-	pdgm_complete = getDimPD(pd_ab_complete, double(1));
+	// pdgm = getDimPD(pd_ab, double(1));
+	// pdgm_with_edge = getDimPD(pd_ab_with_edge, double(1));
+	// pdgm_complete = getDimPD(pd_ab_complete, double(1));
 
-	double bn_dist_1 = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
-	output.push_back(bn_dist_1);
-	double bn_dist_complete_1 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
-	output.push_back(bn_dist_complete_1);
-	double w_dist_1 = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
-	output.push_back(w_dist_1);
-	double w_dist_complete_1 = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
-	output.push_back(w_dist_complete_1);
+	// double bn_dist_1 = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
+	// output.push_back(bn_dist_1);
+	// double bn_dist_complete_1 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
+	// output.push_back(bn_dist_complete_1);
+	// double w_dist_1 = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
+	// output.push_back(w_dist_1);
+	// double w_dist_complete_1 = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
+	// output.push_back(w_dist_complete_1);
 
 	// cout << "\nbn_dist_dim0=" << bn_dist_0 << "\tbn_dist_dim1=" << bn_dist_1;
 	// cout << "\tbn_dist_comp_dim0=" << bn_dist_complete_0 << "\tbn_dist_comp_dim1=" << bn_dist_complete_1 << "\n";
@@ -356,13 +375,13 @@ int main(int argc, char *argv[])
 {
 	fastio;
 
-	if (argc < 7)
+	if (argc < 8)
 	{
 		cout << "[Usage]: "
-			 << "./script dataset_name train_set test_set nbd_hop comb_nbd_hop output_file dataase_name \n";
+			 << "./script dataset_name train_set test_set nbd_hop comb_nbd_hop output_file database_loc \n";
 		return 0;
 	}
-
+	cout << "\n381\n";
 	string dataset_name = argv[1];
 	string train_set = argv[2];
 	string test_set = argv[3];
@@ -370,17 +389,20 @@ int main(int argc, char *argv[])
 	int comb_nbd_hop = atoi(argv[5]);
 	string output_file = argv[6];
 	string database_loc = argv[7];
-
+	cout << "\n389\n";
+	
 	// string database_loc = "./database.db";
 	char database_loc_proper[database_loc.size()];
 	strcpy(database_loc_proper, database_loc.c_str());
 	int rc = sqlite3_open(database_loc_proper, &database);
+	cout << "\n395\n";
 
 	tsFile.open((string)test_set);
 	oFile.open((string)output_file);
 	// sFile.open((string) sparse_file, ios::binary);
-
+	cout << "\n397\n";
 	intt num_nodes = input(train_set, in, reverse_in, to_indices, to_node); // take input
+	cout << "\n400\n";
 	if (tsFile)
 	{
 		while (true)
@@ -423,20 +445,21 @@ int main(int argc, char *argv[])
 						sources.push_back(src_nbd[i]);
 						// sources.push_back("1033");
 						// sources.push_back("1034");
-						// cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
+						cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
 						vector<double> scores = callFunctions(sources, comb_nbd_hop, dataset_name);
+						exit(0);
 						cout << "\n"
 							 << source << "\t"
-							 << dest << "\t" 
+							 << dest << "\t"
 							 << src_nbd[i] << ":"
 							 << scores[0] << ","
 							 << scores[1] << ","
 							 << scores[2] << ","
-							 << scores[3] << ","
-							 << scores[4] << ","
-							 << scores[5] << ","
-							 << scores[6] << ","
-							 << scores[7] << "\t";
+							 << scores[3] << "\t";
+						//  << scores[4] << ","
+						//  << scores[5] << ","
+						//  << scores[6] << ","
+						//  << scores[7] << "\t";
 						oFile << "\n"
 							  << source << "\t"
 							  << dest << "\t"
@@ -444,14 +467,15 @@ int main(int argc, char *argv[])
 							  << scores[0] << ","
 							  << scores[1] << ","
 							  << scores[2] << ","
-							  << scores[3] << ","
-							  << scores[4] << ","
-							  << scores[5] << ","
-							  << scores[6] << ","
-							  << scores[7] << "\t";
+							  << scores[3] << "\t";
+						//   << scores[4] << ","
+						//   << scores[5] << ","
+						//   << scores[6] << ","
+						//   << scores[7] << "\t";
 						// return 0;
 						scores.clear();
 					}
+					break;
 				}
 				else
 				{
@@ -475,4 +499,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-
