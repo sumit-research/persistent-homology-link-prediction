@@ -152,7 +152,7 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 
 		rc = sqlite3_step(res);
 	}
-	if(nhood_graph.size() == 0){
+	if(nhood_graph.size() == 1){
 		vector<ii> tmp;
 		nhood_graph.push_back(tmp);
 		nhood_graph.push_back(tmp);
@@ -236,15 +236,15 @@ vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop
 
 		rc = sqlite3_step(res);
 	}
-	if(nhood_graph.size() == 0){
+	if(nhood_graph.size() == 1){
 		vector<ii> tmp;
 		nhood_graph.push_back(tmp);
 	}
 
 	sqlite3_finalize(res);
 	//   sqlite3_close(database);
-
-	// cout << "With SQL single neighborhood\n";
+	// cout << "nhood_graph.size() -> " << nhood_graph.size() << '\n'; 
+	// cout << "With SQL single neighborhood for " << source << "\n";
 	// for (int i = 1; i < nhood_graph.size(); i++)
 	// {
 	// 	cout << to_no[i] << "-> ";
@@ -385,7 +385,14 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 	to_ind.clear();
 	to_no.clear();
 
-	vector<vector<ii>> nbd = getNhop_database(dataset_name, sources[0], hop);
+	vector<vector<ii>> nbd_a = getNhop_database(dataset_name, sources[0], hop);
+
+	to_ind.clear();
+	to_no.clear();
+
+	vector<vector<ii>> nbd_b = getNhop_database(dataset_name, sources[1], hop);
+	vector<vector<double>> pd_a = getPD(nbd_a);
+	vector<vector<double>> pd_b = getPD(nbd_b);
 
 	// vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
 
@@ -445,7 +452,7 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 
 int main(int argc, char *argv[])
 {
-	fastio;
+	// fastio;
 
 	if (argc < 7)
 	{
@@ -512,8 +519,8 @@ int main(int argc, char *argv[])
 						vector<string> sources;
 						sources.push_back(source);
 						sources.push_back(src_nbd[i]);
-						// sources.push_back("1033");
-						// sources.push_back("1034");
+						// sources.push_back("1103979");
+						// sources.push_back("117");
 						// cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
 						vector<double> scores = callFunctions(sources, comb_nbd_hop, dataset_name);
 						cout << "\n"
@@ -543,6 +550,7 @@ int main(int argc, char *argv[])
 						// return 0;
 						scores.clear();
 					}
+					// return 0;
 				}
 				else
 				{
