@@ -85,7 +85,7 @@ vector<string> just_getNhop_database(string dataset_name, string source, intt ho
 	return nhood_list;
 }
 
-vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources, intt hop)
+vector<vector<ii>> getNhop_database(string dataset_name, string sources[2], intt hop)
 {
 
 	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ? UNION ALL Select ID_b FROM nodes where ID_a = ? AND hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_b IN nhood1 AND nodes.HOP=1;";
@@ -366,7 +366,7 @@ vector<pair<double, double>> getDimPD(vector<vector<double>> pd, double dimensio
 	return pdgm;
 }
 
-void callFunctions(vector<string> sources, intt hop, string dataset_name, double output[4])
+void callFunctions(string sources[2], intt hop, string dataset_name, double output[4])
 {
 	// vector<double> output;
 	to_ind.clear();
@@ -488,6 +488,7 @@ int main(int argc, char *argv[])
 	// sFile.open((string) sparse_file, ios::binary);
 	intt num_nodes = input(train_set, in, reverse_in, to_indices, to_node); // take input
 	double scores[4];
+	string sources[2];
 	if (tsFile)
 	{
 		while (true)
@@ -525,9 +526,9 @@ int main(int argc, char *argv[])
 
 					for (size_t i = 0; i < src_nbd.size(); i++)
 					{
-						vector<string> sources;
-						sources.push_back(source);
-						sources.push_back(src_nbd[i]);
+						// vector<string> sources;
+						sources[0] = source;
+						sources[1] = src_nbd[i];
 						// sources.push_back("1033");
 						// sources.push_back("1034");
 						// cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
