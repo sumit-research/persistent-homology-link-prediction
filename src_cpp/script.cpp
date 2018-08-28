@@ -174,6 +174,89 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 	return nhood_graph;
 }
 
+
+vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop) //,
+																						   // map<string, intt> &to_ind, map<intt, string> &to_no)
+{
+
+	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_b IN nhood1 AND nodes.HOP=1;";
+
+	int rc = sqlite3_prepare_v2(database, psql, -1, &res, 0);
+
+	char value1[source.size()];
+
+	if (rc == SQLITE_OK)
+	{
+		strcpy(value1, source.c_str());
+
+		sqlite3_bind_text(res, 1, value1, strlen(value1), 0);
+		sqlite3_bind_int(res, 2, hop);
+	}
+	else
+	{
+
+		fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(database));
+	}
+
+	vector<vector<ii>> nhood_graph;
+
+	rc = sqlite3_step(res);
+	int ncols = sqlite3_column_count(res);
+	intt current_node = 1;
+	nhood_graph.resize(1);
+
+	while (rc == SQLITE_ROW)
+	{
+
+		vector<string> temp(ncols);
+
+		for (int i = 0; i < ncols; i++)
+		{
+			temp[i] = string((char *)sqlite3_column_text(res, i));
+		}
+
+		if (to_ind.find(temp[2]) == to_ind.end())
+		{
+			to_ind[temp[2]] = current_node;
+			to_no[current_node] = temp[2];
+			vector<ii> tmp;
+			nhood_graph.push_back(tmp);
+			current_node++;
+		}
+		if (to_ind.find(temp[3]) == to_ind.end())
+		{
+			to_ind[temp[3]] = current_node;
+			to_no[current_node] = temp[3];
+			vector<ii> tmp;
+			nhood_graph.push_back(tmp);
+			current_node++;
+		}
+
+		nhood_graph[to_ind[temp[2]]].push_back(make_pair(1, to_ind[temp[3]]));
+		// results.push_back(temp);
+
+		rc = sqlite3_step(res);
+	}
+	if(nhood_graph.size() == 0){
+		vector<ii> tmp;
+		nhood_graph.push_back(tmp);
+	}
+
+	sqlite3_finalize(res);
+	//   sqlite3_close(database);
+
+	// cout << "With SQL single neighborhood\n";
+	// for (int i = 1; i < nhood_graph.size(); i++)
+	// {
+	// 	cout << to_no[i] << "-> ";
+	// 	for (int j = 0; j < nhood_graph[i].size(); j++)
+	// 		cout << to_no[nhood_graph[i][j].second] << " ";
+
+	// 	cout << '\n';
+	// }
+	return nhood_graph;
+}
+
 vector<vector<ii>> getNHop(vector<vector<ii>> &graph, vector<string> sources, intt hop) //,
 																						//    map<intt, intt> &to_indices_nhop, map<intt, intt> &to_node_nhop)
 {
@@ -298,6 +381,14 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 
 	// vector<vector<ii>> comb_nbd_waste = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
 	vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]]);
+
+
+	// To get neighborhood of single node
+	to_ind.clear();
+	to_no.clear();
+
+	vector<vector<ii>> nbd = getNhop_database(dataset_name, sources[0], hop);
+
 	// vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
 	vector<string> sources_a;
 	sources_a.push_back(sources[0]);
