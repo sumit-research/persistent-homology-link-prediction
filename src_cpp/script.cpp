@@ -19,10 +19,10 @@
 using namespace std;
 #define intt int64_t
 #define ii pair<intt, intt>
-#define fastio                    \
-	ios_base::sync_with_stdio(0); \
-	cin.tie(0);                   \
-	cout.tie(0)
+// #define fastio                    \
+// 	ios_base::sync_with_stdio(0); \
+// 	cin.tie(0);                   \
+// 	cout.tie(0)
 
 vector<vector<ii>> in;
 vector<vector<ii>> reverse_in;
@@ -41,8 +41,7 @@ char *err_msg = 0;
 
 ifstream tsFile;
 ofstream oFile;
-vector<string> just_getNhop_database(string dataset_name, string source, intt hop) //,
-																				   // map<string, intt> &to_ind, map<intt, string> &to_no)
+vector<string> just_getNhop_database(string dataset_name, string source, intt hop)
 {
 
 	char *psql = "SELECT DISTINCT ID_b FROM nodes WHERE ID_a = ? AND hop <= ?;";
@@ -86,8 +85,7 @@ vector<string> just_getNhop_database(string dataset_name, string source, intt ho
 	return nhood_list;
 }
 
-vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources, intt hop) //,
-																						   // map<string, intt> &to_ind, map<intt, string> &to_no)
+vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources, intt hop)
 {
 
 	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ? UNION ALL Select ID_b FROM nodes where ID_a = ? AND hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_b IN nhood1 AND nodes.HOP=1;";
@@ -175,8 +173,7 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 }
 
 
-vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop) //,
-																						   // map<string, intt> &to_ind, map<intt, string> &to_no)
+vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop) 
 {
 
 	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_b IN nhood1 AND nodes.HOP=1;";
@@ -257,8 +254,7 @@ vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop
 	return nhood_graph;
 }
 
-vector<vector<ii>> getNHop(vector<vector<ii>> &graph, vector<string> sources, intt hop) //,
-																						//    map<intt, intt> &to_indices_nhop, map<intt, intt> &to_node_nhop)
+vector<vector<ii>> getNHop(vector<vector<ii>> &graph, vector<string> sources, intt hop)
 {
 	// Add these 3 lines
 	vector<intt> intt_sources;
@@ -375,34 +371,35 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 	vector<double> output;
 	to_ind.clear();
 	to_no.clear();
-	to_indices_nhop.clear();
-	to_node_nhop.clear();
+	// to_indices_nhop.clear();
+	// to_node_nhop.clear();
 	vector<vector<ii>> comb_nbd = getNhop_database(dataset_name, sources, hop); //, to_ind, to_no);
 
 	// vector<vector<ii>> comb_nbd_waste = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
 	vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]]);
-
-
+	// int a;
+	// cin>>a;
+	cout<<"\n382\n";
 	// To get neighborhood of single node
+	
+	// vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
 	to_ind.clear();
 	to_no.clear();
-
-	vector<vector<ii>> nbd = getNhop_database(dataset_name, sources[0], hop);
-
-	// vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
-	vector<string> sources_a;
-	sources_a.push_back(sources[0]);
-	sources_a.push_back(sources[0]);
-	vector<string> sources_b;
-	sources_b.push_back(sources[1]);
-	sources_b.push_back(sources[1]);
-	vector<vector<ii>> a_nbd = getNhop_database(dataset_name, sources_a, hop); //, to_ind, to_no);
-	vector<vector<ii>> b_nbd = getNhop_database(dataset_name, sources_b, hop); //, to_ind, to_no);
-	cout << "\n"
-		 << sources[0] << "\t" << sources[1] << "\n";
-	return output;
+	vector<vector<ii>> a_nbd = getNhop_database(dataset_name, sources[0], hop);
+	// cin >> a;
+	cout << "\n390\n";
 	vector<vector<double>> pd_a = getPD(a_nbd);
+	// cin >> a;
+	cout << "\n393\n";
+	to_ind.clear();
+	to_no.clear();
+	vector<vector<ii>> b_nbd = getNhop_database(dataset_name, sources[1], hop);
+	// cin >> a;
+	cout << "\n398\n";
 	vector<vector<double>> pd_b = getPD(b_nbd);
+	// cin >> a;
+	cout << "\n401\n";
+
 	vector<vector<double>> pd_ab = getPD(comb_nbd);
 	vector<vector<double>> pd_ab_with_edge = getPD(comb_nbd_with_edge);
 	vector<vector<double>> pd_ab_complete = getPD(comb_nbd.size() - 1);
@@ -464,7 +461,7 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 
 int main(int argc, char *argv[])
 {
-	fastio;
+	// fastio;
 
 	if (argc < 8)
 	{
@@ -472,7 +469,6 @@ int main(int argc, char *argv[])
 			 << "./script dataset_name train_set test_set nbd_hop comb_nbd_hop output_file database_loc \n";
 		return 0;
 	}
-	cout << "\n381\n";
 	string dataset_name = argv[1];
 	string train_set = argv[2];
 	string test_set = argv[3];
@@ -480,20 +476,16 @@ int main(int argc, char *argv[])
 	int comb_nbd_hop = atoi(argv[5]);
 	string output_file = argv[6];
 	string database_loc = argv[7];
-	cout << "\n389\n";
 	
 	// string database_loc = "./database.db";
 	char database_loc_proper[database_loc.size()];
 	strcpy(database_loc_proper, database_loc.c_str());
 	int rc = sqlite3_open(database_loc_proper, &database);
-	cout << "\n395\n";
-
+	
 	tsFile.open((string)test_set);
 	oFile.open((string)output_file);
 	// sFile.open((string) sparse_file, ios::binary);
-	cout << "\n397\n";
 	intt num_nodes = input(train_set, in, reverse_in, to_indices, to_node); // take input
-	cout << "\n400\n";
 	if (tsFile)
 	{
 		while (true)
@@ -538,7 +530,6 @@ int main(int argc, char *argv[])
 						// sources.push_back("1034");
 						cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
 						vector<double> scores = callFunctions(sources, comb_nbd_hop, dataset_name);
-						exit(0);
 						cout << "\n"
 							 << source << "\t"
 							 << dest << "\t"
@@ -547,6 +538,9 @@ int main(int argc, char *argv[])
 							 << scores[1] << ","
 							 << scores[2] << ","
 							 << scores[3] << "\t";
+						int a;
+						cin>>a;
+						// exit(0);
 						//  << scores[4] << ","
 						//  << scores[5] << ","
 						//  << scores[6] << ","
@@ -563,10 +557,9 @@ int main(int argc, char *argv[])
 						//   << scores[5] << ","
 						//   << scores[6] << ","
 						//   << scores[7] << "\t";
-						// return 0;
 						scores.clear();
 					}
-					break;
+					// break;
 				}
 				else
 				{
