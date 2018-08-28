@@ -234,8 +234,8 @@ vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop
 
 		rc = sqlite3_step(res);
 	}
-	if(nhood_graph.size() == 0){
-		vector<ii> tmp;
+		if(nhood_graph.size() == 1){
+			vector<ii> tmp;
 		nhood_graph.push_back(tmp);
 	}
 
@@ -366,9 +366,9 @@ vector<pair<double, double>> getDimPD(vector<vector<double>> pd, double dimensio
 	return pdgm;
 }
 
-vector<double> callFunctions(vector<string> sources, intt hop, string dataset_name)
+void callFunctions(vector<string> sources, intt hop, string dataset_name, double output[4])
 {
-	vector<double> output;
+	// vector<double> output;
 	to_ind.clear();
 	to_no.clear();
 	// to_indices_nhop.clear();
@@ -379,7 +379,7 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 	vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]]);
 	// int a;
 	// cin>>a;
-	cout<<"\n382\n";
+	// cout<<"\n382\n";
 	// To get neighborhood of single node
 	
 	// vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
@@ -387,19 +387,19 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 	to_no.clear();
 	vector<vector<ii>> a_nbd = getNhop_database(dataset_name, sources[0], hop);
 	// cin >> a;
-	cout << "\n390\n";
+	// cout << "\n390\n";
 	vector<vector<double>> pd_a = getPD(a_nbd);
 	// cin >> a;
-	cout << "\n393\n";
+	// cout << "\n393\n";
 	to_ind.clear();
 	to_no.clear();
 	vector<vector<ii>> b_nbd = getNhop_database(dataset_name, sources[1], hop);
 	
 	// cin >> a;
-	cout << "\n398\n";
+	// cout << "\n398\n";
 	vector<vector<double>> pd_b = getPD(b_nbd);
 	// cin >> a;
-	cout << "\n401\n";
+	// cout << "\n401\n";
 
 	vector<vector<double>> pd_ab = getPD(comb_nbd);
 	vector<vector<double>> pd_ab_with_edge = getPD(comb_nbd_with_edge);
@@ -432,13 +432,13 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 	// double bn_dist_complete_0 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
 	// output.push_back(bn_dist_complete_0);
 	double w_dist = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
-	output.push_back(w_dist);
+	output[0] = w_dist;
 	double w_dist_complete = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
-	output.push_back(w_dist_complete);
+	output[1] = w_dist_complete;
 	double w_dist_a = hera::wasserstein_dist(pdgm_a, pdgm_with_edge, params, "");
-	output.push_back(w_dist_a);
+	output[2] = w_dist_a;
 	double w_dist_b = hera::wasserstein_dist(pdgm_b, pdgm_with_edge, params, "");
-	output.push_back(w_dist_b);
+	output[3] = w_dist_b;
 
 	// pdgm = getDimPD(pd_ab, double(1));
 	// pdgm_with_edge = getDimPD(pd_ab_with_edge, double(1));
@@ -457,12 +457,12 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 	// cout << "\tbn_dist_comp_dim0=" << bn_dist_complete_0 << "\tbn_dist_comp_dim1=" << bn_dist_complete_1 << "\n";
 	// cout << "\nw_dist_dim0=" << w_dist_0 << "\tw_dist_dim1=" << w_dist_1;
 	// cout << "\tw_dist_comp_dim0=" << w_dist_complete_0 << "\tw_dist_comp_dim1=" << w_dist_complete_1 << "\n";
-	return output;
+	// return output;
 }
 
 int main(int argc, char *argv[])
 {
-	// fastio;
+	fastio;
 
 	if (argc < 8)
 	{
@@ -487,6 +487,7 @@ int main(int argc, char *argv[])
 	oFile.open((string)output_file);
 	// sFile.open((string) sparse_file, ios::binary);
 	intt num_nodes = input(train_set, in, reverse_in, to_indices, to_node); // take input
+	double scores[4];
 	if (tsFile)
 	{
 		while (true)
@@ -529,8 +530,8 @@ int main(int argc, char *argv[])
 						sources.push_back(src_nbd[i]);
 						// sources.push_back("1033");
 						// sources.push_back("1034");
-						cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
-						vector<double> scores = callFunctions(sources, comb_nbd_hop, dataset_name);
+						// cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
+						callFunctions(sources, comb_nbd_hop, dataset_name, scores);
 						cout << "\n"
 							 << source << "\t"
 							 << dest << "\t"
@@ -539,8 +540,8 @@ int main(int argc, char *argv[])
 							 << scores[1] << ","
 							 << scores[2] << ","
 							 << scores[3] << "\t";
-						int a;
-						cin>>a;
+						// int a;
+						// cin>>a;
 						// exit(0);
 						//  << scores[4] << ","
 						//  << scores[5] << ","
@@ -558,7 +559,7 @@ int main(int argc, char *argv[])
 						//   << scores[5] << ","
 						//   << scores[6] << ","
 						//   << scores[7] << "\t";
-						scores.clear();
+						// scores.clear();
 					}
 					// break;
 				}
