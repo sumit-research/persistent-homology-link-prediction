@@ -19,10 +19,10 @@
 using namespace std;
 #define intt int64_t
 #define ii pair<intt, intt>
-// #define fastio                    \
-// 	ios_base::sync_with_stdio(0); \
-// 	cin.tie(0);                   \
-// 	cout.tie(0)
+#define fastio                    \
+	ios_base::sync_with_stdio(0); \
+	cin.tie(0);                   \
+	cout.tie(0)
 
 vector<vector<ii>> in;
 vector<vector<ii>> reverse_in;
@@ -394,6 +394,7 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 	to_ind.clear();
 	to_no.clear();
 	vector<vector<ii>> b_nbd = getNhop_database(dataset_name, sources[1], hop);
+	
 	// cin >> a;
 	cout << "\n398\n";
 	vector<vector<double>> pd_b = getPD(b_nbd);
