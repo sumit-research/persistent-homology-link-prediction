@@ -18,7 +18,7 @@
 
 using namespace std;
 #define intt int64_t
-#define ii pair<intt, intt>
+#define ii pair<double, intt>
 #define fastio                    \
 	ios_base::sync_with_stdio(0); \
 	cin.tie(0);                   \
@@ -41,8 +41,7 @@ char *err_msg = 0;
 
 ifstream tsFile;
 ofstream oFile;
-vector<string> just_getNhop_database(string dataset_name, string source, intt hop) //,
-																				   // map<string, intt> &to_ind, map<intt, string> &to_no)
+vector<string> just_getNhop_database(string dataset_name, string source, intt hop)
 {
 
 	char *psql = "SELECT DISTINCT ID_b FROM nodes WHERE ID_a = ? AND hop <= ?;";
@@ -86,8 +85,7 @@ vector<string> just_getNhop_database(string dataset_name, string source, intt ho
 	return nhood_list;
 }
 
-vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources, intt hop) //,
-																						   // map<string, intt> &to_ind, map<intt, string> &to_no)
+vector<vector<ii>> getNhop_database(string dataset_name, string sources[2], intt hop)
 {
 
 	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ? UNION ALL Select ID_b FROM nodes where ID_a = ? AND hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_b IN nhood1 AND nodes.HOP=1;";
@@ -130,14 +128,6 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 			temp[i] = string((char *)sqlite3_column_text(res, i));
 		}
 
-		if (to_ind.find(temp[2]) == to_ind.end())
-		{
-			to_ind[temp[2]] = current_node;
-			to_no[current_node] = temp[2];
-			vector<ii> tmp;
-			nhood_graph.push_back(tmp);
-			current_node++;
-		}
 		if (to_ind.find(temp[3]) == to_ind.end())
 		{
 			to_ind[temp[3]] = current_node;
@@ -146,13 +136,22 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 			nhood_graph.push_back(tmp);
 			current_node++;
 		}
+		if (to_ind.find(temp[4]) == to_ind.end())
+		{
+			to_ind[temp[4]] = current_node;
+			to_no[current_node] = temp[4];
+			vector<ii> tmp;
+			nhood_graph.push_back(tmp);
+			current_node++;
+		}
 
-		nhood_graph[to_ind[temp[2]]].push_back(make_pair(1, to_ind[temp[3]]));
+		nhood_graph[to_ind[temp[3]]].push_back(make_pair(stod(temp[1]), to_ind[temp[4]]));
 		// results.push_back(temp);
 
 		rc = sqlite3_step(res);
 	}
-	if(nhood_graph.size() == 1){
+	if (nhood_graph.size() == 0)
+	{
 		vector<ii> tmp;
 		nhood_graph.push_back(tmp);
 		nhood_graph.push_back(tmp);
@@ -174,8 +173,7 @@ vector<vector<ii>> getNhop_database(string dataset_name, vector<string> sources,
 }
 
 
-vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop) //,
-																						   // map<string, intt> &to_ind, map<intt, string> &to_no)
+vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop) 
 {
 
 	char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_b IN nhood1 AND nodes.HOP=1;";
@@ -214,14 +212,6 @@ vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop
 			temp[i] = string((char *)sqlite3_column_text(res, i));
 		}
 
-		if (to_ind.find(temp[2]) == to_ind.end())
-		{
-			to_ind[temp[2]] = current_node;
-			to_no[current_node] = temp[2];
-			vector<ii> tmp;
-			nhood_graph.push_back(tmp);
-			current_node++;
-		}
 		if (to_ind.find(temp[3]) == to_ind.end())
 		{
 			to_ind[temp[3]] = current_node;
@@ -230,14 +220,22 @@ vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop
 			nhood_graph.push_back(tmp);
 			current_node++;
 		}
+		if (to_ind.find(temp[4]) == to_ind.end())
+		{
+			to_ind[temp[4]] = current_node;
+			to_no[current_node] = temp[4];
+			vector<ii> tmp;
+			nhood_graph.push_back(tmp);
+			current_node++;
+		}
 
-		nhood_graph[to_ind[temp[2]]].push_back(make_pair(1, to_ind[temp[3]]));
+		nhood_graph[to_ind[temp[3]]].push_back(make_pair(stod(temp[1]), to_ind[temp[4]]));
 		// results.push_back(temp);
 
 		rc = sqlite3_step(res);
 	}
-	if(nhood_graph.size() == 1){
-		vector<ii> tmp;
+		if(nhood_graph.size() == 1){
+			vector<ii> tmp;
 		nhood_graph.push_back(tmp);
 	}
 
@@ -256,8 +254,7 @@ vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop
 	return nhood_graph;
 }
 
-vector<vector<ii>> getNHop(vector<vector<ii>> &graph, vector<string> sources, intt hop) //,
-																						//    map<intt, intt> &to_indices_nhop, map<intt, intt> &to_node_nhop)
+vector<vector<ii>> getNHop(vector<vector<ii>> &graph, vector<string> sources, intt hop)
 {
 	// Add these 3 lines
 	vector<intt> intt_sources;
@@ -323,7 +320,7 @@ vector<vector<ii>> getNHop(vector<vector<ii>> &graph, vector<string> sources, in
 vector<vector<ii>> addEdge(vector<vector<ii>> graph, intt a, intt b)
 {
 	vector<vector<ii>> empty_graph = graph;
-	empty_graph[a].push_back(make_pair(1, b));
+	empty_graph[a].push_back(make_pair( 0.142611469, b));
 	return empty_graph;
 }
 
@@ -369,29 +366,46 @@ vector<pair<double, double>> getDimPD(vector<vector<double>> pd, double dimensio
 	return pdgm;
 }
 
-vector<double> callFunctions(vector<string> sources, intt hop, string dataset_name)
+void callFunctions(string sources[2], intt hop, string dataset_name, double output[4])
 {
-
+	// vector<double> output;
 	to_ind.clear();
 	to_no.clear();
-	to_indices_nhop.clear();
-	to_node_nhop.clear();
+	// to_indices_nhop.clear();
+	// to_node_nhop.clear();
 	vector<vector<ii>> comb_nbd = getNhop_database(dataset_name, sources, hop); //, to_ind, to_no);
+
 	// vector<vector<ii>> comb_nbd_waste = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
 	vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]]);
-
-
+	// int a;
+	// cin>>a;
+	// cout<<"\n382\n";
 	// To get neighborhood of single node
+	
+	// vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
 	to_ind.clear();
 	to_no.clear();
-
-	vector<vector<ii>> nbd = getNhop_database(dataset_name, sources[0], hop);
-
-	// vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
+	vector<vector<ii>> a_nbd = getNhop_database(dataset_name, sources[0], hop);
+	// cin >> a;
+	// cout << "\n390\n";
+	vector<vector<double>> pd_a = getPD(a_nbd);
+	// cin >> a;
+	// cout << "\n393\n";
+	to_ind.clear();
+	to_no.clear();
+	vector<vector<ii>> b_nbd = getNhop_database(dataset_name, sources[1], hop);
+	
+	// cin >> a;
+	// cout << "\n398\n";
+	vector<vector<double>> pd_b = getPD(b_nbd);
+	// cin >> a;
+	// cout << "\n401\n";
 
 	vector<vector<double>> pd_ab = getPD(comb_nbd);
 	vector<vector<double>> pd_ab_with_edge = getPD(comb_nbd_with_edge);
 	vector<vector<double>> pd_ab_complete = getPD(comb_nbd.size() - 1);
+	vector<pair<double, double>> pdgm_a = getDimPD(pd_a, double(0));
+	vector<pair<double, double>> pdgm_b = getDimPD(pd_b, double(0));
 	vector<pair<double, double>> pdgm = getDimPD(pd_ab, double(0));
 	vector<pair<double, double>> pdgm_with_edge = getDimPD(pd_ab_with_edge, double(0));
 	vector<pair<double, double>> pdgm_complete = getDimPD(pd_ab_complete, double(0));
@@ -413,47 +427,49 @@ vector<double> callFunctions(vector<string> sources, intt hop, string dataset_na
 	params.gamma_threshold = 0.0;
 	params.max_num_phases = 800;
 
-	vector<double> output;
-	double bn_dist_0 = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
-	output.push_back(bn_dist_0);
-	double bn_dist_complete_0 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
-	output.push_back(bn_dist_complete_0);
-	double w_dist_0 = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
-	output.push_back(w_dist_0);
-	double w_dist_complete_0 = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
-	output.push_back(w_dist_complete_0);
+	// double bn_dist_0 = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
+	// output.push_back(bn_dist_0);
+	// double bn_dist_complete_0 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
+	// output.push_back(bn_dist_complete_0);
+	double w_dist = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
+	output[0] = w_dist;
+	double w_dist_complete = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
+	output[1] = w_dist_complete;
+	double w_dist_a = hera::wasserstein_dist(pdgm_a, pdgm_with_edge, params, "");
+	output[2] = w_dist_a;
+	double w_dist_b = hera::wasserstein_dist(pdgm_b, pdgm_with_edge, params, "");
+	output[3] = w_dist_b;
 
-	pdgm = getDimPD(pd_ab, double(1));
-	pdgm_with_edge = getDimPD(pd_ab_with_edge, double(1));
-	pdgm_complete = getDimPD(pd_ab_complete, double(1));
+	// pdgm = getDimPD(pd_ab, double(1));
+	// pdgm_with_edge = getDimPD(pd_ab_with_edge, double(1));
+	// pdgm_complete = getDimPD(pd_ab_complete, double(1));
 
-	double bn_dist_1 = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
-	output.push_back(bn_dist_1);
-	double bn_dist_complete_1 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
-	output.push_back(bn_dist_complete_1);
-	double w_dist_1 = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
-	output.push_back(w_dist_1);
-	double w_dist_complete_1 = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
-	output.push_back(w_dist_complete_1);
+	// double bn_dist_1 = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
+	// output.push_back(bn_dist_1);
+	// double bn_dist_complete_1 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
+	// output.push_back(bn_dist_complete_1);
+	// double w_dist_1 = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
+	// output.push_back(w_dist_1);
+	// double w_dist_complete_1 = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
+	// output.push_back(w_dist_complete_1);
 
 	// cout << "\nbn_dist_dim0=" << bn_dist_0 << "\tbn_dist_dim1=" << bn_dist_1;
 	// cout << "\tbn_dist_comp_dim0=" << bn_dist_complete_0 << "\tbn_dist_comp_dim1=" << bn_dist_complete_1 << "\n";
 	// cout << "\nw_dist_dim0=" << w_dist_0 << "\tw_dist_dim1=" << w_dist_1;
 	// cout << "\tw_dist_comp_dim0=" << w_dist_complete_0 << "\tw_dist_comp_dim1=" << w_dist_complete_1 << "\n";
-	return output;
+	// return output;
 }
 
 int main(int argc, char *argv[])
 {
 	fastio;
 
-	if (argc < 7)
+	if (argc < 8)
 	{
 		cout << "[Usage]: "
-			 << "./script dataset_name train_set test_set nbd_hop comb_nbd_hop output_file database_name \n";
+			 << "./script dataset_name train_set test_set nbd_hop comb_nbd_hop output_file database_loc \n";
 		return 0;
 	}
-
 	string dataset_name = argv[1];
 	string train_set = argv[2];
 	string test_set = argv[3];
@@ -461,17 +477,18 @@ int main(int argc, char *argv[])
 	int comb_nbd_hop = atoi(argv[5]);
 	string output_file = argv[6];
 	string database_loc = argv[7];
-
+	
 	// string database_loc = "./database.db";
 	char database_loc_proper[database_loc.size()];
 	strcpy(database_loc_proper, database_loc.c_str());
 	int rc = sqlite3_open(database_loc_proper, &database);
-
+	
 	tsFile.open((string)test_set);
 	oFile.open((string)output_file);
 	// sFile.open((string) sparse_file, ios::binary);
-
 	intt num_nodes = input(train_set, in, reverse_in, to_indices, to_node); // take input
+	double scores[4];
+	string sources[2];
 	if (tsFile)
 	{
 		while (true)
@@ -509,25 +526,28 @@ int main(int argc, char *argv[])
 
 					for (size_t i = 0; i < src_nbd.size(); i++)
 					{
-						vector<string> sources;
-						sources.push_back(source);
-						sources.push_back(src_nbd[i]);
+						// vector<string> sources;
+						sources[0] = source;
+						sources[1] = src_nbd[i];
 						// sources.push_back("1033");
 						// sources.push_back("1034");
 						// cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
-						vector<double> scores = callFunctions(sources, comb_nbd_hop, dataset_name);
+						callFunctions(sources, comb_nbd_hop, dataset_name, scores);
 						cout << "\n"
 							 << source << "\t"
-							 << dest << "\t" 
+							 << dest << "\t"
 							 << src_nbd[i] << ":"
 							 << scores[0] << ","
 							 << scores[1] << ","
 							 << scores[2] << ","
-							 << scores[3] << ","
-							 << scores[4] << ","
-							 << scores[5] << ","
-							 << scores[6] << ","
-							 << scores[7] << "\t";
+							 << scores[3] << "\t";
+						// int a;
+						// cin>>a;
+						// exit(0);
+						//  << scores[4] << ","
+						//  << scores[5] << ","
+						//  << scores[6] << ","
+						//  << scores[7] << "\t";
 						oFile << "\n"
 							  << source << "\t"
 							  << dest << "\t"
@@ -535,14 +555,14 @@ int main(int argc, char *argv[])
 							  << scores[0] << ","
 							  << scores[1] << ","
 							  << scores[2] << ","
-							  << scores[3] << ","
-							  << scores[4] << ","
-							  << scores[5] << ","
-							  << scores[6] << ","
-							  << scores[7] << "\t";
-						// return 0;
-						scores.clear();
+							  << scores[3] << "\t";
+						//   << scores[4] << ","
+						//   << scores[5] << ","
+						//   << scores[6] << ","
+						//   << scores[7] << "\t";
+						// scores.clear();
 					}
+					// break;
 				}
 				else
 				{
@@ -566,4 +586,3 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-

@@ -19,7 +19,7 @@ def main():
 	c.execute(sql_table)
 
 	chunksize = 10 ** 6 
-	for chunk in pd.read_csv(dumped_file, sep=" ", names = ["distance", "weight", "hop", "ID_a", "ID_b"], dtype={"distance":float,"weight":float, "hop": int, "ID_a": str, "ID_b": str}, chunksize = chunksize):
+	for chunk in pd.read_csv(dumped_file, sep=" ", names = ["distance", "weight", "hop", "ID_a", "ID_b"], dtype={"distance":float, "weight":float, "hop": int, "ID_a": str, "ID_b": str}, chunksize = chunksize):
 		chunk.to_sql("nodes", conn, if_exists='append', index = False)
 
 	create_index1 = """ CREATE INDEX IF NOT EXISTS index_nbrhood ON nodes(ID_a,hop); """

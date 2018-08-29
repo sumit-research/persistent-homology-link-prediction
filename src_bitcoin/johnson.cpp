@@ -98,13 +98,20 @@ void write_txt(intt src, vector<double>& dist, intt num_nodes){
 
 void dump_pairs(intt u, vector<double>& avg_dist, vector<intt>& hop_dist, intt num_nodes){
 
+	vector<double> weights(num_nodes+1, 100.0);
+
+	for(int i = 0; i < in[u].size(); i++){
+		weights[in[u][i].second] = in[u][i].first;
+	}
+
 	for(intt i = 1; i <= num_nodes; i++){
 
 		double distance = avg_dist[i];
 		if(distance == INT64_MAX)
 			distance = 100;
-
-		dFile << distance << " " << hop_dist[i] << " " << to_node[u] << " " << to_node[i] << '\n';
+		
+			// cout << distance << " " << weights[i] << " " << hop_dist[i] << " " << to_node[u] << " " << to_node[i] << '\n';
+		dFile << distance << " " << weights[i] << " " << hop_dist[i] << " " << to_node[u] << " " << to_node[i] << '\n';
 	}
 }
 
@@ -168,7 +175,7 @@ bool bellman(vector< vector< ii > >& adj, vector<double>& dist, intt src, intt n
 	return true;
 }
 
-void johnson(vector< vector< ii > >& adj, vector< vector< ii > >& reverse_adj, intt num_nodes, bool dumping){
+void johnson(vector< vector< ii > > adj, vector< vector< ii > > reverse_adj, intt num_nodes, bool dumping){
 
 	// connect an extra vertex to every node to get graph G'
 	for(intt i = 1; i <= num_nodes; i++){
@@ -308,7 +315,7 @@ intt input(map<string,intt>& to_indices, map<intt,string>& to_node){
 				}
 				iFile >> weight;
 				// cout << source << " " << dest << "\n";
-				in[to_indices[source]].push_back(make_pair(weight, to_indices[dest])); 
+				in[to_indices[source]].push_back(make_pair(weight, to_indices[dest]));
 				reverse_in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));
 
 				// add reverse edge if it doens't already exist
