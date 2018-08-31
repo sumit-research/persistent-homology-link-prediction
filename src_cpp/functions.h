@@ -147,6 +147,8 @@ vector<vector<ii>> getNhop_database(string dataset_name, string sources[2], intt
         vector<ii> tmp;
         nhood_graph.push_back(tmp);
         nhood_graph.push_back(tmp);
+        sqlite3_finalize(res);
+        return nhood_graph;
     }
 
     sqlite3_finalize(res);
@@ -161,6 +163,19 @@ vector<vector<ii>> getNhop_database(string dataset_name, string sources[2], intt
 
     // 	cout << '\n';
     // }
+
+    // remove the edge between two sources if it exists
+
+    // // find the position
+    ii p = make_pair(1, to_ind[sources[1]]);
+    vector<ii>::iterator it = find(nhood_graph[to_ind[sources[0]]].begin(), nhood_graph[to_ind[sources[0]]].end(), p);
+    if(it != nhood_graph[to_ind[sources[0]]].end())
+    	nhood_graph[to_ind[sources[0]]].erase(it);
+
+    p = make_pair(1, to_ind[sources[0]]);
+    it = find(nhood_graph[to_ind[sources[1]]].begin(), nhood_graph[to_ind[sources[1]]].end(), p);
+    if(it != nhood_graph[to_ind[sources[1]]].end())
+    	nhood_graph[to_ind[sources[1]]].erase(it);
     return nhood_graph;
 }
 
