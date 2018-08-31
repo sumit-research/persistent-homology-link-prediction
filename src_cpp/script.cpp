@@ -7,10 +7,9 @@ using namespace std;
 	cin.tie(0);                   \
 	cout.tie(0)
 
-
 int main(int argc, char *argv[])
 {
-	fastio;
+	// fastio;
 
 	if (argc < 9)
 	{
@@ -26,17 +25,17 @@ int main(int argc, char *argv[])
 	double threshold = atof(argv[6]);
 	string output_file = argv[7];
 	string database_loc = argv[8];
-	
+
 	// string database_loc = "./database.db";
 	char database_loc_proper[database_loc.size()];
 	strcpy(database_loc_proper, database_loc.c_str());
 	int rc = sqlite3_open(database_loc_proper, &database);
-	
+
 	tsFile.open((string)test_set);
 	oFile.open((string)output_file);
 	// sFile.open((string) sparse_file, ios::binary);
 	intt num_nodes = input(train_set, in, reverse_in, to_indices, to_node); // take input
-	double scores[4];
+	double scores[16];
 	string sources[2];
 	if (tsFile)
 	{
@@ -96,14 +95,19 @@ int main(int argc, char *argv[])
 							 << scores[0] << ","
 							 << scores[1] << ","
 							 << scores[2] << ","
-							 << scores[3] << "\t";
-						// int a;
-						// cin>>a;
-						// exit(0);
-						//  << scores[4] << ","
-						//  << scores[5] << ","
-						//  << scores[6] << ","
-						//  << scores[7] << "\t";
+							 << scores[3] << ","
+							 << scores[4] << ","
+							 << scores[5] << ","
+							 << scores[6] << ","
+							 << scores[7] << ","
+							 << scores[8] << ","
+							 << scores[9] << ","
+							 << scores[10] << ","
+							 << scores[11] << ","
+							 << scores[12] << ","
+							 << scores[13] << ","
+							 << scores[14] << ","
+							 << scores[15] << "\t";
 						oFile << "\n"
 							  << source << "\t"
 							  << dest << "\t"
@@ -111,12 +115,19 @@ int main(int argc, char *argv[])
 							  << scores[0] << ","
 							  << scores[1] << ","
 							  << scores[2] << ","
-							  << scores[3] << "\t";
-						//   << scores[4] << ","
-						//   << scores[5] << ","
-						//   << scores[6] << ","
-						//   << scores[7] << "\t";
-						// scores.clear();
+							  << scores[3] << ","
+							  << scores[4] << ","
+							  << scores[5] << ","
+							  << scores[6] << ","
+							  << scores[7] << ","
+							  << scores[8] << ","
+							  << scores[9] << ","
+							  << scores[10] << ","
+							  << scores[11] << ","
+							  << scores[12] << ","
+							  << scores[13] << ","
+							  << scores[14] << ","
+							  << scores[15] << "\t";
 					}
 					// break;
 				}

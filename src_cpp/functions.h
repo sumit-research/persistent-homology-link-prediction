@@ -358,9 +358,8 @@ vector<pair<double, double>> getDimPD(vector<vector<double>> pd, double dimensio
     return pdgm;
 }
 
-void callFunctions(string sources[2], intt hop, string dataset_name, double output[4], double threshold)
+void callFunctions(string sources[2], intt hop, string dataset_name, double output[16], double threshold)
 {
-    // vector<double> output;
     to_ind.clear();
     to_no.clear();
     // to_indices_nhop.clear();
@@ -369,29 +368,17 @@ void callFunctions(string sources[2], intt hop, string dataset_name, double outp
 
     // vector<vector<ii>> comb_nbd_waste = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
     vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]]);
-    // int a;
-    // cin>>a;
-    // cout<<"\n382\n";
     // To get neighborhood of single node
 
     // vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
     to_ind.clear();
     to_no.clear();
     vector<vector<ii>> a_nbd = getNhop_database(dataset_name, sources[0], hop);
-    // cin >> a;
-    // cout << "\n390\n";
     vector<vector<double>> pd_a = getPD(a_nbd, threshold);
-    // cin >> a;
-    // cout << "\n393\n";
     to_ind.clear();
     to_no.clear();
     vector<vector<ii>> b_nbd = getNhop_database(dataset_name, sources[1], hop);
-
-    // cin >> a;
-    // cout << "\n398\n";
     vector<vector<double>> pd_b = getPD(b_nbd, threshold);
-    // cin >> a;
-    // cout << "\n401\n";
 
     vector<vector<double>> pd_ab = getPD(comb_nbd, threshold);
     vector<vector<double>> pd_ab_with_edge = getPD(comb_nbd_with_edge, threshold);
@@ -419,10 +406,6 @@ void callFunctions(string sources[2], intt hop, string dataset_name, double outp
     params.gamma_threshold = 0.0;
     params.max_num_phases = 800;
 
-    // double bn_dist_0 = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
-    // output.push_back(bn_dist_0);
-    // double bn_dist_complete_0 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
-    // output.push_back(bn_dist_complete_0);
     double w_dist = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
     output[0] = w_dist;
     double w_dist_complete = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
@@ -432,27 +415,46 @@ void callFunctions(string sources[2], intt hop, string dataset_name, double outp
     double w_dist_b = hera::wasserstein_dist(pdgm_b, pdgm_with_edge, params, "");
     output[3] = w_dist_b;
 
-    // pdgm = getDimPD(pd_ab, double(1));
-    // pdgm_with_edge = getDimPD(pd_ab_with_edge, double(1));
-    // pdgm_complete = getDimPD(pd_ab_complete, double(1));
+    double bn_dist = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
+    output[4] = bn_dist;
+    double bn_dist_complete = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
+    output[5] = bn_dist_complete;
+    double bn_dist_a = hera::bottleneckDistExact(pdgm_a, pdgm_with_edge);
+    output[6] = bn_dist_a;
+    double bn_dist_b = hera::bottleneckDistExact(pdgm_b, pdgm_with_edge);
+    output[7] = bn_dist_b;
 
-    // double bn_dist_1 = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
-    // output.push_back(bn_dist_1);
-    // double bn_dist_complete_1 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
-    // output.push_back(bn_dist_complete_1);
-    // double w_dist_1 = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
-    // output.push_back(w_dist_1);
-    // double w_dist_complete_1 = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
-    // output.push_back(w_dist_complete_1);
+    pdgm.clear();
+    pdgm_a.clear();
+    pdgm_b.clear();
+    pdgm_with_edge.clear();
+    pdgm_complete.clear();
+    pdgm_a = getDimPD(pd_a, double(1));
+    pdgm_b = getDimPD(pd_b, double(1));
+    pdgm = getDimPD(pd_ab, double(1));
+    pdgm_with_edge = getDimPD(pd_ab_with_edge, double(1));
+    pdgm_complete = getDimPD(pd_ab_complete, double(1));
 
-    // cout << "\nbn_dist_dim0=" << bn_dist_0 << "\tbn_dist_dim1=" << bn_dist_1;
-    // cout << "\tbn_dist_comp_dim0=" << bn_dist_complete_0 << "\tbn_dist_comp_dim1=" << bn_dist_complete_1 << "\n";
-    // cout << "\nw_dist_dim0=" << w_dist_0 << "\tw_dist_dim1=" << w_dist_1;
-    // cout << "\tw_dist_comp_dim0=" << w_dist_complete_0 << "\tw_dist_comp_dim1=" << w_dist_complete_1 << "\n";
-    // return output;
+    w_dist = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
+    output[8] = w_dist;
+    w_dist_complete = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
+    output[9] = w_dist_complete;
+    w_dist_a = hera::wasserstein_dist(pdgm_a, pdgm_with_edge, params, "");
+    output[10] = w_dist_a;
+    w_dist_b = hera::wasserstein_dist(pdgm_b, pdgm_with_edge, params, "");
+    output[11] = w_dist_b;
+
+    bn_dist = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
+    output[12] = bn_dist;
+    bn_dist_complete = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
+    output[13] = bn_dist_complete;
+    bn_dist_a = hera::bottleneckDistExact(pdgm_a, pdgm_with_edge);
+    output[14] = bn_dist_a;
+    bn_dist_b = hera::bottleneckDistExact(pdgm_b, pdgm_with_edge);
+    output[15] = bn_dist_b;
 }
 
-void callFunctions(string sources[2], intt hop, string dataset_name, vector<vector<double>> pd_a, double output[4], double threshold)
+void callFunctions(string sources[2], intt hop, string dataset_name, vector<vector<double>> pd_a, double output[16], double threshold)
 {
     // vector<double> output;
     to_ind.clear();
@@ -463,33 +465,21 @@ void callFunctions(string sources[2], intt hop, string dataset_name, vector<vect
 
     // vector<vector<ii>> comb_nbd_waste = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
     vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]]);
-    // int a;
-    // cin>>a;
-    // cout<<"\n382\n";
     // To get neighborhood of single node
 
     // vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
-    // to_ind.clear();
-    // to_no.clear();
-    // vector<vector<ii>> a_nbd = getNhop_database(dataset_name, sources[0], hop);
-    // // cin >> a;
-    // // cout << "\n390\n";
-    // vector<vector<double>> pd_a = getPD(a_nbd);
-    // cin >> a;
-    // cout << "\n393\n";
     to_ind.clear();
     to_no.clear();
     vector<vector<ii>> b_nbd = getNhop_database(dataset_name, sources[1], hop);
 
-    // cin >> a;
-    // cout << "\n398\n";
     vector<vector<double>> pd_b = getPD(b_nbd, threshold);
-    // cin >> a;
-    // cout << "\n401\n";
-
+    cout<<"\n476\n";
     vector<vector<double>> pd_ab = getPD(comb_nbd, threshold);
+    cout << "\n478\n";
     vector<vector<double>> pd_ab_with_edge = getPD(comb_nbd_with_edge, threshold);
+    cout << "\n480\n";
     vector<vector<double>> pd_ab_complete = getPD(comb_nbd.size() - 1, threshold);
+    cout << "\n482\n";
     vector<pair<double, double>> pdgm_a = getDimPD(pd_a, double(0));
     vector<pair<double, double>> pdgm_b = getDimPD(pd_b, double(0));
     vector<pair<double, double>> pdgm = getDimPD(pd_ab, double(0));
@@ -519,29 +509,64 @@ void callFunctions(string sources[2], intt hop, string dataset_name, vector<vect
     // output.push_back(bn_dist_complete_0);
     double w_dist = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
     output[0] = w_dist;
+    cout << "\nw_dist0\t" << w_dist << "\n";
     double w_dist_complete = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
     output[1] = w_dist_complete;
+    cout << "\nw_dist_complete0\t" << w_dist_complete << "\n";
     double w_dist_a = hera::wasserstein_dist(pdgm_a, pdgm_with_edge, params, "");
     output[2] = w_dist_a;
+    cout << "\nw_dist_a0\t" << w_dist_a << "\n";
     double w_dist_b = hera::wasserstein_dist(pdgm_b, pdgm_with_edge, params, "");
     output[3] = w_dist_b;
+    cout << "\nw_dist_b0\t" << w_dist_b <<"\t"<< pdgm_b.size()<< "\n";
 
-    // pdgm = getDimPD(pd_ab, double(1));
-    // pdgm_with_edge = getDimPD(pd_ab_with_edge, double(1));
-    // pdgm_complete = getDimPD(pd_ab_complete, double(1));
+    double bn_dist = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
+    output[4] = bn_dist;
+    cout << "\nbn_dist0\t" << bn_dist << "\n";
+    double bn_dist_complete = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
+    output[5] = bn_dist_complete;
+    cout << "\nbn_dist_complete0\t" << bn_dist_complete << "\n";
+    double bn_dist_a = hera::bottleneckDistExact(pdgm_a, pdgm_with_edge);
+    output[6] = bn_dist_a;
+    cout << "\nbn_dist_a0\t" << bn_dist_a << "\n";
+    double bn_dist_b = hera::bottleneckDistExact(pdgm_b, pdgm_with_edge);
+    output[7] = bn_dist_b;
+    cout << "\nbn_dist_b0\t" << bn_dist_b << "\n";
 
-    // double bn_dist_1 = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
-    // output.push_back(bn_dist_1);
-    // double bn_dist_complete_1 = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
-    // output.push_back(bn_dist_complete_1);
-    // double w_dist_1 = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
-    // output.push_back(w_dist_1);
-    // double w_dist_complete_1 = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
-    // output.push_back(w_dist_complete_1);
+    pdgm.clear();
+    pdgm_a.clear();
+    pdgm_b.clear();
+    pdgm_with_edge.clear();
+    pdgm_complete.clear();
+    pdgm_a = getDimPD(pd_a, double(1));
+    pdgm_b = getDimPD(pd_b, double(1));
+    pdgm = getDimPD(pd_ab, double(1));
+    pdgm_with_edge = getDimPD(pd_ab_with_edge, double(1));
+    pdgm_complete = getDimPD(pd_ab_complete, double(1));
 
-    // cout << "\nbn_dist_dim0=" << bn_dist_0 << "\tbn_dist_dim1=" << bn_dist_1;
-    // cout << "\tbn_dist_comp_dim0=" << bn_dist_complete_0 << "\tbn_dist_comp_dim1=" << bn_dist_complete_1 << "\n";
-    // cout << "\nw_dist_dim0=" << w_dist_0 << "\tw_dist_dim1=" << w_dist_1;
-    // cout << "\tw_dist_comp_dim0=" << w_dist_complete_0 << "\tw_dist_comp_dim1=" << w_dist_complete_1 << "\n";
-    // return output;
+    w_dist = hera::wasserstein_dist(pdgm, pdgm_with_edge, params, "");
+    output[8] = w_dist;
+    cout << "\nw_dist1\t" << w_dist << "\n";
+    w_dist_complete = hera::wasserstein_dist(pdgm_complete, pdgm_with_edge, params, "");
+    output[9] = w_dist_complete;
+    cout << "\nw_dist_complete1\t" << w_dist_complete << "\n";
+    w_dist_a = hera::wasserstein_dist(pdgm_a, pdgm_with_edge, params, "");
+    output[10] = w_dist_a;
+    cout << "\nw_dist_a1\t" << w_dist_a << "\n";
+    w_dist_b = hera::wasserstein_dist(pdgm_b, pdgm_with_edge, params, "");
+    output[11] = w_dist_b;
+    cout << "\nw_dist_b1\t" << w_dist_b << "\n";
+
+    bn_dist = hera::bottleneckDistExact(pdgm, pdgm_with_edge);
+    output[12] = bn_dist;
+    cout << "\nbn_dist1\t" << bn_dist << "\n";
+    bn_dist_complete = hera::bottleneckDistExact(pdgm_complete, pdgm_with_edge);
+    output[13] = bn_dist_complete;
+    cout << "\nbn_dist_complete1\t" << bn_dist_complete << "\n";
+    bn_dist_a = hera::bottleneckDistExact(pdgm_a, pdgm_with_edge);
+    output[14] = bn_dist_a;
+    cout << "\nbn_dist_a1\t" << bn_dist_a << "\n";
+    bn_dist_b = hera::bottleneckDistExact(pdgm_b, pdgm_with_edge);
+    output[15] = bn_dist_b;
+    cout << "\nbn_dist_b1\t" << bn_dist_b << "\n";
 }
