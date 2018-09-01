@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	oFile.open((string)output_file);
 	// sFile.open((string) sparse_file, ios::binary);
 	intt num_nodes = input(train_set, in, reverse_in, to_indices, to_node); // take input
-	double scores[16];
+	double scores[8];
 	string sources[2];
 	if (tsFile)
 	{
@@ -122,15 +122,15 @@ int main(int argc, char *argv[])
 							  << scores[4] << ","
 							  << scores[5] << ","
 							  << scores[6] << ","
-							  << scores[7] << ","
-							  << scores[8] << ","
-							  << scores[9] << ","
-							  << scores[10] << ","
-							  << scores[11] << ","
-							  << scores[12] << ","
-							  << scores[13] << ","
-							  << scores[14] << ","
-							  << scores[15] << "\t";
+							  << scores[7] << "\t";
+						//   << scores[8] << ","
+						//   << scores[9] << ","
+						//   << scores[10] << ","
+						//   << scores[11] << ","
+						//   << scores[12] << ","
+						//   << scores[13] << ","
+						//   << scores[14] << ","
+						//   << scores[15] << "\t";
 					}
 					// break;
 				}
