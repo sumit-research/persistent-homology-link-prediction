@@ -1165,17 +1165,23 @@ void print_usage_and_exit(int exit_code) {
 std::vector<vector<double>> call_ripser(int64_t dim_max, float threshold,
                                         vector<vector<double>> apsp) {
 
-	// if (apsp.size() == 0) {
-	// 	int a;
-	// 	cin >> a;
-	// }
+	// std::cout << "\napsp.size() = " << apsp.size()<<"\tthreshold"<<threshold << "\n";
 
+	// for (size_t i = 0; i < apsp.size(); i++) {
+
+	// 	for (size_t j = 0; i < apsp[i].size(); j++) { std::cout << apsp[i][j] << "\t"; }
+	// 	std::cout << endl;
+	// }
+	// int a;
+	// cin >> a;
 	if (apsp.size() == 1) {
-		std::vector<vector<double>> outvec;
-		outvec.push_back(vector<double>(3));
+		std::vector<vector<double>> outvec(1);
+		// outvec.push_back(vector<double>(3));
 		outvec[0].push_back(0);
 		outvec[0].push_back(0);
 		outvec[0].push_back(threshold);
+		// std::cout << "\noutput:" << outvec[0][0] << "," << outvec[0][1] << "," << outvec[0][2]
+		//           << "\n";
 		return outvec;
 	}
 

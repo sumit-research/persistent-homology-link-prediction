@@ -9,7 +9,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	// fastio;
+	fastio;
 
 	if (argc < 9)
 	{
@@ -76,6 +76,9 @@ int main(int argc, char *argv[])
 					}
 				}
 				// cout<<"\nisFound: "<<isFoundDest<<"\n";
+				cout << "\n"
+					 << source << "\t"
+					 << dest << "\n";
 				if (isFoundDest)
 				{
 
@@ -88,26 +91,26 @@ int main(int argc, char *argv[])
 						// sources.push_back("1034");
 						// cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
 						callFunctions(sources, comb_nbd_hop, dataset_name, pd_a, scores, threshold);
-						cout << "\n"
-							 << source << "\t"
-							 << dest << "\t"
-							 << src_nbd[i] << ":"
-							 << scores[0] << ","
-							 << scores[1] << ","
-							 << scores[2] << ","
-							 << scores[3] << ","
-							 << scores[4] << ","
-							 << scores[5] << ","
-							 << scores[6] << ","
-							 << scores[7] << ","
-							 << scores[8] << ","
-							 << scores[9] << ","
-							 << scores[10] << ","
-							 << scores[11] << ","
-							 << scores[12] << ","
-							 << scores[13] << ","
-							 << scores[14] << ","
-							 << scores[15] << "\t";
+						// cout << "\n"
+						// 	 << source << "\t"
+						// 	 << dest << "\t"
+						// 	 << src_nbd[i] << ":"
+						// 	 << scores[0] << ","
+						// 	 << scores[1] << ","
+						// 	 << scores[2] << ","
+						// 	 << scores[3] << ","
+						// 	 << scores[4] << ","
+						// 	 << scores[5] << ","
+						// 	 << scores[6] << ","
+						// 	 << scores[7] << ","
+						// 	 << scores[8] << ","
+						// 	 << scores[9] << ","
+						// 	 << scores[10] << ","
+						// 	 << scores[11] << ","
+						// 	 << scores[12] << ","
+						// 	 << scores[13] << ","
+						// 	 << scores[14] << ","
+						// 	 << scores[15] << "\t";
 						oFile << "\n"
 							  << source << "\t"
 							  << dest << "\t"
@@ -133,9 +136,9 @@ int main(int argc, char *argv[])
 				}
 				else
 				{
-					cout << "\n"
-						 << source << "\t" << dest << "\t"
-						 << "inf";
+					// cout << "\n"
+					// 	 << source << "\t" << dest << "\t"
+					// 	 << "inf";
 					oFile << "\n"
 						  << source << "\t" << dest << "\t"
 						  << "inf";

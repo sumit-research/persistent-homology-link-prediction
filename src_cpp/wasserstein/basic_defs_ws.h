@@ -65,11 +65,11 @@ bool is_infinity(const Real& x)
     return x == Real(-1);
 };
 
-// template<class Real = double>
-// Real get_infinity()
-// {
-//     return Real( -1 );
-// }
+template<class Real = double>
+Real get_infinity()
+{
+    return Real( -1 );
+}
 
 template<class Real = double>
 bool is_p_valid_norm(const Real& p)
