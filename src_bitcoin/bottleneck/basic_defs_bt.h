@@ -48,14 +48,17 @@ derivative works thereof, in binary and source code form.
 #include <iostream>
 #endif
 
-namespace  hera {
-namespace bt {
+namespace hera
+{
+namespace bt
+{
 
 typedef int IdType;
 constexpr IdType MinValidId = 10;
 
-template<class Real = double>
-struct Point {
+template <class Real = double>
+struct Point
+{
     Real x, y;
 
     bool operator==(const Point<Real> &other) const
@@ -74,8 +77,8 @@ struct Point {
 
 #ifndef FOR_R_TDA
 
-    template<class R>
-    friend std::ostream& operator<<(std::ostream& output, const Point<R>& p)
+    template <class R>
+    friend std::ostream &operator<<(std::ostream &output, const Point<R> &p)
     {
         output << "(" << p.x << ", " << p.y << ")";
         return output;
@@ -84,19 +87,23 @@ struct Point {
 #endif
 };
 
-template<class Real = double>
-struct DiagramPoint {
+template <class Real = double>
+struct DiagramPoint
+{
     // Points above the diagonal have type NORMAL
     // Projections onto the diagonal have type DIAG
     // for DIAG points only x-coordinate is relevant
     // to-do: add getters/setters, checks in constructors, etc
-    enum Type {
-        NORMAL, DIAG
+    enum Type
+    {
+        NORMAL,
+        DIAG
     };
     // data members
-private:
+  private:
     Real x, y;
-public:
+
+  public:
     Type type;
     IdType id;
 
@@ -106,8 +113,8 @@ public:
         // compare by id only
         assert(this->id >= MinValidId);
         assert(other.id >= MinValidId);
-        bool areEqual{ this->id == other.id };
-        assert(!areEqual or  ((this->x == other.x) and (this->y == other.y) and (this->type == other.type)));
+        bool areEqual{this->id == other.id};
+        assert(!areEqual or ((this->x == other.x) and (this->y == other.y) and (this->type == other.type)));
         return areEqual;
     }
 
@@ -116,17 +123,17 @@ public:
         return !(*this == other);
     }
 
-    DiagramPoint(Real _x, Real _y, Type _type, IdType _id) :
-        x(_x),
-        y(_y),
-        type(_type),
-        id(_id)
+    DiagramPoint(Real _x, Real _y, Type _type, IdType _id) : x(_x),
+                                                             y(_y),
+                                                             type(_type),
+                                                             id(_id)
     {
-        if ( _y == _x and _type != DIAG)
+        if (_y == _x and _type != DIAG)
+        {
+            std::cout << "\n_x, _y, _type, _id = " << _x << "," << _y << "," << _type << "," << _id << "\n";
             throw std::runtime_error("Point on the main diagonal must have DIAG type");
-
+        }
     }
-
 
     bool isDiagonal() const { return type == DIAG; }
 
@@ -151,25 +158,28 @@ public:
     }
 
 #ifndef FOR_R_TDA
-    template<class R>
-    friend std::ostream& operator<<(std::ostream& output, const DiagramPoint<R>& p)
+    template <class R>
+    friend std::ostream &operator<<(std::ostream &output, const DiagramPoint<R> &p)
     {
-        if ( p.isDiagonal() ) {
-            output << "(" << p.x << ", " << p.y << ", " <<  0.5 * (p.x + p.y) << ", "  << p.id << " DIAG )";
-        } else {
+        if (p.isDiagonal())
+        {
+            output << "(" << p.x << ", " << p.y << ", " << 0.5 * (p.x + p.y) << ", " << p.id << " DIAG )";
+        }
+        else
+        {
             output << "(" << p.x << ", " << p.y << ", " << p.id << " NORMAL)";
         }
         return output;
     }
 #endif
-
 };
 
 // compute l-inf distance between two diagram points
-template<class Real>
-Real distLInf(const DiagramPoint<Real>& a, const DiagramPoint<Real>& b)
+template <class Real>
+Real distLInf(const DiagramPoint<Real> &a, const DiagramPoint<Real> &b)
 {
-    if ( a.isDiagonal() and b.isDiagonal() ) {
+    if (a.isDiagonal() and b.isDiagonal())
+    {
         // distance between points on the diagonal is 0
         return 0.0;
     }
@@ -177,16 +187,16 @@ Real distLInf(const DiagramPoint<Real>& a, const DiagramPoint<Real>& b)
     return std::max(fabs(a.getRealX() - b.getRealX()), fabs(a.getRealY() - b.getRealY()));
 }
 
-
 template <class T>
-inline void hash_combine(std::size_t & seed, const T & v)
+inline void hash_combine(std::size_t &seed, const T &v)
 {
     std::hash<T> hasher;
     seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }
 
-template<class Real = double>
-struct DiagramPointHash {
+template <class Real = double>
+struct DiagramPointHash
+{
     size_t operator()(const DiagramPoint<Real> &p) const
     {
         assert(p.id >= MinValidId);
@@ -194,54 +204,55 @@ struct DiagramPointHash {
     }
 };
 
-template<class Real = double>
+template <class Real = double>
 Real distLInf(const DiagramPoint<Real> &a, const DiagramPoint<Real> &b);
 
 //template<class Real = double>
 //typedef std::unordered_set<Point, PointHash> PointSet;
-template<class Real_ = double>
+template <class Real_ = double>
 class DiagramPointSet;
 
-template<class Real>
+template <class Real>
 void addProjections(DiagramPointSet<Real> &A, DiagramPointSet<Real> &B);
 
-template<class Real_>
-class DiagramPointSet {
-public:
-
+template <class Real_>
+class DiagramPointSet
+{
+  public:
     using Real = Real_;
     using DgmPoint = DiagramPoint<Real>;
     using DgmPointHash = DiagramPointHash<Real>;
     using const_iterator = typename std::unordered_set<DgmPoint, DgmPointHash>::const_iterator;
     using iterator = typename std::unordered_set<DgmPoint, DgmPointHash>::iterator;
 
-private:
-
-    bool isLinked { false };
-    IdType maxId { MinValidId + 1 };
+  private:
+    bool isLinked{false};
+    IdType maxId{MinValidId + 1};
     std::unordered_set<DgmPoint, DgmPointHash> points;
 
-public:
-
-    void insert(const DgmPoint& p)
+  public:
+    void insert(const DgmPoint &p)
     {
         points.insert(p);
-        if (p.id > maxId) {
+        if (p.id > maxId)
+        {
             maxId = p.id + 1;
         }
     }
 
-    void erase(const DgmPoint& p, bool doCheck = true)
+    void erase(const DgmPoint &p, bool doCheck = true)
     {
-    // if doCheck, erasing non-existing elements causes assert
+        // if doCheck, erasing non-existing elements causes assert
         auto it = points.find(p);
-        if (it != points.end()) {
+        if (it != points.end())
+        {
             points.erase(it);
-        } else {
+        }
+        else
+        {
             assert(!doCheck);
         }
     }
-
 
     void erase(const const_iterator it)
     {
@@ -250,12 +261,17 @@ public:
 
     void removeDiagonalPoints()
     {
-        if (isLinked) {
+        if (isLinked)
+        {
             auto ptIter = points.begin();
-            while(ptIter != points.end()) {
-                if (ptIter->isDiagonal()) {
+            while (ptIter != points.end())
+            {
+                if (ptIter->isDiagonal())
+                {
                     ptIter = points.erase(ptIter);
-                } else {
+                }
+                else
+                {
                     ptIter++;
                 }
             }
@@ -313,18 +329,18 @@ public:
         return points.cend();
     }
 
-
     const_iterator find(const DgmPoint &p) const
     {
         return points.find(p);
     }
 
 #ifndef FOR_R_TDA
-    template<class R>
-    friend std::ostream& operator<<(std::ostream& output, const DiagramPointSet<R>& ps)
+    template <class R>
+    friend std::ostream &operator<<(std::ostream &output, const DiagramPointSet<R> &ps)
     {
         output << "{ ";
-        for(auto pit = ps.cbegin(); pit != ps.cend(); ++pit) {
+        for (auto pit = ps.cbegin(); pit != ps.cend(); ++pit)
+        {
             output << *pit << ", ";
         }
         output << "\b\b }";
@@ -332,70 +348,74 @@ public:
     }
 #endif
 
-    friend void addProjections<Real_>(DiagramPointSet<Real_>& A, DiagramPointSet<Real_>& B);
+    friend void addProjections<Real_>(DiagramPointSet<Real_> &A, DiagramPointSet<Real_> &B);
 
-    template<class PairIterator>
+    template <class PairIterator>
     void fillIn(PairIterator begin_iter, PairIterator end_iter)
     {
         isLinked = false;
         clear();
         IdType uniqueId = MinValidId + 1;
-        for (auto iter = begin_iter; iter != end_iter; ++iter) {
+        for (auto iter = begin_iter; iter != end_iter; ++iter)
+        {
             insert(DgmPoint(iter->first, iter->second, DgmPoint::NORMAL, uniqueId++));
         }
     }
 
-    template<class PointContainer>
-    void fillIn(const PointContainer& dgm_cont)
+    template <class PointContainer>
+    void fillIn(const PointContainer &dgm_cont)
     {
         using Traits = DiagramTraits<PointContainer>;
         isLinked = false;
         clear();
         IdType uniqueId = MinValidId + 1;
-        for (const auto& pt : dgm_cont) {
+        for (const auto &pt : dgm_cont)
+        {
             Real x = Traits::get_x(pt);
             Real y = Traits::get_y(pt);
             insert(DgmPoint(x, y, DgmPoint::NORMAL, uniqueId++));
         }
     }
 
-
     // ctor from range
-    template<class PairIterator>
+    template <class PairIterator>
     DiagramPointSet(PairIterator begin_iter, PairIterator end_iter)
     {
         fillIn(begin_iter, end_iter);
     }
 
     // ctor from container, uses DiagramTraits
-    template<class PointContainer>
-    DiagramPointSet(const PointContainer& dgm)
+    template <class PointContainer>
+    DiagramPointSet(const PointContainer &dgm)
     {
         fillIn(dgm);
     }
 
-
     // default ctor, empty diagram
-    DiagramPointSet(IdType minId = MinValidId + 1) : maxId(minId + 1) {};
+    DiagramPointSet(IdType minId = MinValidId + 1) : maxId(minId + 1){};
 
     IdType nextId() { return maxId + 1; }
 
 }; // DiagramPointSet
 
-
-template<class Real, class DiagPointContainer>
-Real getFurthestDistance3Approx(DiagPointContainer& A, DiagPointContainer& B) {
+template <class Real, class DiagPointContainer>
+Real getFurthestDistance3Approx(DiagPointContainer &A, DiagPointContainer &B)
+{
     Real result{0.0};
     DiagramPoint<Real> begA = *(A.begin());
     DiagramPoint<Real> optB = *(B.begin());
-    for (const auto &pointB : B) {
-        if (distLInf(begA, pointB) > result) {
+    for (const auto &pointB : B)
+    {
+        if (distLInf(begA, pointB) > result)
+        {
             result = distLInf(begA, pointB);
             optB = pointB;
         }
     }
-    for (const auto &pointA : A) {
-        if (distLInf(pointA, optB) > result) {
+    for (const auto &pointA : A)
+    {
+        if (distLInf(pointA, optB) > result)
+        {
             result = distLInf(pointA, optB);
         }
     }
@@ -405,34 +425,38 @@ Real getFurthestDistance3Approx(DiagPointContainer& A, DiagPointContainer& B) {
 // preprocess diagrams A and B by adding projections onto diagonal of points of
 // A to B and vice versa. Also removes points at infinity!
 // NB: ids of points will be changed!
-template<class Real_>
-void addProjections(DiagramPointSet<Real_>& A, DiagramPointSet<Real_>& B)
+template <class Real_>
+void addProjections(DiagramPointSet<Real_> &A, DiagramPointSet<Real_> &B)
 {
 
     using Real = Real_;
     using DgmPoint = DiagramPoint<Real>;
     using DgmPointSet = DiagramPointSet<Real>;
 
-    IdType uniqueId {MinValidId + 1};
+    IdType uniqueId{MinValidId + 1};
     DgmPointSet newA, newB;
 
     // copy normal points from A to newA
     // add projections to newB
-    for(auto& pA : A) {
-        if (pA.isNormal() and not pA.isInfinity()) {
+    for (auto &pA : A)
+    {
+        if (pA.isNormal() and not pA.isInfinity())
+        {
             // add pA's projection to B
-            DgmPoint dpA {pA.getRealX(), pA.getRealY(), DgmPoint::NORMAL, uniqueId++};
-            DgmPoint dpB {(pA.getRealX() +pA.getRealY())/2, (pA.getRealX() +pA.getRealY())/2, DgmPoint::DIAG, uniqueId++};
+            DgmPoint dpA{pA.getRealX(), pA.getRealY(), DgmPoint::NORMAL, uniqueId++};
+            DgmPoint dpB{(pA.getRealX() + pA.getRealY()) / 2, (pA.getRealX() + pA.getRealY()) / 2, DgmPoint::DIAG, uniqueId++};
             newA.insert(dpA);
             newB.insert(dpB);
         }
     }
 
-    for(auto& pB : B) {
-        if (pB.isNormal() and not pB.isInfinity()) {
+    for (auto &pB : B)
+    {
+        if (pB.isNormal() and not pB.isInfinity())
+        {
             // add pB's projection to A
-            DgmPoint dpB {pB.getRealX(), pB.getRealY(), DgmPoint::NORMAL, uniqueId++};
-            DgmPoint dpA {(pB.getRealX() +pB.getRealY())/2, (pB.getRealX() +pB.getRealY())/2, DgmPoint::DIAG, uniqueId++};
+            DgmPoint dpB{pB.getRealX(), pB.getRealY(), DgmPoint::NORMAL, uniqueId++};
+            DgmPoint dpA{(pB.getRealX() + pB.getRealY()) / 2, (pB.getRealX() + pB.getRealY()) / 2, DgmPoint::DIAG, uniqueId++};
             newB.insert(dpB);
             newA.insert(dpA);
         }
@@ -443,7 +467,6 @@ void addProjections(DiagramPointSet<Real_>& A, DiagramPointSet<Real_>& B)
     A.isLinked = true;
     B.isLinked = true;
 }
-
 
 //#ifndef FOR_R_TDA
 
@@ -470,7 +493,6 @@ void addProjections(DiagramPointSet<Real_>& A, DiagramPointSet<Real_>& B)
 //}
 //#endif // FOR_R_TDA
 
-
 } // end namespace bt
 } // end namespace hera
-#endif  // HERA_BASIC_DEFS_BT_H
+#endif // HERA_BASIC_DEFS_BT_H

@@ -152,6 +152,7 @@ namespace hera {
                     user_id(_user_id)
             {
                 if (_y == _x and _type != DIAG) {
+                    // std::cout << "\n_x, _y, _type, _id = " << _x << "," << _y << "," << _type << "," << _id << "\n";
                     throw std::runtime_error("Point on the main diagonal must have DIAG type");
                 }
 

@@ -13,7 +13,7 @@ using namespace std;
 #define intt int64_t
 #define ii pair<double, intt>
 
-void dijsktra(vector<vector<ii>> &adj, vector<double> &dist, intt src, intt num_nodes)
+void dijsktra(vector<vector<ii>> &adj, vector<intt> &dist, intt src, intt num_nodes)
 {
     dist[src] = 0;
     // cout << "Source: " << src << '\n';
@@ -42,7 +42,7 @@ void dijsktra(vector<vector<ii>> &adj, vector<double> &dist, intt src, intt num_
     return;
 }
 
-bool bellman(vector<vector<ii>> &adj, vector<double> &dist, intt src, intt num_nodes)
+bool bellman(vector<vector<ii>> &adj, vector<intt> &dist, intt src, intt num_nodes)
 {
     dist[src] = 0;
 
@@ -87,8 +87,8 @@ bool bellman(vector<vector<ii>> &adj, vector<double> &dist, intt src, intt num_n
 vector<vector<double>> johnson(vector<vector<ii>> &adj, vector<vector<ii>> &reverse_adj, intt num_nodes)
 {
 
-    vector<double> dist(num_nodes + 1, std::numeric_limits<double>::max());
-    vector<double> reverse_dist(num_nodes + 1, std::numeric_limits<double>::max());
+    vector<intt> dist(num_nodes + 1, INT64_MAX);
+    vector<intt> reverse_dist(num_nodes + 1, INT64_MAX);
     vector<double> distance(num_nodes + 1, 0.0);
     vector<vector<double>> apsp;
 
@@ -103,8 +103,8 @@ vector<vector<double>> johnson(vector<vector<ii>> &adj, vector<vector<ii>> &reve
         //     cout << "Done till " << u << "th node.\n";
         // }
 
-        fill(dist.begin(), dist.end(), std::numeric_limits<double>::max());
-        fill(reverse_dist.begin(), reverse_dist.end(), std::numeric_limits<double>::max());
+        fill(dist.begin(), dist.end(), INT64_MAX);
+        fill(reverse_dist.begin(), reverse_dist.end(), INT64_MAX);
 
         dist[u] = reverse_dist[u] = 0;
 
@@ -117,9 +117,9 @@ vector<vector<double>> johnson(vector<vector<ii>> &adj, vector<vector<ii>> &reve
         // get old edge/path weights back
         for (intt v = 1; v <= num_nodes; v++)
         {
-            if (dist[v] == std::numeric_limits<double>::max())
+            if (dist[v] == INT64_MAX)
                 dist[v] = 100.0;
-            if (reverse_dist[v] == std::numeric_limits<double>::max())
+            if (reverse_dist[v] == INT64_MAX)
                 reverse_dist[v] = 100.0;
 
             distance[v] = ((double)dist[v] + (double)reverse_dist[v]) / 2.0;

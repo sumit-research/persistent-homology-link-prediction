@@ -5,12 +5,14 @@
 #include <utility>
 #include <queue>
 #include <tuple>
-#include <map>
 #include <set>
 #include <limits>
 #include <queue>
 #include <algorithm>
 #include <cmath>
+#include <cstring>
+#include <sqlite3.h>
+#include <unordered_map>
 
 using namespace std;
 #define intt int64_t
@@ -19,13 +21,65 @@ using namespace std;
 
 vector< vector<intt> > adj;
 vector< vector<intt> > in;
-map<string,intt> to_indices; // maps node to index(1-n), index is always from 1-n where n is number of distinct nodes
-map<intt,string> to_node; // reverse map tp obtain node number using it's index
+unordered_map<string,intt> to_indices; // unordered_maps node to index(1-n), index is always from 1-n where n is number of distinct nodes
+unordered_map<intt,string> to_node; // reverse map tp obtain node number using it's index
+unordered_map<string, intt> to_ind;
+unordered_map<intt, string> to_no;
+
+sqlite3 *database;
+sqlite3_stmt *res;
+char *err_msg = 0;
 
 ifstream iFile;
+ifstream tsFile;
 ofstream oFile;
 
-intt input(map<string,intt>& to_indices, map<intt,string>& to_node){
+vector<string> just_getNhop_database(string source, intt hop) //,
+																				   // map<string, intt> &to_ind, map<intt, string> &to_no)
+{
+
+	char *psql = "SELECT DISTINCT ID_b FROM nodes WHERE ID_a = ? AND hop <= ?;";
+
+	int rc = sqlite3_prepare_v2(database, psql, -1, &res, 0);
+
+	char value1[source.size()];
+
+	if (rc == SQLITE_OK)
+	{
+		strcpy(value1, source.c_str());
+
+		sqlite3_bind_text(res, 1, value1, strlen(value1), 0);
+		sqlite3_bind_int(res, 2, hop);
+	}
+	else
+	{
+
+		fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(database));
+	}
+
+	vector<string> nhood_list;
+
+	rc = sqlite3_step(res);
+	int ncols = sqlite3_column_count(res);
+
+	while (rc == SQLITE_ROW)
+	{
+
+		nhood_list.push_back(string((char *)sqlite3_column_text(res, 0)));
+		rc = sqlite3_step(res);
+	}
+
+	sqlite3_finalize(res);
+
+	// cout << "SQl nbd list\n";
+	// for (int i = 0; i < nhood_list.size(); i++)
+	// {
+	// 	cout << nhood_list[i] << '\n';
+	// }
+	return nhood_list;
+}
+
+intt input(unordered_map<string,intt>& to_indices, unordered_map<intt,string>& to_node){
 	string u; 
 	intt edges = 0;
 	int num_sources = 0;
@@ -146,7 +200,7 @@ double adamic_adar(set<int> source_out, int dest, int source){
 	}
 
 	if(aa == 0.0)
-		return -1;
+		return -1.0;
 
 	return aa;
 }
@@ -177,76 +231,113 @@ double milne_witten(set<int> source_in, int dest, int source, int num_nodes){
 
 int main(int argc, char* argv[]){
 
-	if(argc != 4 and argc != 5){
-		cout << "[Usage]: " << "./baseline data_file output_filename source_node\n";
-		cout << "[Usage]: " << "./baseline data_file output_filename source_node node\n";
+	if(argc != 6){
+		cout << "[Usage]: " << "./baseline trainFile testFile databaseFile outputFilename hop\n";
 		return 0;
 	}
 
 	string in_file = argv[1];
-	string out_file = argv[2];
-	string node1 = argv[3];
-	string dest;
-	if(argc == 5)
-		dest = argv[4];
+	string test_file = argv[2];
+	string database_loc = argv[3];
+	string out_file = argv[4];
+	intt hop = atoi(argv[5]);
 
 
 	iFile.open(in_file);
+	tsFile.open(test_file);
+	oFile.open(out_file);
+	// oFile.close();
+	// iFile.close();
+	// tsFile.close();
 
 	int num_nodes = input(to_indices, to_node);
+	char database_loc_proper[database_loc.size()];
+	strcpy(database_loc_proper, database_loc.c_str());
+	int rc = sqlite3_open(database_loc_proper, &database);
 
-	intt source = to_indices[node1];
-	intt node = to_indices[dest];
+	while(true)
+	{
+		string  n1, n2;
+		tsFile >> n1 >> n2;
 
-	// get set of nodes with an incoming edge from source
-	set<int> source_out;
-	for(int i = 0; i < adj[source].size(); i++){
-		source_out.insert(adj[source][i]);
+		if(tsFile.eof()){
+			break;
+		}
+		else
+		{
+
+			intt source = to_indices[n1];
+			intt dest = to_indices[n2];
+
+			// get set of nodes with an incoming edge from source
+			set<int> source_out;
+			for(int i = 0; i < adj[source].size(); i++){
+				source_out.insert(adj[source][i]);
+			}
+
+			// get set of nodes with outgoing edge to source
+			set<int> source_in;
+			for(int i = 0; i < in[source].size(); i++){
+				source_in.insert(in[source][i]);
+			}
+
+			int aaRank, mwRank; 
+			vector<string> nbds = just_getNhop_database(n1, hop);
+
+			if(find(nbds.begin(), nbds.end(), n2) == nbds.end()){
+				aaRank = -1;
+				mwRank = -1;
+			}
+			else
+			{
+				vector< di > aascore; // (rating, node)
+				vector< di > mwscore; // (rating, node)
+
+				// for every destination vertex calculate both scores and push them in an array
+				// cout << n1 << ' ' << n2 << '\n';
+				for(int i = 0; i < nbds.size(); i++){
+					// cout << to_indices[nbds[i]] << ' ' << source << ' ' << nbds[i] << '\n';
+					aascore.push_back(make_pair(adamic_adar(source_out, to_indices[nbds[i]], source), nbds[i]));
+					mwscore.push_back(make_pair(milne_witten(source_in, to_indices[nbds[i]], source, num_nodes), nbds[i]));
+				}
+
+				sort(aascore.rbegin(), aascore.rend());
+				sort(mwscore.rbegin(), mwscore.rend());
+
+				// cout << "\nhere307\n";
+				bool aaflag = true, mwflag = true;
+
+				for(int i = 1; i <= aascore.size(); i++){
+					if(aaflag and aascore[i-1].second == n2){
+						if(aascore[i-1].first == -1.0)
+							aaRank = -2;
+						else
+							aaRank = i;
+						aaflag = false;
+					}
+					if(mwflag and mwscore[i-1].second == n2){
+						if(mwscore[i-1].first == -1.0)
+							mwRank = -2;
+						else
+							mwRank = i;
+						mwflag = false;
+					}
+					if(!mwflag and !aaflag)
+						break;
+				}
+
+			}
+			cout << n1 << " " << n2 << " " << aaRank << " " << mwRank << '\n';
+			oFile << n1 << " " << n2 << " " << aaRank << " " << mwRank << '\n';
+			to_ind.clear();
+			to_no.clear();
+		}
 	}
+	oFile.close();
+	iFile.close();
+	tsFile.close();
+	sqlite3_close(database);
 
-	// get set of nodes with outgoing edge to source
-	set<int> source_in;
-	for(int i = 0; i < in[source].size(); i++){
-		source_in.insert(in[source][i]);
-	}
-
-	if(argc == 5){
-		cout << adamic_adar(source_out, node, source) << '\n';
-		cout << milne_witten(source_in, node, source, num_nodes) << '\n';
-		return 0;
-	}
-	oFile.open(out_file);
-
-	vector< di > aascore; // (rating, node)
-	vector< di > mwscore; // (rating, node)
-
-	// for every destination vertex calculate both scores and push them in an array
-	for(int i = 1; i <= num_nodes; i++){
-		if(i == source)
-			continue;
-
-		aascore.push_back(make_pair(adamic_adar(source_out, i, source), to_node[i]));
-		mwscore.push_back(make_pair(milne_witten(source_in, i, source, num_nodes), to_node[i]));
-	}
-
-	sort(aascore.rbegin(), aascore.rend());
-	sort(mwscore.rbegin(), mwscore.rend());
-
-	oFile << "Adamic Adar ratings, Source = " << to_node[source] << '\n';
-
-	for(int i = 0; i < aascore.size(); i++){
-		oFile << aascore[i].second << "  " << aascore[i].first << '\n';
-	}
-
-	oFile << '\n';
-
-	oFile << "Milne Witten ratings, Source = " << to_node[source] << '\n';
-
-	for(int i = 0; i < mwscore.size(); i++){
-		oFile << mwscore[i].second << "  " << mwscore[i].first << '\n';
-	}
-
-	oFile << '\n';
 	return 0;
 }
 
