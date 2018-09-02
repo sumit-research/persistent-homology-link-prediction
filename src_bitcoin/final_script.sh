@@ -1,7 +1,7 @@
 #!/bin/bash
 
 g++ -std=c++17 johnson.cpp -o johnson
-./johnson --dump_pairs bitcoin /home/deepak/Project/files/data/bitcoin/data.txt /home/deepak/Project/files/outputs/bitcoin/apsp_full.txt /home/deepak/Project/files/outputs/bitcoin/dumped.txt
-python3 createDB.py ../../files/outputs/bitcoin/database.db ../../files/outputs/bitcoin/dumped.txt
+./johnson --dump_pairs moreno /home/deepak/Project/files/data/moreno/data.txt /home/deepak/Project/files/outputs/moreno/apsp_full.txt /home/deepak/Project/files/outputs/moreno/dumped.txt
+python3 createDB.py ../../files/outputs/moreno/database.db ../../files/outputs/moreno/dumped.txt
 g++ -std=c++17 -pthread script.cpp -l sqlite3 -O3 -o run_script
-./run_script bitcoin /home/deepak/Project/files/data/bitcoin/data.txt  /home/deepak/Project/files/data/bitcoin/testset.txt 5 2 /home/deepak/Project/files/outputs/bitcoin/testOutput_5_2.txt /home/deepak/Project/files/outputs/bitcoin/database.db
+./run_script moreno /home/deepak/Project/files/data/moreno/data.txt  /home/deepak/Project/files/data/moreno/testset.txt 5 2 /home/deepak/Project/files/outputs/moreno/testOutput_5_2.txt

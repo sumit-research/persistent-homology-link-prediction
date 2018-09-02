@@ -121,14 +121,6 @@ vector<vector<ii>> getNhop_database(string dataset_name, string sources[2], intt
             temp[i] = string((char *)sqlite3_column_text(res, i));
         }
 
-        if (to_ind.find(temp[2]) == to_ind.end())
-        {
-            to_ind[temp[2]] = current_node;
-            to_no[current_node] = temp[2];
-            vector<ii> tmp;
-            nhood_graph.push_back(tmp);
-            current_node++;
-        }
         if (to_ind.find(temp[3]) == to_ind.end())
         {
             to_ind[temp[3]] = current_node;
@@ -137,8 +129,16 @@ vector<vector<ii>> getNhop_database(string dataset_name, string sources[2], intt
             nhood_graph.push_back(tmp);
             current_node++;
         }
+        if (to_ind.find(temp[4]) == to_ind.end())
+        {
+            to_ind[temp[4]] = current_node;
+            to_no[current_node] = temp[4];
+            vector<ii> tmp;
+            nhood_graph.push_back(tmp);
+            current_node++;
+        }
 
-        nhood_graph[to_ind[temp[2]]].push_back(make_pair(1, to_ind[temp[3]]));
+        nhood_graph[to_ind[temp[3]]].push_back(make_pair(stod(temp[1]), to_ind[temp[4]]));
         // results.push_back(temp);
 
         rc = sqlite3_step(res);
@@ -168,15 +168,27 @@ vector<vector<ii>> getNhop_database(string dataset_name, string sources[2], intt
     // remove the edge between two sources if it exists
 
     // // find the position
-    ii p = make_pair(1, to_ind[sources[1]]);
-    vector<ii>::iterator it = find(nhood_graph[to_ind[sources[0]]].begin(), nhood_graph[to_ind[sources[0]]].end(), p);
-    if (it != nhood_graph[to_ind[sources[0]]].end())
-        nhood_graph[to_ind[sources[0]]].erase(it);
+    // cout << "here171\n";
+    intt p = to_ind[sources[1]];
+    // cout << "here173\n";
+    vector<ii>::iterator it;
+    for(int i = 0; i < nhood_graph[to_ind[sources[0]]].size(); i++){
+        if(nhood_graph[to_ind[sources[0]]][i].second == p){
+            it = nhood_graph[to_ind[sources[0]]].begin()+i;
+            nhood_graph[to_ind[sources[0]]].erase(it);
+            break;
+        }
+    }
 
-    p = make_pair(1, to_ind[sources[0]]);
-    it = find(nhood_graph[to_ind[sources[1]]].begin(), nhood_graph[to_ind[sources[1]]].end(), p);
-    if (it != nhood_graph[to_ind[sources[1]]].end())
-        nhood_graph[to_ind[sources[1]]].erase(it);
+    p = to_ind[sources[0]];
+    for(int i = 0; i < nhood_graph[to_ind[sources[1]]].size(); i++){
+        if(nhood_graph[to_ind[sources[1]]][i].second == p){
+            it = nhood_graph[to_ind[sources[1]]].begin()+i;
+            nhood_graph[to_ind[sources[1]]].erase(it);
+            break;
+        }
+    }
+
     return nhood_graph;
 }
 
@@ -219,14 +231,6 @@ vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop
             temp[i] = string((char *)sqlite3_column_text(res, i));
         }
 
-        if (to_ind.find(temp[2]) == to_ind.end())
-        {
-            to_ind[temp[2]] = current_node;
-            to_no[current_node] = temp[2];
-            vector<ii> tmp;
-            nhood_graph.push_back(tmp);
-            current_node++;
-        }
         if (to_ind.find(temp[3]) == to_ind.end())
         {
             to_ind[temp[3]] = current_node;
@@ -235,8 +239,16 @@ vector<vector<ii>> getNhop_database(string dataset_name, string source, intt hop
             nhood_graph.push_back(tmp);
             current_node++;
         }
+        if (to_ind.find(temp[4]) == to_ind.end())
+        {
+            to_ind[temp[4]] = current_node;
+            to_no[current_node] = temp[4];
+            vector<ii> tmp;
+            nhood_graph.push_back(tmp);
+            current_node++;
+        }
 
-        nhood_graph[to_ind[temp[2]]].push_back(make_pair(1, to_ind[temp[3]]));
+        nhood_graph[to_ind[temp[3]]].push_back(make_pair(stod(temp[1]), to_ind[temp[4]]));
         // results.push_back(temp);
 
         rc = sqlite3_step(res);
@@ -328,7 +340,7 @@ vector<vector<ii>> getNHop(vector<vector<ii>> &graph, vector<string> sources, in
 vector<vector<ii>> addEdge(vector<vector<ii>> graph, intt a, intt b)
 {
     vector<vector<ii>> empty_graph = graph;
-    empty_graph[a].push_back(make_pair(1, b));
+    empty_graph[a].push_back(make_pair(0.142611469, b));
     return empty_graph;
 }
 
