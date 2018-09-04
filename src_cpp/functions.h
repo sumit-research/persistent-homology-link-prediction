@@ -334,6 +334,11 @@ vector<vector<ii>> addEdge(vector<vector<ii>> graph, intt a, intt b)
 
 vector<vector<double>> getPD(intt graph_size, double threshold)
 {
+    
+    // if (graph_size == 0) {
+    //     graph_size = 1;
+    // }
+    
     vector<vector<double>> outvec(graph_size);
 
     for (size_t i = 0; i < graph_size - 1; i++)
@@ -522,7 +527,15 @@ void callFunctions(string sources[2], intt hop, string dataset_name, vector<vect
     // cin >> a;
 
     vector<vector<double>> pd_b = getPD(b_nbd, threshold);
+    if (comb_nbd.size() < b_nbd.size())
+    {
 
+        for (size_t i = 0; i < 8; i++)
+        {
+            output[i] = -1;
+        }
+        return;
+    }
     // if (b_nbd.size() == 2)
     // {
     //     cout << "\npd_b.size()="
@@ -554,6 +567,9 @@ void callFunctions(string sources[2], intt hop, string dataset_name, vector<vect
     // cout << "\n480\n";
     vector<vector<double>> pd_ab_complete = getPD(comb_nbd.size() - 1, threshold);
     // cout << "\n482\n";
+
+    
+    
     vector<pair<double, double>> pdgm_a = getDimPD(pd_a, double(0));
     vector<pair<double, double>> pdgm_b = getDimPD(pd_b, double(0));
     vector<pair<double, double>> pdgm = getDimPD(pd_ab, double(0));

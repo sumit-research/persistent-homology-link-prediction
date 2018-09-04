@@ -1174,7 +1174,7 @@ std::vector<vector<double>> call_ripser(int64_t dim_max, float threshold,
 	// }
 	// int a;
 	// cin >> a;
-	if (apsp.size() == 1) {
+	if (apsp.size() == 1 || apsp.size() == 0) {
 		std::vector<vector<double>> outvec(1);
 		// outvec.push_back(vector<double>(3));
 		outvec[0].push_back(0);

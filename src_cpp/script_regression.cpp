@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
             string v, source, dest;
             // cin >> u;
 
-            tsFile >> v >> source >> dest; // read from file
+            tsFile >> source >> dest >> v; // read from file
 
             if (tsFile.eof())
             {
