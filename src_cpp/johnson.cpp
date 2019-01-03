@@ -11,7 +11,7 @@
 
 using namespace std;
 #define intt int64_t
-#define ii pair<intt,intt> 
+#define ii pair<intt,intt>
 #define fastio	ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0)
 
 
@@ -55,7 +55,7 @@ void write_txt(intt src, vector<double>& dist, intt num_nodes){
 		// if(dist[v] <= num_nodes and v != src){
 		// 	temp++;
 		// 	indFile << (v-1) << '\n';
-		// 	wFile << dist[v] << '\n'; 
+		// 	wFile << dist[v] << '\n';
 		// }
 	}
 	// cFile << temp << '\n' << flush;
@@ -73,7 +73,7 @@ void write_txt(intt src, vector<double>& dist, intt num_nodes){
 // 	intt conn = 0, ind = 0, dis = 0;
 // 	string line;
 // 	while(getline(cFileIn, line)){
-// 		intt u = stoll(line);		
+// 		intt u = stoll(line);
 // 		conn += u;
 // 		sFile.write(reinterpret_cast<const char*>(&u), sizeof(intt));
 // 	}
@@ -124,7 +124,7 @@ void dijsktra(vector< vector< ii > >& adj, vector<intt>& dist, intt src, intt nu
 			// update condition
 			if(dist[v.second] > dist[u.second] + v.first){
 				dist[v.second] = dist[u.second] + v.first;
-				pq.push(make_pair(dist[v.second], v.second)); // push the new distance, vertex pair in the queue 
+				pq.push(make_pair(dist[v.second], v.second)); // push the new distance, vertex pair in the queue
 			}
 		}
 	}
@@ -184,7 +184,7 @@ void johnson(vector< vector< ii > >& adj, vector< vector< ii > >& reverse_adj, i
 	if(/*!bellman(adj, dist, 0, num_nodes)*/false){
 		// cout << "Negative weight cycle found.\n Computation aborted.\n";
 	}
-	
+
 	else{
 		// cout << "No negative cycle.\n";
 		// create new node weights
@@ -210,7 +210,7 @@ void johnson(vector< vector< ii > >& adj, vector< vector< ii > >& reverse_adj, i
 			if(u%1000 == 0){
 				cout << "Done till " << u <<"th node.\n";
 			}
-			
+
 			fill(dist.begin(), dist.end(), INT64_MAX);
 			fill(reverse_dist.begin(), reverse_dist.end(), INT64_MAX);
 
@@ -224,14 +224,14 @@ void johnson(vector< vector< ii > >& adj, vector< vector< ii > >& reverse_adj, i
 
 			// get old edge/path weights back
 			for(intt v = 1; v <= num_nodes; v++){
-				if(dist[v] == INT64_MAX) 
+				if(dist[v] == INT64_MAX)
 					dist[v] = 100;
 				if(reverse_dist[v] == INT64_MAX )
 					reverse_dist[v] = 100;
 
 				distance[v] = ((double)dist[v] + (double)reverse_dist[v])/2.0;
 				// if(dist[v] == 5 or dist[v] == 6 or dist[v] == 3)
-				// 	cout << dist[v] << " dest-> " << to_node[v] << " sourcce-> " << to_node[u] << '\n';	
+				// 	cout << dist[v] << " dest-> " << to_node[v] << " sourcce-> " << to_node[u] << '\n';
 
 			}
 
@@ -249,11 +249,11 @@ void johnson(vector< vector< ii > >& adj, vector< vector< ii > >& reverse_adj, i
 
 		// write_sparse(num_nodes);
 
-	} 
+	}
 }
 
 intt input(map<string,intt>& to_indices, map<intt,string>& to_node){
-	string u; 
+	string u;
 	intt edges = 0;
 	int num_sources = 0;
 	intt i = 1;
@@ -272,10 +272,10 @@ intt input(map<string,intt>& to_indices, map<intt,string>& to_node){
 		else{
 
 			// check for the source node
-			if(u[u.length()-1] == ':'){ 
+			if(u[u.length()-1] == ':'){
 				string un;
 				source = u.substr(0, u.length()-1); // remove colon
-				
+
 				if(to_indices.find(source) == to_indices.end()){
 					to_indices[source] = i;
 					to_node[i] = source;
@@ -302,13 +302,13 @@ intt input(map<string,intt>& to_indices, map<intt,string>& to_node){
 				}
 				iFile >> weight;
 				// cout << source << " " << dest << "\n";
-				in[to_indices[source]].push_back(make_pair(weight, to_indices[dest])); 
+				in[to_indices[source]].push_back(make_pair(weight, to_indices[dest]));
 				reverse_in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));
 
 				// add reverse edge if it doens't already exist
 				// if(find(in[to_indices[dest]].begin(), in[to_indices[dest]].end(), make_pair(weight, to_indices[source])) == in[to_indices[dest]].end())
 				// 	in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));
-			}	
+			}
 		}
 	}
 	// cout << "Edges: " << edges << '\n';
@@ -371,7 +371,7 @@ int main(int argc, char *argv[]){
 	// }
 
 	// cout << "\n\n";
-	
+
 	// for(int i = 1; i <= num_nodes; i++){
 	// 	cout << to_node[i] << ":\n";
 	// 	for(int j = 0; j < reverse_in[i].size(); j++)
