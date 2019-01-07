@@ -404,7 +404,7 @@ vector<pair<double, double>> getDimPD(vector<vector<double>> pd, double dimensio
         return pdgm;
 }
 
-void callFunctions(string sources[2], intt hop, string dataset_name, double output[8], double threshold)
+void callFunctions(string sources[2], intt hop, string dataset_name, double output[8], double threshold, bool directed)
 {
         to_ind.clear();
         to_no.clear();
@@ -413,7 +413,7 @@ void callFunctions(string sources[2], intt hop, string dataset_name, double outp
         vector<vector<ii>> comb_nbd = getNhop_database(dataset_name, sources, hop); //, to_ind, to_no);
 
         // vector<vector<ii>> comb_nbd_waste = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
-        vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]]);
+        vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]], directed);
         // To get neighborhood of single node
 
         // vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);
@@ -500,7 +500,7 @@ void callFunctions(string sources[2], intt hop, string dataset_name, double outp
         // output[15] = bn_dist_b;
 }
 
-void callFunctions(string sources[2], intt hop, string dataset_name, vector<vector<double>> pd_a, double output[1], double threshold)
+void callFunctions(string sources[2], intt hop, string dataset_name, vector<vector<double>> pd_a, double output[1], double threshold, bool directed)
 {
         // vector<double> output;
         to_ind.clear();
@@ -519,7 +519,7 @@ void callFunctions(string sources[2], intt hop, string dataset_name, vector<vect
         // }
 
         // vector<vector<ii>> comb_nbd_waste = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
-        vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]]);
+        vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]], directed);
         // To get neighborhood of single node
 
         // vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_indices_nhop[to_indices[sources[0]]], to_indices_nhop[to_indices[sources[1]]]);

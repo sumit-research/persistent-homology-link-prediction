@@ -87,8 +87,8 @@ bool bellman(vector<vector<ii> > &adj, vector<double> &dist, intt src, intt num_
 vector<vector<double> > johnson(vector<vector<ii> > &adj, vector<vector<ii> > &reverse_adj, intt num_nodes)
 {
 
-        vector<double> dist(num_nodes + 1, DBL_MAX);
-        vector<double> reverse_dist(num_nodes + 1, DBL_MAX);
+        vector<double> dist(num_nodes + 1, numeric_limits<double>::max());
+        vector<double> reverse_dist(num_nodes + 1, numeric_limits<double>::max());
         vector<double> distance(num_nodes + 1, 0.0);
         vector<vector<double> > apsp;
 
@@ -103,8 +103,8 @@ vector<vector<double> > johnson(vector<vector<ii> > &adj, vector<vector<ii> > &r
                 //     cout << "Done till " << u << "th node.\n";
                 // }
 
-                fill(dist.begin(), dist.end(), DBL_MAX);
-                fill(reverse_dist.begin(), reverse_dist.end(), DBL_MAX);
+                fill(dist.begin(), dist.end(), numeric_limits<double>::max());
+                fill(reverse_dist.begin(), reverse_dist.end(), numeric_limits<double>::max());
 
                 dist[u] = reverse_dist[u] = 0;
 
@@ -117,9 +117,9 @@ vector<vector<double> > johnson(vector<vector<ii> > &adj, vector<vector<ii> > &r
                 // get old edge/path weights back
                 for (intt v = 1; v <= num_nodes; v++)
                 {
-                        if (dist[v] == DBL_MAX)
+                        if (dist[v] == numeric_limits<double>::max())
                                 dist[v] = 100.0;
-                        if (reverse_dist[v] == DBL_MAX)
+                        if (reverse_dist[v] == numeric_limits<double>::max())
                                 reverse_dist[v] = 100.0;
 
                         distance[v] = ((double)dist[v] + (double)reverse_dist[v]) / 2.0;
@@ -186,7 +186,7 @@ intt input(string train_set, vector<vector<ii> > &in, vector<vector<ii> > &rever
                         in[to_indices[source]].push_back(make_pair(weight, to_indices[dest]));
                         reverse_in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));
 
-                        
+
                         if(!directed)
                         {
                                 in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));

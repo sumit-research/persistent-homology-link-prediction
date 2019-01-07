@@ -10,7 +10,8 @@ using namespace std;
 int main(int argc, char *argv[])
 {
         // fastio;
-
+        bool directed = false;
+        bool weighted = false;
         if (argc < 9)
         {
                 cout << "[Usage]: "
@@ -103,7 +104,7 @@ int main(int argc, char *argv[])
                                                 // sources.push_back("1033");
                                                 // sources.push_back("1034");
                                                 // cout << "\n"<<source << "\t" << src_nbd[i] << "\n";
-                                                callFunctions(sources, comb_nbd_hop, dataset_name, pd_a, scores, threshold);
+                                                callFunctions(sources, comb_nbd_hop, dataset_name, pd_a, scores, threshold, directed);
                                                 cout << "\n"
                                                      << source << "\t"
                                                      << dest << "\t"
@@ -145,7 +146,7 @@ int main(int argc, char *argv[])
                                                 //   << scores[14] << ","
                                                 //   << scores[15] << "\t";
                                         }
-                                        // break;
+                                        break;
                                 }
                                 else
                                 {
@@ -158,8 +159,9 @@ int main(int argc, char *argv[])
                                 }
 
                                 src_nbd.clear();
-                                // break;
+
                         }
+
                 }
         }
 

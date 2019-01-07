@@ -106,8 +106,8 @@ void dump_pairs(intt u, vector<double>& avg_dist, vector<intt>& hop_dist, intt n
         {
 
                 double distance = avg_dist[i];
-                if(distance == DBL_MAX)
-                        distance = 100;
+                if(distance == numeric_limits<double>::max())
+                        distance = 100.0;
 
                 // cout << distance << " " << weights[i] << " " << hop_dist[i] << " " << to_node[u] << " " << to_node[i] << '\n';
                 dFile << distance << " " << weights[i] << " " << hop_dist[i] << " " << to_node[u] << " " << to_node[i] << '\n';
@@ -238,7 +238,7 @@ void johnson(vector< vector< ii > > adj, vector< vector< ii > > reverse_adj, int
                         for(intt v = 1; v <= num_nodes; v++) {
                                 if(dist[v] == std::numeric_limits<double>::max())
                                         dist[v] = 100.0;
-                                if(reverse_dist[v] == std::numeric_limits<double>::max() )
+                                if(reverse_dist[v] == std::numeric_limits<double>::max())
                                         reverse_dist[v] = 100.0;
 
                                 distance[v] = ((double)dist[v] + (double)reverse_dist[v])/2.0;
@@ -272,6 +272,7 @@ intt input(bool weighted, bool directed)
         in.resize(1);
         reverse_in.resize(1);
         string source, dest;
+        int lines = 0;
         while (true)
         {
                 iFile >> source; // read from file
@@ -283,6 +284,7 @@ intt input(bool weighted, bool directed)
 
                 else
                 {
+
                         iFile >> dest;
 
                         edges++;
@@ -328,7 +330,7 @@ intt input(bool weighted, bool directed)
 
 
 int main(int argc, char *argv[]){
-        fastio;
+        // fastio;
 
         // for taking command line arguements
         int j = 1;
@@ -345,19 +347,19 @@ int main(int argc, char *argv[]){
                 return 0;
         }
 
-        if((string)argv[1] == "--dump_pairs") {
+        if((string)argv[j] == "--dump_pairs") {
                 j++;
                 dumping = true;
         }
 
-        if((string)argv[2] == "--directed"){
-            j++;
-            directed = true;
+        if((string)argv[j] == "--directed"){
+                j++;
+                directed = true;
         }
 
-        if((string)argv[3] == "--weighted"){
-            j++;
-            weighted = true;
+        if((string)argv[j] == "--weighted"){
+                j++;
+                weighted = true;
         }
 
         string dataset_name = argv[j++];
@@ -371,7 +373,10 @@ int main(int argc, char *argv[]){
         iFile.open((string) input_file);
         oFile.open((string) output_file);
 
+        cout << "Directed-> " << directed << '\n';
+        cout << "Weighted-> " << weighted << '\n';
         intt num_nodes = input(weighted, directed); // take input
+        cout << num_nodes << '\n';
 
         if(num_nodes == 1) {
                 oFile << (double) 0 << '\n';
