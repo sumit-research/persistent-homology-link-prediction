@@ -337,10 +337,15 @@ vector<vector<ii>> getNHop(vector<vector<ii>> &graph, vector<string> sources, in
         return new_graph;
 }
 
-vector<vector<ii>> addEdge(vector<vector<ii>> graph, intt a, intt b)
+vector<vector<ii>> addEdge(vector<vector<ii>> graph, intt a, intt b, bool directed)
 {
         vector<vector<ii>> empty_graph = graph;
-        empty_graph[a].push_back(make_pair(0.142611469, b));
+        empty_graph[a].push_back(make_pair(1.0, b));
+
+        // ask sir
+        if(!directed){
+            empty_graph[b].push_back(make_pair(1.0, a));
+        }
         return empty_graph;
 }
 

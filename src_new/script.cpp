@@ -17,14 +17,27 @@ int main(int argc, char *argv[])
                      << "./script dataset_name train_set test_set nbd_hop comb_nbd_hop threshold output_file database_loc \n";
                 return 0;
         }
-        string dataset_name = argv[1];
-        string train_set = argv[2];
-        string test_set = argv[3];
-        int nbd_hop = atoi(argv[4]);
-        int comb_nbd_hop = atoi(argv[5]);
-        double threshold = atof(argv[6]);
-        string output_file = argv[7];
-        string database_loc = argv[8];
+
+        int j = 1;
+
+        if((string)argv[1] == "--directed"){
+            j++;
+            directed = true;
+        }
+
+        if((string)argv[2] == "--weighted"){
+            j++;
+            weighted = true;
+        }
+
+        string dataset_name = argv[j++];
+        string train_set = argv[j++];
+        string test_set = argv[j++];
+        int nbd_hop = atoi(argv[j++]);
+        int comb_nbd_hop = atoi(argv[j++]);
+        double threshold = atof(argv[j++]);
+        string output_file = argv[j++];
+        string database_loc = argv[j++];
 
         // string database_loc = "./database.db";
         char database_loc_proper[database_loc.size()];
@@ -34,7 +47,7 @@ int main(int argc, char *argv[])
         tsFile.open((string)test_set);
         oFile.open((string)output_file);
         // sFile.open((string) sparse_file, ios::binary);
-        intt num_nodes = input(train_set, in, reverse_in, to_indices, to_node); // take input
+        intt num_nodes = input(train_set, in, reverse_in, to_indices, to_node, weighted, directed); // take input
         double scores[8];
         string sources[2];
         if (tsFile)

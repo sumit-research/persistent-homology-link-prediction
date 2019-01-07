@@ -84,7 +84,7 @@ bool bellman(vector<vector<ii> > &adj, vector<double> &dist, intt src, intt num_
         return true;
 }
 
-vector<vector<double> > johnson(vector<vector<ii> > &adj, vector<vector<ii> > &reverse_adj, intt num_nodes, bool directed, bool unweighted)
+vector<vector<double> > johnson(vector<vector<ii> > &adj, vector<vector<ii> > &reverse_adj, intt num_nodes)
 {
 
         vector<double> dist(num_nodes + 1, DBL_MAX);
@@ -161,6 +161,7 @@ intt input(string train_set, vector<vector<ii> > &in, vector<vector<ii> > &rever
                         if(weighted)
                                 iFile >> weight;
 
+                        // converting source node id to a index
                         if(to_indices.find(source) == to_indices.end())
                         {
                                 to_indices[source] = i;
@@ -171,6 +172,7 @@ intt input(string train_set, vector<vector<ii> > &in, vector<vector<ii> > &rever
                                 i++;
                         }
 
+                        // converting destination node id to a index
                         if (to_indices.find(dest) == to_indices.end())
                         {
                                 to_indices[dest] = i;
@@ -184,7 +186,7 @@ intt input(string train_set, vector<vector<ii> > &in, vector<vector<ii> > &rever
                         in[to_indices[source]].push_back(make_pair(weight, to_indices[dest]));
                         reverse_in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));
 
-                        // ask sir if we want to modify input or the code for undirected graph
+                        
                         if(!directed)
                         {
                                 in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));

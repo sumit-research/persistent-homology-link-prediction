@@ -264,11 +264,8 @@ void johnson(vector< vector< ii > > adj, vector< vector< ii > > reverse_adj, int
         }
 }
 
-intt input(string train_set, vector<vector<ii> > &in, vector<vector<ii> > &reverse_in,
-           unordered_map<string, intt> &to_indices, unordered_map<intt, string> &to_node, bool weighted, bool directed)
+intt input(bool weighted, bool directed)
 {
-        ifstream iFile;
-        iFile.open(train_set);
         intt edges = 0;
         int num_sources = 0;
         intt i = 1;
@@ -338,6 +335,8 @@ int main(int argc, char *argv[]){
 
         // used to detect user option for dumping all the pairs
         bool dumping = false;
+        bool directed = false; // undirected graph by default
+        bool weighted = false; // unweighted graph by default
 
         if(argc < 5) {
                 cout << "[Usage]: " << "./johnson dataset_name input_filename output_filename dump_file\n";
@@ -346,9 +345,19 @@ int main(int argc, char *argv[]){
                 return 0;
         }
 
-        else if(argc == 6 and (string)argv[1] == "--dump_pairs") {
+        if((string)argv[1] == "--dump_pairs") {
                 j++;
                 dumping = true;
+        }
+
+        if((string)argv[2] == "--directed"){
+            j++;
+            directed = true;
+        }
+
+        if((string)argv[3] == "--weighted"){
+            j++;
+            weighted = true;
         }
 
         string dataset_name = argv[j++];
@@ -362,7 +371,7 @@ int main(int argc, char *argv[]){
         iFile.open((string) input_file);
         oFile.open((string) output_file);
 
-        intt num_nodes = input(to_indices, to_node); // take input
+        intt num_nodes = input(weighted, directed); // take input
 
         if(num_nodes == 1) {
                 oFile << (double) 0 << '\n';
