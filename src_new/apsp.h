@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <limits>
 #include <queue>
+#include <math.h>
 
 using namespace std;
 #define intt int64_t
@@ -31,7 +32,7 @@ void dijsktra(vector<vector<ii> > &adj, vector<double> &dist, intt src, intt num
                         ii v = adj[u.second][i];
 
                         // update condition
-                        if (dist[v.second] > dist[u.second] + v.first)
+                        if (isgreater(dist[v.second], dist[u.second]+v.first))
                         {
                                 dist[v.second] = dist[u.second] + v.first;
                                 pq.push(make_pair(dist[v.second], v.second)); // push the new distance, vertex pair in the queue
@@ -58,7 +59,7 @@ bool bellman(vector<vector<ii> > &adj, vector<double> &dist, intt src, intt num_
                                 // update the distance of node v from source vertex
                                 ii v = adj[u][i];
 
-                                if (dist[v.second] > dist[u] + v.first)
+                                if (isgreater(dist[v.second], dist[u]+v.first))
                                 {
                                         dist[v.second] = dist[u] + v.first;
                                 }
@@ -74,7 +75,7 @@ bool bellman(vector<vector<ii> > &adj, vector<double> &dist, intt src, intt num_
                         // if you can find a shorter path from source to some vertex then report negative cycle
                         ii v = adj[u][i];
 
-                        if (dist[v.second] > dist[u] + v.first)
+                        if (isgreater(dist[v.second], dist[u]+v.first))
                         {
                                 return false;
                         }

@@ -20,7 +20,7 @@ using namespace std;
 
 vector<intt> bfs(vector<vector<ii>> &in, vector<intt> sources, intt num_nodes)
 {
-        vector<intt> len(num_nodes + 1, num_nodes + 10); // len[i]-> length of path from source to node i
+        vector<intt> len(num_nodes + 1, 100); // len[i]-> length of path from source to node i
         vector<bool> visit(num_nodes, 0);       // visited array
 
         queue<int> q;

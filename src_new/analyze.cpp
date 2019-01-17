@@ -1,0 +1,106 @@
+#include "functions.h"
+#include <chrono>
+using namespace std;
+#define intt int64_t
+#define ii pair<double, intt>
+#define fastio                    \
+        ios_base::sync_with_stdio(0); \
+        cin.tie(0);                   \
+        cout.tie(0)
+
+int main(int argc, char *argv[])
+{
+        // fastio;
+        bool directed = false;
+        bool weighted = false;
+        if (argc < 5)
+        {
+                cout << "[Usage]: "
+                     << "./script dataset_name train_set test_set database_loc \n";
+                return 0;
+        }
+
+        int j = 1;
+
+        if((string)argv[1] == "--directed") {
+                j++;
+                directed = true;
+        }
+
+        if((string)argv[2] == "--weighted") {
+                j++;
+                weighted = true;
+        }
+
+        string dataset_name = argv[j++];
+        string train_set = argv[j++];
+        string test_set = argv[j++];
+        string database_loc = argv[j++];
+
+        // string database_loc = "./database.db";
+        char database_loc_proper[database_loc.size()];
+        strcpy(database_loc_proper, database_loc.c_str());
+        int rc = sqlite3_open(database_loc_proper, &database);
+
+        tsFile.open((string)test_set);
+        // sFile.open((string) sparse_file, ios::binary);
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        intt num_nodes = input(train_set, in, reverse_in, to_indices, to_node, weighted, directed); // take input
+        double scores[8];
+        string sources[2];
+        if (tsFile)
+        {
+                while (true)
+                {
+                        string source, dest;
+                        // cin >> u;
+                        tsFile >> source >> dest; // read from file
+
+                        if (tsFile.eof())
+                        {
+                                break; // break it end of file
+                        }
+
+                        else
+                        {
+                                // source = "19697";
+                                // dest = "24966";
+                                string sources[2] = {source, dest};
+                                intt hop_dist = get_hop_distance(sources);
+                                intt comb_nbd_hop = hop_dist/2 + 1;
+                                intt nbd_hop = hop_dist;
+
+
+                                if(comb_nbd_hop == 0)
+                                        comb_nbd_hop = 1;
+
+                                vector<string> src_nbd = just_getNhop_database(dataset_name, source, nbd_hop);
+                                bool isFoundDest = false;
+
+                                to_ind.clear();
+                                to_no.clear();
+
+                                cout << "source: " << source << " destination: " << dest;
+                                cout << "\nNeighborhood hop distance: " << nbd_hop;
+                                cout << "\nNeighborhood Size: " << src_nbd.size() << "\n\n";
+
+                                src_nbd.clear();
+
+                        }
+                        // return 0;
+
+                }
+        }
+
+        tsFile.close();
+        sqlite3_close(database);
+
+        auto finish = std::chrono::high_resolution_clock::now();
+        chrono::duration<double> elapsed = finish - start;
+
+        // cout << "\nTime taken: " << elapsed.count() << '\n';
+
+        return 0;
+}

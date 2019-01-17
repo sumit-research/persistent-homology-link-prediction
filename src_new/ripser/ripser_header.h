@@ -85,11 +85,11 @@ public:
 
 	index_t operator()(index_t n, index_t k) const {
 
-		// if (!(n < B.size() && k < B[n].size())) {
-		// 	std::cout << "\n(n < B.size() && k < B[n].size()) = " << n << "," << B.size() << ","
-		// 	          << k << "," << B[n].size() << "\n";
-		// }
-
+		if (!(n < B.size() && k < B[n].size())) {
+			std::cout << "\n(n < B.size() && k < B[n].size()) = " << n << "," << B.size() << ","
+			          << k << "," << B[n].size() << "\n";
+		}
+		// cout << n << " " << B.size() << " " << k << " " << B[n].size() << '\n';
 		assert(n < B.size() && k < B[n].size());
 		return B[n][k];
 	}

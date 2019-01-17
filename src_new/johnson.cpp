@@ -8,6 +8,7 @@
 #include <map>
 #include <limits>
 #include <queue>
+#include <math.h>
 #include "nhop.h"
 
 using namespace std;
@@ -99,13 +100,13 @@ void dump_pairs(intt u, vector<double>& avg_dist, vector<intt>& hop_dist, intt n
         vector<double> weights(num_nodes+1, 100.0);
 
         for(int i = 0; i < in[u].size(); i++) {
-                weights[in[u][i].second] = in[u][i].first;
+                weights[in[u][i].second] = static_cast<double>(in[u][i].first);
         }
 
         for(intt i = 1; i <= num_nodes; i++)
         {
 
-                double distance = avg_dist[i];
+                double distance = static_cast<double>(avg_dist[i]);
                 if(distance == numeric_limits<double>::max())
                         distance = 100.0;
 
@@ -129,7 +130,7 @@ void dijsktra(vector< vector< ii > >& adj, vector<double>& dist, intt src, intt 
                         ii v = adj[u.second][i];
 
                         // update condition
-                        if(dist[v.second] > dist[u.second] + v.first) {
+                        if(isgreater(dist[v.second], dist[u.second]+v.first)) {
                                 dist[v.second] = dist[u.second] + v.first;
                                 pq.push(make_pair(dist[v.second], v.second)); // push the new distance, vertex pair in the queue
                         }
@@ -152,7 +153,7 @@ bool bellman(vector< vector< ii > >& adj, vector<double>& dist, intt src, intt n
                                 // update the distance of node v from source vertex
                                 ii v = adj[u][i];
 
-                                if(dist[v.second] > dist[u] + v.first) {
+                                if(isgreater(dist[v.second], dist[u]+v.first)) {
                                         dist[v.second] = dist[u] + v.first;
                                 }
                         }
@@ -165,7 +166,7 @@ bool bellman(vector< vector< ii > >& adj, vector<double>& dist, intt src, intt n
                         // if you can find a shorter path from source to some vertex then report negative cycle
                         ii v = adj[u][i];
 
-                        if(dist[v.second] > dist[u] + v.first) {
+                        if(isgreater(dist[v.second], dist[u]+v.first)) {
                                 return false;
                         }
                 }
@@ -176,17 +177,12 @@ bool bellman(vector< vector< ii > >& adj, vector<double>& dist, intt src, intt n
 
 void johnson(vector< vector< ii > > adj, vector< vector< ii > > reverse_adj, intt num_nodes, bool dumping){
 
-        // connect an extra vertex to every node to get graph G'
-        for(intt i = 1; i <= num_nodes; i++) {
-                adj[0].push_back(make_pair(0, i));
-        }
-
         // cout << "New node created.\n";
 
         vector<double> dist(num_nodes+1,std::numeric_limits<double>::max());
         vector<double> reverse_dist(num_nodes+1, std::numeric_limits<double>::max());
         vector<double> distance(num_nodes+1, 0.0);
-        vector<intt> hop_dist(num_nodes+1, INT64_MAX);
+        vector<intt> hop_dist(num_nodes+1, 100);
 
         // check for negative weight cycle in new graph
         if(/*!bellman(adj, dist, 0, num_nodes)*/ false) {
@@ -194,21 +190,6 @@ void johnson(vector< vector< ii > > adj, vector< vector< ii > > reverse_adj, int
         }
 
         else{
-                // cout << "No negative cycle.\n";
-                // create new node weights
-                vector<double> h(num_nodes+1, 0);
-                for(intt u = 0; u <= num_nodes; u++) {
-                        h[u] = dist[u];
-                }
-
-                // create new edge weights such that all the weights are positive
-                for(int u = 0; u <= num_nodes; u++) {
-                        for(intt i = 0; i < adj[u].size(); i++) {
-
-                                adj[u][i].first = adj[u][i].first + h[u] - h[adj[u][i].second];
-
-                        }
-                }
 
                 // run djikstra for every vertex
                 // cout << "Starting..\n";
@@ -221,8 +202,9 @@ void johnson(vector< vector< ii > > adj, vector< vector< ii > > reverse_adj, int
 
                         fill(dist.begin(), dist.end(), std::numeric_limits<double>::max());
                         fill(reverse_dist.begin(), reverse_dist.end(), std::numeric_limits<double>::max());
+                        fill(hop_dist.begin(), hop_dist.end(), num_nodes+10);
 
-                        dist[u] = reverse_dist[u] = 0;
+                        dist[u] = reverse_dist[u] = hop_dist[u] = 0.0;
 
                         if(adj[u].size() != 0) {
                                 vector<intt> sources;
@@ -231,16 +213,19 @@ void johnson(vector< vector< ii > > adj, vector< vector< ii > > reverse_adj, int
                                 dijsktra(adj, dist, u, num_nodes);
                         }
 
-                        if(reverse_adj.size() != 0)
+                        if(reverse_adj[u].size() != 0)
                                 dijsktra(reverse_adj, reverse_dist, u, num_nodes);
 
                         // get old edge/path weights back
                         for(intt v = 1; v <= num_nodes; v++) {
+
                                 if(dist[v] == std::numeric_limits<double>::max())
                                         dist[v] = 100.0;
                                 if(reverse_dist[v] == std::numeric_limits<double>::max())
                                         reverse_dist[v] = 100.0;
-
+                                // if(to_node[u] == "1033"){
+                                //     cout << "source-> " << to_node[u] << " dest-> " << to_node[v] << " u->v dist= " << dist[v] << " v->u dist= " << reverse_dist[v] << '\n';
+                                // }
                                 distance[v] = ((double)dist[v] + (double)reverse_dist[v])/2.0;
                                 // if(dist[v] == 5 or dist[v] == 6 or dist[v] == 3)
                                 //  cout << dist[v] << " dest-> " << to_node[v] << " sourcce-> " << to_node[u] << '\n';

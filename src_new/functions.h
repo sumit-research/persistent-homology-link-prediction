@@ -34,10 +34,13 @@ char *err_msg = 0;
 
 ifstream tsFile;
 ofstream oFile;
+
+
+
 vector<string> just_getNhop_database(string dataset_name, string source, intt hop)
 {
 
-        char *psql = "SELECT DISTINCT ID_b FROM nodes WHERE ID_a = ? AND hop <= ? and hop != 0;";
+        char *psql = "SELECT DISTINCT ID_b FROM nodes WHERE ID_a = ? AND hop <= ?";
 
         int rc = sqlite3_prepare_v2(database, psql, -1, &res, 0);
 
@@ -78,9 +81,47 @@ vector<string> just_getNhop_database(string dataset_name, string source, intt ho
         return nhood_list;
 }
 
+intt get_hop_distance(string sources[2])
+{
+    char *psql = "SELECT hop FROM nodes WHERE ID_a = ? AND ID_b = ?";
+
+    int rc = sqlite3_prepare_v2(database, psql, -1, &res, 0);
+
+    char value1[sources[0].size()];
+    char value2[sources[1].size()];
+
+    if(rc == SQLITE_OK)
+    {
+        strcpy(value1, sources[0].c_str());
+        strcpy(value2, sources[1].c_str());
+
+        sqlite3_bind_text(res, 1, value1, strlen(value1), 0);
+        sqlite3_bind_text(res, 2, value2, strlen(value2), 0);
+
+    }
+    else
+    {
+
+            fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(database));
+    }
+
+    rc = sqlite3_step(res);
+    int ncols = sqlite3_column_count(res);
+    vector<string> temp(ncols);
+
+    for (int i = 0; i < ncols; i++)
+    {
+            temp[i] = string((char *)sqlite3_column_text(res, i));
+    }
+    rc = sqlite3_step(res);
+    sqlite3_finalize(res);
+
+    return (intt)stoi(temp[0]);
+}
+
 vector<vector<ii>> getNhop_database(string dataset_name, string sources[2], intt hop)
 {
-
+        // cout << hop <<  " " << sources[0] << '\n';
         char *psql = "WITH nhood1 as (SELECT ID_b FROM nodes WHERE ID_a = ? and hop <= ? UNION ALL Select ID_b FROM nodes where ID_a = ? AND hop <= ?) Select * FROM nodes Where ID_a IN nhood1 AND ID_b IN nhood1 AND nodes.HOP=1;";
 
         int rc = sqlite3_prepare_v2(database, psql, -1, &res, 0);
@@ -143,9 +184,11 @@ vector<vector<ii>> getNhop_database(string dataset_name, string sources[2], intt
 
                 rc = sqlite3_step(res);
         }
-        if (nhood_graph.size() == 0)
+
+        if (nhood_graph.size() == 1)
         {
                 vector<ii> tmp;
+                // cout << "yes\n";
                 nhood_graph.push_back(tmp);
                 nhood_graph.push_back(tmp);
                 sqlite3_finalize(res);
@@ -389,6 +432,7 @@ vector<vector<double>> getPD(vector<vector<ii>> small_graph, double threshold)
                 }
         }
         vector<vector<double>> apsp = johnson(small_graph, reverse_graph, small_graph.size() - 1);
+        // cout << apsp.size() << '\n';
         return call_ripser(1, threshold, apsp); //threshold = 4 is for some reason. max dimension = 1 required by us.
 }
 vector<pair<double, double>> getDimPD(vector<vector<double>> pd, double dimension)
@@ -406,11 +450,14 @@ vector<pair<double, double>> getDimPD(vector<vector<double>> pd, double dimensio
 
 void callFunctions(string sources[2], intt hop, string dataset_name, double output[8], double threshold, bool directed)
 {
+
         to_ind.clear();
         to_no.clear();
         // to_indices_nhop.clear();
         // to_node_nhop.clear();
+
         vector<vector<ii>> comb_nbd = getNhop_database(dataset_name, sources, hop); //, to_ind, to_no);
+        // cout << "Combined Neighborhood size " << comb_nbd.size() << '\n';
 
         // vector<vector<ii>> comb_nbd_waste = getNHop(in, sources, hop); //, to_indices_nhop, to_node_nhop); //_without_database
         vector<vector<ii>> comb_nbd_with_edge = addEdge(comb_nbd, to_ind[sources[0]], to_ind[sources[1]], directed);
@@ -421,14 +468,19 @@ void callFunctions(string sources[2], intt hop, string dataset_name, double outp
         to_no.clear();
         vector<vector<ii>> a_nbd = getNhop_database(dataset_name, sources[0], hop);
         vector<vector<double>> pd_a = getPD(a_nbd, threshold);
+        // cout << "here1\n";
         to_ind.clear();
         to_no.clear();
         vector<vector<ii>> b_nbd = getNhop_database(dataset_name, sources[1], hop);
         vector<vector<double>> pd_b = getPD(b_nbd, threshold);
+        // cout << "here2\n";
 
         vector<vector<double>> pd_ab = getPD(comb_nbd, threshold);
+        // cout << "here3\n";
         vector<vector<double>> pd_ab_with_edge = getPD(comb_nbd_with_edge, threshold);
+        // cout << "here4\n";
         vector<vector<double>> pd_ab_complete = getPD(comb_nbd.size() - 1, threshold);
+        // cout << "here5\n";
         vector<pair<double, double>> pdgm_a = getDimPD(pd_a, double(0));
         vector<pair<double, double>> pdgm_b = getDimPD(pd_b, double(0));
         vector<pair<double, double>> pdgm = getDimPD(pd_ab, double(0));
@@ -503,11 +555,15 @@ void callFunctions(string sources[2], intt hop, string dataset_name, double outp
 void callFunctions(string sources[2], intt hop, string dataset_name, vector<vector<double>> pd_a, double output[1], double threshold, bool directed)
 {
         // vector<double> output;
+
+
+        // cout << "hereedada\n";
         to_ind.clear();
         to_no.clear();
         // to_indices_nhop.clear();
         // to_node_nhop.clear();
         vector<vector<ii>> comb_nbd = getNhop_database(dataset_name, sources, hop); //, to_ind, to_no);
+        // cout << "comb+nbd_size: " << comb_nbd.size() << '\n';
         // cout << "\nsources:(" << sources[0] << "," << sources[1] << ") comb_nbd.size() = " << comb_nbd.size() << "\n";
         // for (size_t i = 0; i < comb_nbd.size(); i++)
         // {
