@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
                         {
                                 // source = "19697";
                                 // dest = "24966";
+                                auto start_ = std::chrono::high_resolution_clock::now();
                                 string sources[2] = {source, dest};
                                 intt hop_dist = get_hop_distance(sources);
                                 intt comb_nbd_hop = hop_dist/2 + 1;
@@ -163,7 +164,7 @@ int main(int argc, char *argv[])
                                                 //   << scores[9] << ","
                                                 //   << scores[10] << ","
                                                 //   << scores[11] << ","
-                                                //   << scores[12] << ","
+                                                //  auto start_ = std::chrono::high_resolution_clock::now(); << scores[12] << ","
                                                 //   << scores[13] << ","
                                                 //   << scores[14] << ","
                                                 //   << scores[15] << "\t";
@@ -180,6 +181,10 @@ int main(int argc, char *argv[])
                                               << source << "\t" << dest << "\t"
                                               << "inf";
                                 }
+                                auto finish_ = std::chrono::high_resolution_clock::now();
+                                chrono::duration<double> elapsed = finish_ - start_;
+
+                                cout << "\nTime taken per pair: " << elapsed.count() << '\n';
                                 count_test_cases++;
                                 if(count_test_cases%10 == 0)
                                     cout << count_test_cases << '\n';

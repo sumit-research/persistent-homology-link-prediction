@@ -202,7 +202,7 @@ void johnson(vector< vector< ii > > adj, vector< vector< ii > > reverse_adj, int
 
                         fill(dist.begin(), dist.end(), std::numeric_limits<double>::max());
                         fill(reverse_dist.begin(), reverse_dist.end(), std::numeric_limits<double>::max());
-                        fill(hop_dist.begin(), hop_dist.end(), num_nodes+10);
+                        fill(hop_dist.begin(), hop_dist.end(), 100);
 
                         dist[u] = reverse_dist[u] = hop_dist[u] = 0.0;
 
