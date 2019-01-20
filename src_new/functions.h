@@ -35,7 +35,41 @@ char *err_msg = 0;
 ifstream tsFile;
 ofstream oFile;
 
+intt get_nbd_size(string source, intt hop){
 
+    char *psql = "SELECT count(DISTINCT ID_b) FROM nodes WHERE ID_a = ? AND hop <= ?";
+
+    int rc = sqlite3_prepare_v2(database, psql, -1, &res, 0);
+
+    char value1[source.size()];
+
+    if (rc == SQLITE_OK)
+    {
+            strcpy(value1, source.c_str());
+
+            sqlite3_bind_text(res, 1, value1, strlen(value1), 0);
+            sqlite3_bind_int(res, 2, hop);
+    }
+    else
+    {
+
+            fprintf(stderr, "Failed to execute statement: %s\n", sqlite3_errmsg(database));
+    }
+
+    rc = sqlite3_step(res);
+    int ncols = sqlite3_column_count(res);
+    vector<string> temp(ncols);
+
+    for (int i = 0; i < ncols; i++)
+    {
+            temp[i] = string((char *)sqlite3_column_text(res, i));
+    }
+    rc = sqlite3_step(res);
+    sqlite3_finalize(res);
+
+    return (intt)stoi(temp[0]);
+
+}
 
 vector<string> just_getNhop_database(string dataset_name, string source, intt hop)
 {

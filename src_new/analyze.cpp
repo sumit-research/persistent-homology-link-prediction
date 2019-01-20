@@ -50,6 +50,8 @@ int main(int argc, char *argv[])
         intt num_nodes = input(train_set, in, reverse_in, to_indices, to_node, weighted, directed); // take input
         double scores[8];
         string sources[2];
+        intt count_full = 0;
+
         if (tsFile)
         {
                 while (true)
@@ -76,7 +78,10 @@ int main(int argc, char *argv[])
                                 if(comb_nbd_hop == 0)
                                         comb_nbd_hop = 1;
 
-                                vector<string> src_nbd = just_getNhop_database(dataset_name, source, nbd_hop);
+                                if(nbd_hop == 100)
+                                    count_full++;
+
+                                intt src_nbd = get_nbd_size(source, nbd_hop);
                                 bool isFoundDest = false;
 
                                 to_ind.clear();
@@ -84,9 +89,7 @@ int main(int argc, char *argv[])
 
                                 cout << "source: " << source << " destination: " << dest;
                                 cout << "\nNeighborhood hop distance: " << nbd_hop;
-                                cout << "\nNeighborhood Size: " << src_nbd.size() << "\n\n";
-
-                                src_nbd.clear();
+                                cout << "\nNeighborhood Size: " << src_nbd << "\n\n";
 
                         }
                         // return 0;
@@ -100,6 +103,7 @@ int main(int argc, char *argv[])
         auto finish = std::chrono::high_resolution_clock::now();
         chrono::duration<double> elapsed = finish - start;
 
+        cout << "Number of pairs having no path: " << count_full << '\n';
         // cout << "\nTime taken: " << elapsed.count() << '\n';
 
         return 0;
