@@ -87,9 +87,10 @@ int main(int argc, char *argv[])
                                 to_ind.clear();
                                 to_no.clear();
 
-                                cout << "source: " << source << " destination: " << dest;
-                                cout << "\nNeighborhood hop distance: " << nbd_hop;
-                                cout << "\nNeighborhood Size: " << src_nbd << "\n\n";
+                                if(hop_dist != 100)
+                                    cout << source << " " <<  dest << '\n';
+                                // cout << "\nNeighborhood hop distance: " << nbd_hop;
+                                // cout << "\nNeighborhood Size: " << src_nbd << "\n\n";
 
                         }
                         // return 0;

@@ -71,11 +71,12 @@ int main(int argc, char *argv[])
 
                         else
                         {
-                                // source = "19697";
-                                // dest = "24966";
+                                // source = "17731";
+                                // dest = "12806";
                                 auto start_ = std::chrono::high_resolution_clock::now();
                                 string sources[2] = {source, dest};
                                 intt hop_dist = get_hop_distance(sources);
+                                // cout << "here79\n";
                                 intt comb_nbd_hop = hop_dist/2 + 1;
                                 intt nbd_hop = hop_dist;
 
@@ -120,6 +121,7 @@ int main(int argc, char *argv[])
                                                 // vector<string> sources;
                                                 sources[0] = source;
                                                 sources[1] = src_nbd[i];
+                                                // sources[1] = "21281";
                                                 if(src_nbd[i] == source)
                                                     continue;
                                                 // sources.push_back("1033");
@@ -128,18 +130,18 @@ int main(int argc, char *argv[])
 
                                                 callFunctions(sources, comb_nbd_hop, dataset_name, pd_a, scores, threshold, directed);
                                                 // cout << "hereaaa\n";
-                                                // cout << "\n"
-                                                //      << source << "\t"
-                                                //      << dest << "\t"
-                                                //      << src_nbd[i] << ":"
-                                                //      << scores[0] << ","
-                                                //      << scores[1] << ","
-                                                //      << scores[2] << ","
-                                                //      << scores[3] << ","
-                                                //      << scores[4] << ","
-                                                //      << scores[5] << ","
-                                                //      << scores[6] << ","
-                                                //      << scores[7] << "\t";
+                                                cout << "\n"
+                                                     << source << "\t"
+                                                     << dest << "\t"
+                                                     << sources[1] << ":"
+                                                     << scores[0] << ","
+                                                     << scores[1] << ","
+                                                     << scores[2] << ","
+                                                     << scores[3] << ","
+                                                     << scores[4] << ","
+                                                     << scores[5] << ","
+                                                     << scores[6] << ","
+                                                     << scores[7] << "\t";
                                                 //   << scores[8] << ","
                                                 //   << scores[9] << ","
                                                 //   << scores[10] << ","
