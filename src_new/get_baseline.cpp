@@ -16,7 +16,7 @@
 
 using namespace std;
 #define intt int64_t
-#define ii pair<double,intt> 
+#define ii pair<double,intt>
 #define di pair<double, string>
 
 vector< vector<intt> > adj;
@@ -79,69 +79,69 @@ vector<string> just_getNhop_database(string source, intt hop) //,
 	return nhood_list;
 }
 
-intt input(unordered_map<string,intt>& to_indices, unordered_map<intt,string>& to_node){
-	string u; 
-	intt edges = 0;
-	int num_sources = 0;
-	intt i = 1;
-	in.resize(1);
-	adj.resize(1);
-			
-	string source, dest;
+intt input(string train_set, bool weighted, bool directed)
+{
+        ifstream iFile;
+        iFile.open(train_set);
+        intt edges = 0;
+        int num_sources = 0;
+        intt i = 1;
+        adj.resize(1);
+        in.resize(1);
+        string source, dest;
+		cout << "here\92\n";
+        while (true)
+        {
+                iFile >> source; // read from file
 
-	while(true){
-		string u;
-		// cin >> u;
-		iFile >> u; // read from file
+                if (iFile.eof())
+                {
+                        break; // break it end of file
+                }
 
-		if(iFile.eof()){
-			break; // break it end of file
-		}
+                else
+                {
+                        iFile >> dest;
 
-		else{
+                        edges++;
+                        double weight = 1.0;
 
-			// check for the source node
-			if(u[u.length()-1] == ':'){ 
-				string un;
-				un = u.substr(0, u.length()-1); // remove colon
-				source = un;
-				if(to_indices.find(source) == to_indices.end()){
-					to_indices[source] = i;
-					to_node[i] = source;
-					vector< intt > tmp;
-					in.push_back(tmp);
-					adj.push_back(tmp);
-					i++;
-				}
+                        if(weighted)
+                                iFile >> weight;
 
-			}
+                        // converting source node id to a index
+                        if(to_indices.find(source) == to_indices.end())
+                        {
+                                to_indices[source] = i;
+                                to_node[i] = source;
+                                vector<intt> tmp;
+                                adj.push_back(tmp);
+                                in.push_back(tmp);
+                                i++;
+                        }
 
-			else{
-				edges++;
-				double weight;
-				dest = u;
+                        // converting destination node id to a index
+                        if (to_indices.find(dest) == to_indices.end())
+                        {
+                                to_indices[dest] = i;
+                                to_node[i] = dest;
+                                vector<intt> tmp;
+                                adj.push_back(tmp);
+                                in.push_back(tmp);
+                                i++;
+                        }
 
-				if(to_indices.find(dest) == to_indices.end()){
-					to_indices[dest] = i;
-					to_node[i] = dest;
-					vector< intt > tmp;
-					in.push_back(tmp);
-					adj.push_back(tmp);
-					i++;
-				}
-				iFile >> weight;
-				// cout << source << " " << dest << "\n";
-				adj[to_indices[source]].push_back(to_indices[dest]);
-				in[to_indices[dest]].push_back(to_indices[source]); 
+                        adj[to_indices[source]].push_back(to_indices[dest]);
+                        in[to_indices[dest]].push_back(to_indices[source]);
 
-				// add reverse edge if it doens't already exist
-				// if(find(in[to_indices[dest]].begin(), in[to_indices[dest]].end(), make_pair(weight, to_indices[source])) == in[to_indices[dest]].end())
-				// 	in[to_indices[dest]].push_back(make_pair(weight, to_indices[source]));
-			}	
-		}
-	}
-	// cout << "Edges: " << edges << '\n';
-	return i-1; // number of distinct nodes
+						if(!directed){
+							adj[to_indices[dest]].push_back(to_indices[source]);
+	                        in[to_indices[source]].push_back(to_indices[dest]);
+						}
+                }
+        }
+        // cout << "Edges: " << edges << '\n';
+        return i - 1; // number of distinct nodes
 }
 
 
@@ -157,7 +157,7 @@ double getNbrCount(int u, string type){
 
 // get common nodes between u and v. If type == 0, this method will return N(u) intersect N(v), else it will return N'(u) intersect N'(v). For undirected graph pass type = 0
 vector<int> getCommon(set<int> source_node, intt v, int type){
-	vector<int> common(1000000); 
+	vector<int> common(1000000);
 	set<int> dest_node;
 
 	if(type == 0){
@@ -180,7 +180,7 @@ vector<int> getCommon(set<int> source_node, intt v, int type){
 /* adamic_adar(u,v) is defined as summation(1/log(|N'(x)|)) for every x that belongs to N(u) intersect N(v), where N(w) is set of nodes which have an edge from w and N'(w)
 is set of nodes which have an edge towards w.*/
 
-double adamic_adar(set<int> source_out, int dest, int source){
+double adamic_adar(set<int> source_out, int dest, int source, string type){
 
 	// get N(source) intersect N(dest)
 	vector<int> common = getCommon(source_out, dest, 0);
@@ -190,7 +190,7 @@ double adamic_adar(set<int> source_out, int dest, int source){
 	for(vector<int>::iterator it = common.begin(); it != common.end(); it++){
 		int node = *it;
 
-		double indeg = getNbrCount(node, (string)"directed_in");
+		double indeg = getNbrCount(node, type);
 
 		if(indeg == 0.0 or indeg == 1.0)
 			continue;
@@ -205,7 +205,7 @@ double adamic_adar(set<int> source_out, int dest, int source){
 	return aa;
 }
 
-double milne_witten(set<int> source_in, int dest, int source, int num_nodes){
+double milne_witten(set<int> source_in, int dest, int source, int num_nodes, string type){
 
 	// get N'(source) intersect N'(dest)
 	vector<int> common = getCommon(source_in, dest, 1);
@@ -216,8 +216,8 @@ double milne_witten(set<int> source_in, int dest, int source, int num_nodes){
 
 	double mw = 0.0;
 
-	double Uindeg = getNbrCount(source, "directed_in");
-	double Vindeg = getNbrCount(dest, "directed_in");
+	double Uindeg = getNbrCount(source, type);
+	double Vindeg = getNbrCount(dest, type);
 
 	// cout << to_node[dest] << ' ' << Vindeg << '\n';
 
@@ -227,20 +227,35 @@ double milne_witten(set<int> source_in, int dest, int source, int num_nodes){
 	mw = nmw/dmw;
 
 	return mw;
-}	
+}
 
 int main(int argc, char* argv[]){
 
-	if(argc != 6){
-		cout << "[Usage]: " << "./baseline trainFile testFile databaseFile outputFilename hop\n";
+	if(argc < 5){
+		cout << "[Usage]: " << "./baseline --directed --weighted trainFile testFile databaseFile outputFilename hop\n";
 		return 0;
 	}
 
-	string in_file = argv[1];
-	string test_file = argv[2];
-	string database_loc = argv[3];
-	string out_file = argv[4];
-	intt hop = atoi(argv[5]);
+	int j = 1;
+
+	bool directed = false;
+	bool weighted = false;
+
+	if((string)argv[1] == "--directed"){
+		j++;
+		directed = true;
+	}
+
+	if((string)argv[2] == "--weighted"){
+		j++;
+		weighted = true;
+	}
+
+	string in_file = argv[j++];
+	string test_file = argv[j++];
+	string database_loc = argv[j++];
+	string out_file = argv[j++];
+	intt hop = atoi(argv[j++]);
 
 
 	iFile.open(in_file);
@@ -250,7 +265,12 @@ int main(int argc, char* argv[]){
 	// iFile.close();
 	// tsFile.close();
 
-	int num_nodes = input(to_indices, to_node);
+	int num_nodes = input(in_file, weighted, directed);
+
+	string type = "undirected";
+	if(directed)
+		type = "directed_in";
+
 	char database_loc_proper[database_loc.size()];
 	strcpy(database_loc_proper, database_loc.c_str());
 	int rc = sqlite3_open(database_loc_proper, &database);
@@ -259,12 +279,16 @@ int main(int argc, char* argv[]){
 	{
 		string  n1, n2;
 		tsFile >> n1 >> n2;
+		double weight = 1.0;
 
 		if(tsFile.eof()){
 			break;
 		}
+
 		else
 		{
+			if(weighted)
+				iFile >> weight;
 
 			intt source = to_indices[n1];
 			intt dest = to_indices[n2];
@@ -281,7 +305,7 @@ int main(int argc, char* argv[]){
 				source_in.insert(in[source][i]);
 			}
 
-			int aaRank, mwRank; 
+			int aaRank, mwRank;
 			vector<string> nbds = just_getNhop_database(n1, hop);
 
 			if(find(nbds.begin(), nbds.end(), n2) == nbds.end()){
@@ -297,8 +321,8 @@ int main(int argc, char* argv[]){
 				// cout << n1 << ' ' << n2 << '\n';
 				for(int i = 0; i < nbds.size(); i++){
 					// cout << to_indices[nbds[i]] << ' ' << source << ' ' << nbds[i] << '\n';
-					aascore.push_back(make_pair(adamic_adar(source_out, to_indices[nbds[i]], source), nbds[i]));
-					mwscore.push_back(make_pair(milne_witten(source_in, to_indices[nbds[i]], source, num_nodes), nbds[i]));
+					aascore.push_back(make_pair(adamic_adar(source_out, to_indices[nbds[i]], source, type), nbds[i]));
+					mwscore.push_back(make_pair(milne_witten(source_in, to_indices[nbds[i]], source, num_nodes, type), nbds[i]));
 				}
 
 				sort(aascore.rbegin(), aascore.rend());
@@ -340,6 +364,3 @@ int main(int argc, char* argv[]){
 
 	return 0;
 }
-
-
-

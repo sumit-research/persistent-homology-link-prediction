@@ -161,7 +161,6 @@ intt input(string train_set, vector<vector<ii> > &in, vector<vector<ii> > &rever
 
                         if(weighted)
                                 iFile >> weight;
-
                         // converting source node id to a index
                         if(to_indices.find(source) == to_indices.end())
                         {

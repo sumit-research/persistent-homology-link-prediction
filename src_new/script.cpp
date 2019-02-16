@@ -122,8 +122,10 @@ int main(int argc, char *argv[])
                                                 sources[0] = source;
                                                 sources[1] = src_nbd[i];
                                                 // sources[1] = "21281";
+                                                
                                                 if(src_nbd[i] == source)
                                                     continue;
+
                                                 // sources.push_back("1033");
                                                 // sources.push_back("1034");
                                                 // cout << "\n"<<sources[0] << "\t" << src_nbd[i] << "\n";
