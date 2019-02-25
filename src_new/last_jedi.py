@@ -38,7 +38,7 @@ def main():
 		conn = sqlite3.connect(database_loc)
 		c = conn.cursor()
 		hop = get_hop(c, node1, node2)
-		print(node1, node2, hop, score)
+		# print(node1, node2, hop, score)
 		if(hop in hop_distri.keys()):
 			hop_distri[hop] += 1
 		else:
