@@ -51,14 +51,16 @@ int main(int argc, char *argv[])
         double scores[8];
         string sources[2];
         intt count_full = 0;
+        intt total_neg = 0;
+        intt total_nbd = 0;
 
         if (tsFile)
         {
                 while (true)
                 {
-                        string source, dest;
+                        string source, dest, label;
                         // cin >> u;
-                        tsFile >> source >> dest; // read from file
+                        tsFile >> source >> dest >> label; // read from file
 
                         if (tsFile.eof())
                         {
@@ -69,6 +71,10 @@ int main(int argc, char *argv[])
                         {
                                 // source = "19697";
                                 // dest = "24966";
+                                if(label == "1")
+                                    continue;
+
+                                total_neg++;
                                 string sources[2] = {source, dest};
                                 intt hop_dist = get_hop_distance(sources);
                                 intt comb_nbd_hop = hop_dist/2 + 1;
@@ -82,15 +88,15 @@ int main(int argc, char *argv[])
                                     count_full++;
 
                                 intt src_nbd = get_nbd_size(source, nbd_hop);
-                                bool isFoundDest = false;
+                                total_nbd += src_nbd;
+                                // bool isFoundDest = false;
 
                                 to_ind.clear();
                                 to_no.clear();
 
-                                if(hop_dist != 100)
-                                    cout << source << " " <<  dest << '\n';
+                                cout << source << " " <<  dest << " " << hop_dist << '\n';
                                 // cout << "\nNeighborhood hop distance: " << nbd_hop;
-                                // cout << "\nNeighborhood Size: " << src_nbd << "\n\n";
+                                cout << "\nNeighborhood Size: " << src_nbd << "\n\n";
 
                         }
                         // return 0;
@@ -104,7 +110,8 @@ int main(int argc, char *argv[])
         auto finish = std::chrono::high_resolution_clock::now();
         chrono::duration<double> elapsed = finish - start;
 
-        cout << "Number of pairs having no path: " << count_full << '\n';
+        cout << "Number of pairs having no path: " << count_full << " out of " << total_neg << '\n';
+        cout << total_nbd/total_neg << '\n';
         // cout << "\nTime taken: " << elapsed.count() << '\n';
 
         return 0;

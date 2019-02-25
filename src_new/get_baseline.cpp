@@ -18,6 +18,7 @@ using namespace std;
 #define intt int64_t
 #define ii pair<double,intt>
 #define di pair<double, string>
+#define iis pair<intt, string>
 
 vector< vector<intt> > adj;
 vector< vector<intt> > in;
@@ -89,7 +90,7 @@ intt input(string train_set, bool weighted, bool directed)
         adj.resize(1);
         in.resize(1);
         string source, dest;
-		cout << "here\92\n";
+		// cout << "here\92\n";
         while (true)
         {
                 iFile >> source; // read from file
@@ -177,6 +178,23 @@ vector<int> getCommon(set<int> source_node, intt v, int type){
 	return common;
 }
 
+int getCommon(set<int> source_node, set<int> dest_node){
+	vector<int> common(1000000);
+
+	vector<int>::iterator it = set_intersection(dest_node.begin(), dest_node.end(), source_node.begin(), source_node.end(), common.begin());
+	common.resize(it-common.begin());
+
+	return common.size();
+}
+
+set<int> getNbrhood(intt source){
+	set<int> source_out;
+	for(int i = 0; i < adj[source].size(); i++){
+		source_out.insert(adj[source][i]);
+	}
+	return source_out;
+}
+
 /* adamic_adar(u,v) is defined as summation(1/log(|N'(x)|)) for every x that belongs to N(u) intersect N(v), where N(w) is set of nodes which have an edge from w and N'(w)
 is set of nodes which have an edge towards w.*/
 
@@ -232,7 +250,7 @@ double milne_witten(set<int> source_in, int dest, int source, int num_nodes, str
 int main(int argc, char* argv[]){
 
 	if(argc < 5){
-		cout << "[Usage]: " << "./baseline --directed --weighted trainFile testFile databaseFile outputFilename hop\n";
+		cout << "[Usage]: " << "./baseline --directed --weighted trainFile testFile outputFilename hop\n";
 		return 0;
 	}
 
@@ -253,7 +271,7 @@ int main(int argc, char* argv[]){
 
 	string in_file = argv[j++];
 	string test_file = argv[j++];
-	string database_loc = argv[j++];
+	// string database_loc = argv[j++];
 	string out_file = argv[j++];
 	intt hop = atoi(argv[j++]);
 
@@ -271,9 +289,15 @@ int main(int argc, char* argv[]){
 	if(directed)
 		type = "directed_in";
 
-	char database_loc_proper[database_loc.size()];
-	strcpy(database_loc_proper, database_loc.c_str());
-	int rc = sqlite3_open(database_loc_proper, &database);
+	// char database_loc_proper[database_loc.size()];
+	// strcpy(database_loc_proper, database_loc.c_str());
+	// int rc = sqlite3_open(database_loc_proper, &database);
+
+	vector<set<int> > neighborhoods(num_nodes+1);
+
+	for(int i = 1; i <= num_nodes; i++){
+		neighborhoods[i] = getNbrhood(i);
+	}
 
 	while(true)
 	{
@@ -293,66 +317,59 @@ int main(int argc, char* argv[]){
 			intt source = to_indices[n1];
 			intt dest = to_indices[n2];
 
-			// get set of nodes with an incoming edge from source
-			set<int> source_out;
-			for(int i = 0; i < adj[source].size(); i++){
-				source_out.insert(adj[source][i]);
+			// int aaRank, mwRank;
+			int paRank, cmRank;
+		
+			vector< iis > pascore; // (rating, node)
+			vector< iis > cmscore; // (rating, node)
+
+			// for every destination vertex calculate both scores and push them in an array
+			// cout << n1 << ' ' << n2 << '\n';
+			for(int i = 1; i <= num_nodes; i++){
+				if(i == source)
+					continue;
+
+				intt pa = neighborhoods[source].size() * neighborhoods[i].size();
+				intt cm = getCommon(neighborhoods[source], neighborhoods[i]);
+
+				// cout << n1 << ' ' << to_node[i] << ' ' << pa << ' ' << cm << '\n';
+
+				pascore.push_back(make_pair(pa, to_node[i]));
+				cmscore.push_back(make_pair(cm, to_node[i]));
 			}
 
-			// get set of nodes with outgoing edge to source
-			set<int> source_in;
-			for(int i = 0; i < in[source].size(); i++){
-				source_in.insert(in[source][i]);
-			}
+			// sort(aascore.rbegin(), aascore.rend());
+			// sort(mwscore.rbegin(), mwscore.rend());
 
-			int aaRank, mwRank;
-			vector<string> nbds = just_getNhop_database(n1, hop);
+			sort(pascore.rbegin(), pascore.rend());
+			sort(cmscore.rbegin(), cmscore.rend());
 
-			if(find(nbds.begin(), nbds.end(), n2) == nbds.end()){
-				aaRank = -1;
-				mwRank = -1;
-			}
-			else
-			{
-				vector< di > aascore; // (rating, node)
-				vector< di > mwscore; // (rating, node)
+			// cout << "\nhere307\n";
+			// bool aaflag = true, mwflag = true;
 
-				// for every destination vertex calculate both scores and push them in an array
-				// cout << n1 << ' ' << n2 << '\n';
-				for(int i = 0; i < nbds.size(); i++){
-					// cout << to_indices[nbds[i]] << ' ' << source << ' ' << nbds[i] << '\n';
-					aascore.push_back(make_pair(adamic_adar(source_out, to_indices[nbds[i]], source, type), nbds[i]));
-					mwscore.push_back(make_pair(milne_witten(source_in, to_indices[nbds[i]], source, num_nodes, type), nbds[i]));
+			bool paflag = true, cmflag = true;
+
+			for(int i = 1; i <= pascore.size(); i++){
+				if(paflag and pascore[i-1].second == n2){
+					if(pascore[i-1].first == 0)
+						paRank = num_nodes-1;
+					else
+						paRank = i;
+					paflag = false;
 				}
-
-				sort(aascore.rbegin(), aascore.rend());
-				sort(mwscore.rbegin(), mwscore.rend());
-
-				// cout << "\nhere307\n";
-				bool aaflag = true, mwflag = true;
-
-				for(int i = 1; i <= aascore.size(); i++){
-					if(aaflag and aascore[i-1].second == n2){
-						if(aascore[i-1].first == -1.0)
-							aaRank = -2;
-						else
-							aaRank = i;
-						aaflag = false;
-					}
-					if(mwflag and mwscore[i-1].second == n2){
-						if(mwscore[i-1].first == -1.0)
-							mwRank = -2;
-						else
-							mwRank = i;
-						mwflag = false;
-					}
-					if(!mwflag and !aaflag)
-						break;
+				if(cmflag and cmscore[i-1].second == n2){
+					if(cmscore[i-1].first == 0)
+						cmRank = num_nodes-1;
+					else
+						cmRank = i;
+					cmflag = false;
 				}
-
+				if(!cmflag and !paflag)
+					break;
 			}
-			cout << n1 << " " << n2 << " " << aaRank << " " << mwRank << '\n';
-			oFile << n1 << " " << n2 << " " << aaRank << " " << mwRank << '\n';
+
+			cout << n1 << " " << n2 << " " << paRank << " " << cmRank << '\n';
+			oFile << n1 << " " << n2 << " " << paRank << " " << cmRank << '\n';
 			to_ind.clear();
 			to_no.clear();
 		}
@@ -360,7 +377,158 @@ int main(int argc, char* argv[]){
 	oFile.close();
 	iFile.close();
 	tsFile.close();
-	sqlite3_close(database);
+	// sqlite3_close(database);
 
 	return 0;
 }
+
+
+// int main(int argc, char* argv[]){
+
+// 	if(argc < 5){
+// 		cout << "[Usage]: " << "./baseline --directed --weighted trainFile testFile databaseFile outputFilename hop\n";
+// 		return 0;
+// 	}
+
+// 	int j = 1;
+
+// 	bool directed = false;
+// 	bool weighted = false;
+
+// 	if((string)argv[1] == "--directed"){
+// 		j++;
+// 		directed = true;
+// 	}
+
+// 	if((string)argv[2] == "--weighted"){
+// 		j++;
+// 		weighted = true;
+// 	}
+
+// 	string in_file = argv[j++];
+// 	string test_file = argv[j++];
+// 	string database_loc = argv[j++];
+// 	string out_file = argv[j++];
+// 	intt hop = atoi(argv[j++]);
+
+
+// 	iFile.open(in_file);
+// 	tsFile.open(test_file);
+// 	oFile.open(out_file);
+// 	// oFile.close();
+// 	// iFile.close();
+// 	// tsFile.close();
+
+// 	int num_nodes = input(in_file, weighted, directed);
+
+// 	string type = "undirected";
+// 	if(directed)
+// 		type = "directed_in";
+
+// 	char database_loc_proper[database_loc.size()];
+// 	strcpy(database_loc_proper, database_loc.c_str());
+// 	int rc = sqlite3_open(database_loc_proper, &database);
+
+// 	while(true)
+// 	{
+// 		string  n1, n2;
+// 		tsFile >> n1 >> n2;
+// 		double weight = 1.0;
+
+// 		if(tsFile.eof()){
+// 			break;
+// 		}
+
+// 		else
+// 		{
+// 			if(weighted)
+// 				iFile >> weight;
+
+// 			intt source = to_indices[n1];
+// 			intt dest = to_indices[n2];
+
+// 			// get set of nodes with an incoming edge from source
+// 			set<int> source_out;
+// 			for(int i = 0; i < adj[source].size(); i++){
+// 				source_out.insert(adj[source][i]);
+// 			}
+
+// 			// get set of nodes with outgoing edge to source
+// 			set<int> source_in;
+// 			for(int i = 0; i < in[source].size(); i++){
+// 				source_in.insert(in[source][i]);
+// 			}
+
+// 			// int aaRank, mwRank;
+// 			int paRank, cmRank;
+// 			vector<string> nbds = just_getNhop_database(n1, hop);
+
+// 			if(find(nbds.begin(), nbds.end(), n2) == nbds.end()){
+// 				// aaRank = -1;
+// 				// mwRank = -1;
+// 				paRank = -1;
+// 				cmRank = -1;
+// 			}
+// 			else
+// 			{
+// 				// vector< di > aascore; // (rating, node)
+// 				// vector< di > mwscore; // (rating, node)
+// 				vector< di > pascore; // (rating, node)
+// 				vector< di > cmscore; // (rating, node)
+
+
+// 				// for every destination vertex calculate both scores and push them in an array
+// 				// cout << n1 << ' ' << n2 << '\n';
+// 				for(int i = 0; i < nbds.size(); i++){
+// 					// cout << to_indices[nbds[i]] << ' ' << source << ' ' << nbds[i] << '\n';
+// 					// aascore.push_back(make_pair(adamic_adar(source_out, to_indices[nbds[i]], source, type), nbds[i]));
+// 					// mwscore.push_back(make_pair(milne_witten(source_in, to_indices[nbds[i]], source, num_nodes, type), nbds[i]));
+// 					pascore.push_back(make_pair(pa(source_out, to_indices[nbds[i]], source), nbds[i]));
+// 					cmscore.push_back(make_pair((double)getCommon(source_out, dest, 0).size(), nbds[i]));
+// 				}
+
+// 				// sort(aascore.rbegin(), aascore.rend());
+// 				// sort(mwscore.rbegin(), mwscore.rend());
+
+// 				sort(pascore.rbegin(), pascore.rend());
+// 				sort(cmscore.rbegin(), cmscore.rend());
+
+// 				// cout << "\nhere307\n";
+// 				// bool aaflag = true, mwflag = true;
+
+// 				bool paflag = true, cmflag = true;
+
+// 				for(int i = 1; i <= pascore.size(); i++){
+// 					if(paflag and pascore[i-1].second == n2){
+// 						if(pascore[i-1].first == -1.0)
+// 							paRank = -2;
+// 						else
+// 							paRank = i;
+// 						paflag = false;
+// 					}
+// 					if(cmflag and cmscore[i-1].second == n2){
+// 						if(cmscore[i-1].first == -1.0)
+// 							cmRank = -2;
+// 						else
+// 							cmRank = i;
+// 						cmflag = false;
+// 					}
+// 					if(!cmflag and !paflag)
+// 						break;
+// 				}
+
+// 			}
+// 			cout << n1 << " " << n2 << " " << paRank << " " << cmRank << '\n';
+// 			oFile << n1 << " " << n2 << " " << paRank << " " << cmRank << '\n';
+// 			to_ind.clear();
+// 			to_no.clear();
+// 		}
+// 	}
+// 	oFile.close();
+// 	iFile.close();
+// 	tsFile.close();
+// 	sqlite3_close(database);
+
+// 	return 0;
+// }
+

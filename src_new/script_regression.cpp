@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
                                                      << scores[6] << ","
                                                      << scores[7] << ","
                                                      << label << "\t";
-								oFile << "\n"
+								                oFile << "\n"
                                                       << source << "\t"
                                                       << dest << "\t"
                                                       << scores[0] << ","
