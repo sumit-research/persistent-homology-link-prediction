@@ -2,15 +2,13 @@ import os
 import sys
 import sqlite3
 
-def get_hop(conn, node1, node2):
+def get_hop(c, node1, node2):
 	query_a = """ SELECT hop from nodes WHERE ID_a = ? AND ID_b = ? """ 
 
 	input_ = (node1, node2)
 
-	c = conn.cursor()
 	c.execute(query_a, input_)
 	rows = [i[0] for i in c.fetchall()]
-	c.close()
 
 	return rows[0]
 
@@ -37,9 +35,10 @@ def main():
 		score = line[column_number]
 		if(score == "inf" or int(score) > 100 or int(score) == -1 or int(score) == -2):
 			continue
-		# print(node1, node2)
 		conn = sqlite3.connect(database_loc)
-		hop = get_hop(conn, node1, node2)
+		c = conn.cursor()
+		hop = get_hop(c, node1, node2)
+		print(node1, node2, hop, score)
 		if(hop in hop_distri.keys()):
 			hop_distri[hop] += 1
 		else:
@@ -48,6 +47,9 @@ def main():
 
 	for key in hop_distri.keys():
 		print("{} {}".format(key, hop_distri[key]))
+
+	c.close()
+	conn.close()
 
 if __name__ == '__main__':
 	main()
