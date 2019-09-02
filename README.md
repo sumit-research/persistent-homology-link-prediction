@@ -1,13 +1,6 @@
 # ShapeOfYou
-This repository contains all the code written for a project with IBM. In this project we use concepts from algebraic topology 
-in the link prediction problem. TDA \- Topological Data Analysis, is an emerging data analytics tool. One of the common methods used within the context of TDA is **Persistent Homology**.
+This repository contains all the code written for the persistent homology based link prediction algorithm. TDA \- Topological Data Analysis, is an emerging data analytics tool. One of the common methods used within the context of TDA is **Persistent Homology**.
 
-## Experiments
-1. **Experiment 1**: We generate all the possible pairs for the given graph file and store those pairs with the distance in a file. We calculate all the scores for all those pairs sequentially. 
-
-2. **Experiment 2**: In this experiment, we take a random sample of 100 edges from the graph. For each edge, we remove that edge from the graph and make a new graph, and do all the computation using that graph. 
-
-3. **Experiment 3**: In this experiment we make a random sample from the graph. Random sample should contain some positive and some negative examples. Positive examples mean that those pair of nodes have an edge between them in the graph, and in negative examples they don't have an edge. Now we use experiment 2 for positive examples(removing that edge and then computing scores) and for negative edges we just compute the scores directly. Then we train a machine learning model on those scores.
 
 ## Usage
 ### I/O format
